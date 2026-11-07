@@ -1,0 +1,55 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-07-log-shipping-labels-live-apply",
+  "applied_on": "2026-11-07",
+  "recorded_on": "2026-11-07",
+  "recorded_by": "codex",
+  "source_commit": "d486d02754a41ad88f9376376541c0c280b6fde0",
+  "repo_version_context": "0.179.57",
+  "workflow_id": "adr-0250-log-shipping-label-repair-and-main-replay",
+  "adr": "0250",
+  "service_ids": [],
+  "summary": "Restore five-hypervisor log-shipping alert coverage by separating shipper identity from the collector guest scrape labels; verify exact merged source against the installed alert and existing collector.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring"
+    },
+    {
+      "kind": "vm",
+      "name": "log-collector",
+      "vmid": "630"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Source and CI",
+      "result": "pass",
+      "observed": "PR650 finalhead4d04da5587429f93b9d54b54f54e745792e6f80d passed primary2410, merged d486d02754a41ad88f9376376541c0c280b6fde0, then exact-main2412 passed00:07:58 UTC. OriginalPRhistory preserved; actual collector guest labels added to native fixtures; independent review approved."
+    },
+    {
+      "check": "Live defect and native validation",
+      "result": "pass",
+      "observed": "Five fresh shipper_host metrics carried role=guest while the old rule selected role=hypervisor and returned no series. Native promtool rule check, rule fixtures and full configuration check passed on the monitoring host. Four focused Python tests passed locally; the local native test was skipped and covered by the actual host run."
+    },
+    {
+      "check": "Atomic repair and reload",
+      "result": "pass",
+      "observed": "2026-11-06 23:52:41 UTC rule replacement from b6f99dbf0e998fc595a0921932f24500605f4c6c69f04f0b34e33f77182c7331 to c68b94171d0581a95c5f832dac58553b23aed26a4603b8a6c7490bc70d6bab11, with root-private backup/var/backups/fleet-prometheus-log-shipping/20261106T235241Z and file/directory fsync. SIGHUP kept PID685. Producer and credential configuration unchanged."
+    },
+    {
+      "check": "Loaded rules and actual data",
+      "result": "pass",
+      "observed": "At23:53:43 UTC both alert rules were healthok/inactive, Prometheus reload success1, and corrected per-shipper ages were124\u2013199seconds across allfive hosts. Thresholds and delays unchanged; no synthetic notification sent."
+    },
+    {
+      "check": "Exact main replay",
+      "result": "pass",
+      "observed": "2026-11-07 00:08:13 UTC fresh-main hashes equal installed bytes: alertc68b94171d0581a95c5f832dac58553b23aed26a4603b8a6c7490bc70d6bab11; collectorf5dfe9ff36a8bfe2936b0ca407e26d83751f5772ff3589b3ce2d2bdccba727cd. Replay changed zero files. Collector timeractive and natural00:03:51run Resultsuccess/exit0."
+    }
+  ],
+  "limitations": [
+    "Global release_manager.py refused101 unrelated in_progress workstreams and repeated pre_existing_gate_failures waiver blockersx12 before any version mutation. Scoped patch metadata uses the documented WS0514 workflow, enforced release readiness, and primary CI. Release-gate configuration/waivers unchanged; no global product-readiness claim."
+  ]
+}

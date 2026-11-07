@@ -1,8 +1,8 @@
 id: ws-20261106-public-network-examples
 adr: '0407'
 title: Preserve network semantics in sanitized address examples
-status: ready
-ready_to_merge: true
+status: merged
+ready_to_merge: false
 live_applied: false
 owner: codex
 branch: codex/public-network-examples
@@ -37,7 +37,7 @@ ownership_manifest:
     - scripts/publish_to_serverclaw.py
     - tests/test_netpolicy.py
     - tests/test_netpolicy_run.py
-    mode: exclusive
+    mode: read_only
 canonical_truth:
   changelog_entry: Keep sanitized Tailnet identities in shared-address space and prune
     only eliminated exported baseline IDs while refusing new policy findings and preserving

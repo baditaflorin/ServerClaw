@@ -58,9 +58,22 @@ def test_a_host_missing_from_the_window_is_written_with_timestamp_zero(tmp_path,
     assert mod.main() == 0
     text = out.read_text()
     assert "openobserve_log_freshness_up 1" in text
-    assert 'host="0pipe",role="hypervisor"} 1700000000' in text
-    assert 'host="0infer",role="hypervisor"} 0' in text
+    assert 'shipper_host="0pipe"} 1700000000' in text
+    assert 'shipper_host="0infer"} 0' in text
     assert text.count("openobserve_log_last_event_timestamp_seconds{") == len(mod.HYPERVISORS)
+
+
+def test_the_probe_labels_do_not_clash_with_the_scrape_target_labels(tmp_path, monkeypatch) -> None:
+    # the VM 630 scrape target carries host= and role=; Prometheus renames a clashing metric label to exported_<name>,
+    # which made the first version of the rule select nothing (found live 2026-11-01)
+    mod = _probe()
+    out = tmp_path / "x.prom"
+    monkeypatch.setattr(mod, "OUT", str(out))
+    monkeypatch.setattr(mod, "last_events", lambda: {})
+    mod.main()
+    series = [line for line in out.read_text().splitlines() if line.startswith("openobserve_log_last_event_timestamp_seconds{")]
+    assert series and all(" host=" not in line and ",host=" not in line and "{host=" not in line and "role=" not in line for line in series)
+    assert 'by (shipper_host)' in _alerts()["HypervisorLogShippingSilent"]["expr"]
 
 
 def test_a_failing_query_writes_up_zero_and_no_host_series(tmp_path, monkeypatch) -> None:

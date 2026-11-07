@@ -8,16 +8,16 @@ tests:
   - name: a hypervisor silent for over 2 hours fires, a recent one never
     interval: 1m
     input_series:
-      - series: 'openobserve_log_last_event_timestamp_seconds{stream="host_logs",host="0mcp",role="hypervisor"}'
+      - series: 'openobserve_log_last_event_timestamp_seconds{stream="host_logs",shipper_host="0mcp",host="collector-vm",role="guest"}'
         values: "3600x300"
-      - series: 'openobserve_log_last_event_timestamp_seconds{stream="host_logs",host="0pipe",role="hypervisor"}'
+      - series: 'openobserve_log_last_event_timestamp_seconds{stream="host_logs",shipper_host="0pipe",host="collector-vm",role="guest"}'
         values: "0+60x300"
     alert_rule_test:
       - {eval_time: 100m, alertname: HypervisorLogShippingSilent, exp_alerts: []}
       - eval_time: 200m
         alertname: HypervisorLogShippingSilent
         exp_alerts:
-          - exp_labels: {severity: warning, service: fleet_log_shipping, host: 0mcp}
+          - exp_labels: {severity: warning, service: fleet_log_shipping, shipper_host: 0mcp}
             exp_annotations:
               summary: "No log from hypervisor 0mcp in OpenObserve host_logs for over 2 hours"
               description: "The journal shipper (vector.service) on 0mcp is stopped, stuck or cannot reach openobserve.0own.com, so its kernel, OOM, SMART, PVE and sshd logs are not being kept. Check `systemctl status vector` and `journalctl -u vector` on the host; the installer is 0pipe scripts/install-vector-host.sh (0docker and 0own ship by their own route)."
@@ -26,14 +26,14 @@ tests:
   - name: a host never seen in the window (timestamp 0) fires after the delay
     interval: 1m
     input_series:
-      - series: 'openobserve_log_last_event_timestamp_seconds{stream="host_logs",host="0infer",role="hypervisor"}'
+      - series: 'openobserve_log_last_event_timestamp_seconds{stream="host_logs",shipper_host="0infer",host="collector-vm",role="guest"}'
         values: "0x200"
     alert_rule_test:
       - {eval_time: 100m, alertname: HypervisorLogShippingSilent, exp_alerts: []}
       - eval_time: 150m
         alertname: HypervisorLogShippingSilent
         exp_alerts:
-          - exp_labels: {severity: warning, service: fleet_log_shipping, host: 0infer}
+          - exp_labels: {severity: warning, service: fleet_log_shipping, shipper_host: 0infer}
             exp_annotations:
               summary: "No log from hypervisor 0infer in OpenObserve host_logs for over 2 hours"
               description: "The journal shipper (vector.service) on 0infer is stopped, stuck or cannot reach openobserve.0own.com, so its kernel, OOM, SMART, PVE and sshd logs are not being kept. Check `systemctl status vector` and `journalctl -u vector` on the host; the installer is 0pipe scripts/install-vector-host.sh (0docker and 0own ship by their own route)."

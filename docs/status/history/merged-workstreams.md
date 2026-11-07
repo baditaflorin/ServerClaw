@@ -201,6 +201,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `` | Fix example.org guest network addressing — swap internal/staging to match reality | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
 | `` | Audit — example.org fleet-wide guest network identity drift | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
 | `` | ADR 0491: replace Keycloak with Authentik (Phase 0 -- decision + client audit) | `merged` | [0491-authentik-for-operator-and-agent-sso.md](../../adr/0491-authentik-for-operator-and-agent-sso.md) |
+| `0407` | Preserve network semantics in sanitized address examples | `merged` | [ws-20261106-public-network-examples.md](../../workstreams/ws-20261106-public-network-examples.md) |
 | `0407` | Finalize image cleanup observability and sanitized publication | `merged` | [ws-20261106-image-gc-release-integration.md](../../workstreams/ws-20261106-image-gc-release-integration.md) |
 | `0226` | Surface bounded image cleanup failures through existing monitoring | `merged` | [fleet-image-gc-monitoring.md](../../runbooks/fleet-image-gc-monitoring.md) |
 | `0226` | Surface bounded runner artifact retention failures | `merged` | [fleet-image-gc-monitoring.md](../../runbooks/fleet-image-gc-monitoring.md) |

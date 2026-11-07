@@ -23,9 +23,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 348
+  total_workstreams: 349
   by_year:
-    '2026': 348
+    '2026': 349
 workstreams:
 - id: ws-20261031-pg-primary-memory
   adr: 0495
@@ -8893,66 +8893,6 @@ workstreams:
   - serverclaw/main HEAD no longer contains the leaked file
   related_adrs:
   - "ADR 0409 \u2014 Generalize committed code to eliminate publication sanitization"
-- id: ws-20261106-public-network-examples
-  adr: '0407'
-  title: Preserve network semantics in sanitized address examples
-  status: ready
-  ready_to_merge: true
-  live_applied: false
-  owner: codex
-  branch: codex/public-network-examples
-  worktree_path: .worktrees/public-network-examples
-  doc: docs/workstreams/ws-20261106-public-network-examples.md
-  depends_on:
-  - ws-20261106-image-gc-release-integration
-  conflicts_with: []
-  shared_surfaces:
-  - config/publication-sanitization.yaml
-  - .woodpecker.yml
-  - VERSION
-  - changelog.md
-  - versions/stack.yaml
-  - README.md
-  - scripts/publish_to_serverclaw.py
-  - tests/test_netpolicy.py
-  - tests/test_netpolicy_run.py
-  ownership_manifest:
-    owned_surfaces:
-    - id: public_network_examples
-      paths:
-      - config/publication-sanitization.yaml
-      - tests/test_publication_network_policy.py
-      - .woodpecker.yml
-      - docs/workstreams/ws-20261106-public-network-examples.md
-      - workstreams/active/ws-20261106-public-network-examples.yaml
-      - VERSION
-      - changelog.md
-      - versions/stack.yaml
-      - README.md
-      - scripts/publish_to_serverclaw.py
-      - tests/test_netpolicy.py
-      - tests/test_netpolicy_run.py
-      mode: exclusive
-  canonical_truth:
-    changelog_entry: Keep sanitized Tailnet identities in shared-address space and
-      prune only eliminated exported baseline IDs while refusing new policy findings
-      and preserving private enforcement.
-    release_bump: patch
-    included_in_repo_version: 0.179.57
-  notes: Publication-only example mapping correction. No live network policy, accepted
-    finding baseline, or checker behavior changes. Exported baseline refresh can only
-    remove accepted IDs and aborts on every new non-info finding. All pair plans validate
-    before writes; shared export path guards protect private files.
-  tasks:
-  - id: mapping
-    title: Preserve Tailnet address class in example replacements
-    status: completed
-  - id: regression
-    title: Check actual sanitized policies and portable synthetic boundaries
-    status: completed
-  - id: publication
-    title: Prepare strict export validation and required publication pipeline inputs
-    status: completed
 - id: ws-0511-serverclaw-public-route-template
   adr: '0407'
   title: Keep the ServerClaw host template aligned with the edge route catalog
@@ -11153,6 +11093,68 @@ workstreams:
   - id: t3
     title: Record the live control-plane recovery and refresh generated repository
       evidence
+    status: completed
+- id: ws-20261107-log-shipping-labels
+  adr: '0250'
+  title: Preserve hypervisor log-shipping alert identity across scrape labels
+  status: ready
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/log-shipping-release
+  worktree_path: .
+  doc: docs/workstreams/ws-20261107-log-shipping-labels.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: log_shipping_identity
+      mode: read_only
+      paths:
+      - config/0own/openobserve/log-freshness/openobserve-log-freshness.py
+      - config/prometheus/rules/fleet-log-shipping.yml
+      - tests/promtool/fleet_log_shipping_rules_test.yml
+      - tests/test_fleet_log_shipping_rules.py
+    - id: active_workstream_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - workstreams.yaml
+    - id: log_shipping_release_integration
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+      paths:
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - README.md
+      - RELEASE.md
+      - build/platform-manifest.json
+      - docs/status/**
+      - docs/release-notes/**
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/runbooks/fleet-observability.md
+      - docs/workstreams/ws-20261107-log-shipping-labels.md
+      - workstreams/active/ws-20261107-log-shipping-labels.yaml
+      - receipts/live-applies/2026-11-07-log-shipping-labels-live-apply.json
+  canonical_truth:
+    changelog_entry: Select hypervisor log freshness by shipper_host so the collector
+      guest's scrape labels cannot silence the alert.
+    release_bump: patch
+    included_in_repo_version: 0.179.58
+    latest_receipts:
+      hypervisor_log_shipping_alerts: 2026-11-07-log-shipping-labels-live-apply
+  tasks:
+  - id: t1
+    title: Verify the live producer and alert mismatch
+    status: completed
+  - id: t2
+    title: Preserve source history and test actual guest scrape labels
+    status: completed
+  - id: t3
+    title: Verify exact merged main and prepare release metadata for the live correction
     status: completed
 - id: ws-0377-repo-intake-subdomain
   adr: '0224'

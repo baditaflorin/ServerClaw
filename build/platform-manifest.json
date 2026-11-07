@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.57",
-  "platform_version": "0.179.59",
-  "generated_at": "2026-11-06T20:53:45Z",
-  "next_refresh_at": "2026-11-06T21:53:45Z",
+  "repo_version": "0.179.58",
+  "platform_version": "0.179.60",
+  "generated_at": "2026-11-07T00:19:16Z",
+  "next_refresh_at": "2026-11-07T01:19:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -6437,10 +6437,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.56",
-    "deployed_at": "2026-11-06",
-    "summary": "Keep sanitized Tailnet identities in generic shared-address space so exported network-policy checks retain their source classification. Prune only accepted findings eliminated by the public projection; reject new non-info findings, malformed policy/baseline pairs and unsafe file aliases before writing exported baselines.",
-    "release_notes_url": "docs/release-notes/0.179.57.md"
+    "last_version": "0.179.57",
+    "deployed_at": "2026-11-07",
+    "summary": "Correct hypervisor log-shipping alert selection and grouping to preserve shipper_host independently of the collector guest scrape labels. Exercise actual guest scrape labels in Prometheus fixtures and record native validation plus exact merged-main replay against both installed files.",
+    "release_notes_url": "docs/release-notes/0.179.58.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

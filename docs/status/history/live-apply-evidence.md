@@ -8,6 +8,7 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `hypervisor_log_shipping_alerts` | `2026-11-07-log-shipping-labels-live-apply` |
 | `image_gc_monitoring` | `2026-11-06-image-gc-monitoring-live-apply` |
 | `domainscope_live_drive_figures` | `2026-11-06-domainscope-live-drive-figures-live-apply` |
 | `docker_prod_logrotate` | `2026-11-06-retention-mainline-live-apply` |

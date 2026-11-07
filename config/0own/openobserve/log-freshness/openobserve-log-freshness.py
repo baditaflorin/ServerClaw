@@ -4,7 +4,8 @@
 Runs on VM 630 (OpenObserve itself) every 2 minutes. A hypervisor's journal shipper can die, hang or lose its network without any
 other signal, and its logs are what we read after an incident. A host with no event in the 6 h window is written with timestamp 0
 (so the alert fires), but when the query itself fails only openobserve_log_freshness_up 0 is written: a probe that reads nothing
-must say so instead of reporting every host silent. The credential is read from the local secret file and never printed.
+must say so instead of reporting every host silent. The label is shipper_host, not host/role: the scrape target already has host and
+role labels and Prometheus would rename ours to exported_host/exported_role (found live 2026-11-01). The credential is read from the local secret file and never printed.
 """
 from __future__ import annotations
 
@@ -52,7 +53,7 @@ def main() -> int:
         seen = last_events()
         lines.append("openobserve_log_freshness_up 1")
         for h in HYPERVISORS:
-            lines.append(f'openobserve_log_last_event_timestamp_seconds{{stream="{STREAM}",host="{h}",role="hypervisor"}} {seen.get(h, 0)}')
+            lines.append(f'openobserve_log_last_event_timestamp_seconds{{stream="{STREAM}",shipper_host="{h}"}} {seen.get(h, 0)}')
         rc = 0
     except Exception as e:  # noqa: BLE001 - any failure means the probe is blind
         print("log freshness probe failed:", type(e).__name__, file=sys.stderr)
