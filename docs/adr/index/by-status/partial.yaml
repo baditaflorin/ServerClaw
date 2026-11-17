@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-06'
+generated: '2026-11-17'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 5
+total_adrs: 6
 adrs:
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
@@ -111,3 +111,23 @@ adrs:
       (README with the measured n
     filename: 0495-pg-primary-memory-guardrails.md
     path: docs/adr/0495-pg-primary-memory-guardrails.md
+  - adr: 0496
+    title: Filter container interfaces from Tailscale endpoint advertisements
+    status: Accepted
+    implementation_status: Partial
+    currently_describes: mixed_state
+    date: '2026-11-17'
+    concern: platform
+    keywords:
+      - filter
+      - container
+      - interfaces
+      - from
+      - tailscale
+      - endpoint
+      - advertisements
+    summary: Evaluate the pinned upstream proposal on the exact installed upstream release.
+    filename: 0496-tailscale-endpoint-advertisement-filter.md
+    path: docs/adr/0496-tailscale-endpoint-advertisement-filter.md
+    implemented_in_repo_version: 0.179.63
+    implemented_on: '2026-11-17'

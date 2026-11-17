@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "architecture": "linux/amd64",
+  "go_image": "golang@sha256:ec47ea3725fea0cc88f6de94919aef19f40f12fc1ec0e2d1b3426dbf15ecca04",
+  "upstream_patch": "https://github.com/tailscale/tailscale/pull/17762",
+  "patch_sha256": "1ac7e039a39e7321c54c573ff071c4ad0cd2904c73a4e088f15480fd0afc0c20",
+  "releases": {
+    "1.104.7": {
+      "source_commit": "cbc74fe48ef1b1649f69a4d9a602319427e25102",
+      "static_binary_sha256": "052b8f41ca31fc5a30717a646d23605c0f437e60acc30e2584b35d2fb053f844",
+      "previous_static_binary_sha256": "a7ed8c1f806f6615113004dae6d0a815a2238ff4959d6d990840cb20ed06331b"
+    },
+    "1.104.5": {
+      "source_commit": "73a48057aaf5f60e4f770b398e9b7af576b01dbe",
+      "static_binary_sha256": "50e734d44627c49e7dd957f1cadf74e211f69db69abe2ba0b0dfdab87fd0e43d",
+      "previous_static_binary_sha256": "7197c7b609b5c9813c43e9cf727c01b07c5fafca13ca5e62aaec20366c07f196"
+    }
+  },
+  "sender_hook_sha256": "30b0c9e09135f56eb6b42cb9e68814ce9c901945257d22d8e8807322db9eda0d",
+  "sender_source_sha256": "bdbeb11b12d2d79d60da28ba998b14bbe750ddc92f2b33ac6b218782a7847da3",
+  "previous_installed_hashes": {
+    "wrapper": [
+      "2794f97840606fecf5f4d726c56995464c16acd9e71bc5943b309795582c7965"
+    ],
+    "health": [
+      "169e22df90a3ff5958cda5c9a96a7f5812900612183cab7e41537a989838fe29",
+      "553a6c93db269fb05642c186e80fa3d63588cae82c67bcf6ba5e5a689772a5d7"
+    ]
+  }
+}

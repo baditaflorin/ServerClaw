@@ -1,0 +1,9 @@
+diff --git a/wgengine/magicsock/magicsock.go b/wgengine/magicsock/magicsock.go
+index d68f60d..bb8727d 100644
+--- a/wgengine/magicsock/magicsock.go
++++ b/wgengine/magicsock/magicsock.go
+@@ -1573,0 +1574,4 @@ func (c *Conn) sendUDP(ipp netip.AddrPort, b []byte, isDisco bool, isGeneveEncap
++	if isDisco && privateDiscoOnLinkOnly() && suppressOffLinkPrivateDisco(ipp.Addr(), c.netMon.InterfaceState(), privateDiscoExcludedInterfaces()) {
++		metricPrivateDiscoOffLinkSuppressed.Add(1)
++		return false, nil
++	}

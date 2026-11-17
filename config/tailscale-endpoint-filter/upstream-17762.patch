@@ -1,0 +1,82 @@
+diff --git a/net/netmon/state.go b/net/netmon/state.go
+index c5e356c..4b77db4 100644
+--- a/net/netmon/state.go
++++ b/net/netmon/state.go
+@@ -11,0 +12 @@
++	"path"
+@@ -30,0 +32,12 @@
++// avoidInterfaces is a debug/power-user knob to exclude specific interfaces from consideration
++// when gathering endpoints.
++var avoidInterfaces = envknob.RegisterString("TS_AVOID_INTERFACES")
++
++// Likewise, onlyInterfaces can be set to specify the _only_ interfaces Tailscale is allowed to
++// consider when gathering endpoints.
++var onlyInterfaces = envknob.RegisterString("TS_ONLY_INTERFACES")
++
++// In the same vein, avoidPrefix is a debug/power-user knob to exclude any addresses within specific
++// prefixes from being used as endpoints. This is a more granular version of $TS_AVOID_INTERFACES.
++var avoidPrefix = envknob.RegisterString("TS_AVOID_PREFIX")
++
+@@ -37,0 +51,33 @@ func isLoopback(nif *net.Interface) bool { return nif.Flags&net.FlagLoopback !=
++func matchInterfaceName(name string, patterns string) bool {
++	patternsList := strings.Split(patterns, ",")
++	for _, pattern := range patternsList {
++		pattern = strings.TrimSpace(pattern)
++		if pattern == "" {
++			continue
++		}
++		if matched, _ := path.Match(pattern, name); matched {
++			return true
++		}
++	}
++	return false
++}
++
++func matchIP(ip netip.Addr, prefixes string) bool {
++	prefixList := strings.Split(prefixes, ",")
++	for _, arg := range prefixList {
++		arg = strings.TrimSpace(arg)
++		if arg == "" {
++			continue
++		}
++		prefix, err := netip.ParsePrefix(arg)
++		if err != nil {
++			continue
++		}
++		if prefix.Contains(ip) {
++			return true
++		}
++	}
++	return false
++
++}
++
+@@ -54,0 +101,18 @@ func isProblematicInterface(nif *net.Interface) bool {
++func isAllowedInterface(nif *net.Interface) bool {
++	name := nif.Name
++	if onlyInterfaces() != "" && !matchInterfaceName(name, onlyInterfaces()) {
++		return false
++	}
++	if avoidInterfaces() != "" && matchInterfaceName(name, avoidInterfaces()) {
++		return false
++	}
++	return true
++}
++
++func isAllowedAddress(ip netip.Addr) bool {
++	if avoidPrefix() != "" && matchIP(ip, avoidPrefix()) {
++		return false
++	}
++	return true
++}
++
+@@ -73,0 +138,4 @@ func LocalAddresses() (regular, loopback []netip.Addr, err error) {
++		if !isAllowedInterface(stdIf) {
++			// Skip interfaces that the user does not want to use with Tailscale.
++			continue
++		}
+@@ -88,0 +157,4 @@ func LocalAddresses() (regular, loopback []netip.Addr, err error) {
++				if !isAllowedAddress(ip) {
++					// Skip addresses that the user does not want to use with Tailscale.
++					continue
++				}

@@ -92,7 +92,7 @@ def test_tailnet_routes_are_single_host_routes_and_keep_the_pre_existing_ones() 
     own = hostvars["0own_bastion"]["fleet_tailscale_node_advertise_routes"]
     assert "10.10.10.109/32" in docker and "10.60.10.50/32" in own
     # VM660 has no tailscaled; the hypervisor routes its /32 (policy autoApprover + Prometheus grant added 2026-10-13).
-    assert "10.60.10.60/32" in own
+    assert "10.10.60.60/32" in own
     # `tailscale set --advertise-routes` replaces the list, so the older routes must still be declared.
     assert {"10.10.10.30/32", "10.10.10.106/32", "10.10.10.107/32"} <= set(docker)
     assert all(route.endswith("/32") for route in docker + own)

@@ -1,0 +1,7 @@
+# managed-by: role=tailscale_endpoint_filter agent=operator
+[Unit]
+Description=Check Tailscale endpoint advertisement filter
+After=tailscaled.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/tailscale-endpoint-filter-health

@@ -1,0 +1,9 @@
+# managed-by: role=tailscale_endpoint_filter agent=operator
+[Unit]
+Description=Monitor Tailscale endpoint advertisement filter
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=1min
+AccuracySec=5s
+[Install]
+WantedBy=timers.target

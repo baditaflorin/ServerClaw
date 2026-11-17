@@ -1,0 +1,66 @@
+workstream: ws-20261117-tailscale-endpoint-filter
+applied_at_utc: '2026-11-17T19:48:09Z'
+source_commit: dd57644704af482113ccd05173e86b9fbb596569
+status: partial
+scope: Six runtime hosts, one hypervisor subnet router, and the monitoring alert group.
+change: Installed the pinned patched Tailscale daemon behind a version- and checksum-checked systemd wrapper. Excluded confirmed Docker bridge interfaces from endpoint advertisements. Armed a five-minute local rollback before restart and confirmed only after independent verification. Deployed and reloaded the corresponding Prometheus alert group.
+verification: A peer's network map fell from 241 bridge addresses to zero while retaining the LAN endpoint. Tailscale ping, proxy HTTP health, the independent WAN guard, local and Prometheus filter health metrics, and fresh TLS-verified non-admin Gitea and Grafana browser logins passed. A second peer independently confirmed zero bridge endpoints.
+limitations: Other peers still advertise bridge addresses. This canary was applied from a committed branch before merge. The daemon falls back to stock if its package version changes, so the existing independent WAN guard remains essential. A later health-script correction for a different node-exporter layout is not yet on the canary. Production reboot and provider recheck were not attempted.
+
+additional_canary:
+  applied_at_utc: '2026-11-17T20:06:12Z'
+  source_commit: 277c6696f522f4e9f2bd08ca480f309099850242
+  scope: One additional runtime, with the second supported upstream release.
+  verification: Independent peer confirmed its Docker bridge endpoint was removed, its LAN endpoint retained, and a relayed Tailscale ping succeeded. The peer reached the node exporter and observed the healthy filter metric; the hypervisor nftables and traffic-control guard checks passed before confirmation.
+  rollback_test: The first attempt rolled back successfully after a direct-only ping check rejected a functioning relay. A subsequent relay-aware check and end-to-end metric fetch passed.
+monitoring_followup:
+  scope: Monitoring VM Prometheus configuration and endpoint-filter alert group.
+  change: Activated the already-inventoried second runtime scrape target, validated the candidate configuration with promtool, and reloaded Prometheus. Added a missing-series alert with a 24-hour observation window.
+  verification: Both runtime metrics were scraped as healthy and all three alert rules evaluated successfully and were inactive. Promtool tests covered degraded, stale, and disappeared series.
+  limitations: The historical missing-series alert remembers a series for 24 hours; the separate expected-runtime scrape job and missing-metric alert cover registered hosts without that time limit. An independent inventory audit is still needed to catch one host accidentally removed from the expected list.
+third_canary:
+  applied_at_utc: '2026-11-17T20:12:25Z'
+  source_commit: 277c6696f522f4e9f2bd08ca480f309099850242
+  scope: Runtime with active container services and 98 Docker bridge addresses.
+  verification: An independent peer observed zero bridge endpoints while retaining the LAN endpoint. Tailscale connectivity, the node-exporter metric, an existing container service health endpoint, its Docker health state, and both hypervisor WAN guards passed before confirmation. The monitoring VM now scrapes the filter metric as healthy.
+  rollback_test: A first attempt rolled back when a short discovery ping timed out. Service health and connectivity recovered; a second attempt allowed bounded settling time and passed the same checks.
+fourth_canary:
+  applied_at_utc: '2026-11-17T20:18:09Z'
+  source_commit: 277c6696f522f4e9f2bd08ca480f309099850242
+  scope: A runtime accessed through its hypervisor guest agent, with 20 bridge addresses and a nested node-exporter textfile directory.
+  verification: Independent peer observed zero bridge endpoints with the LAN endpoint retained. Tailscale, node-exporter metric, an existing container service health endpoint, Docker health, and both host WAN guards passed. Central Prometheus scraped the healthy metric.
+  limitations: The hypervisor experienced substantial I/O pressure during the operation; the cause is unknown. Further operations on that host were paused.
+expected_runtime_monitoring:
+  scope: Seven currently protected nodes registered in the managed Prometheus scrape inventory.
+  verification: The dedicated textfile-only scrape returned healthy metrics from all seven nodes. Promtool tests cover unreachable and never-scraped registered targets as well as complete absence of the expected-target job.
+  limitations: Registration is required for each future rollout; the rules do not detect one target being accidentally removed from the inventory while others remain.
+rolled_back_attempt:
+  scope: Additional runtime hosting the work board and CI service.
+  outcome: Both attempts restored the stock daemon after verification failed. The first used a tailnet metrics address not permitted by the existing policy. The second saw peer discovery time out; discovery from the same monitoring peer also timed out briefly after rollback. LAN metrics and the work board API remained reachable, and a separate peer confirmed a relayed Tailscale connection after rollback. A third attempt used bidirectional discovery plus the established LAN scrape and succeeded.
+fifth_canary:
+  applied_at_utc: '2026-11-17T20:32:47Z'
+  source_commit: 277c6696f522f4e9f2bd08ca480f309099850242
+  scope: Runtime hosting the work board and CI service, with 24 container bridge interfaces.
+  verification: Independent peer observed zero bridge endpoints with the LAN endpoint retained. Tailscale discovery passed in both directions, the work board API and existing LAN metric path were reachable, both host WAN guards passed, and central Prometheus scraped the filter metric as healthy.
+  earlier_rollbacks: Two earlier attempts restored the stock daemon, first due to testing an inaccessible metrics address and then a peer discovery timeout; the latter was also reproducible with the stock daemon and cleared after reverse initiation.
+sixth_canary:
+  applied_at_utc: '2026-11-17T20:36:12Z'
+  source_commit: 277c6696f522f4e9f2bd08ca480f309099850242
+  scope: Monitoring VM, with two container bridge interfaces.
+  verification: An independent peer observed zero bridge endpoints with the LAN endpoint retained; bidirectional Tailscale, Prometheus readiness, the local exporter metric and both host WAN guards passed. Central Prometheus scraped all six expected-runtime metrics as healthy.
+  rollback_test: An initial attempt restored the stock daemon because the verification tried to scrape from a peer denied by existing firewall policy. The verified retry used Prometheus's existing local scrape path.
+seventh_canary:
+  applied_at_utc: '2026-11-17T20:41:35Z'
+  source_commit: 277c6696f522f4e9f2bd08ca480f309099850242
+  scope: Public hypervisor and Tailscale subnet router, with four Docker bridge interfaces and an internal LAN bridge.
+  verification: An independent peer observed zero Docker bridge endpoints while retaining the internal LAN bridge. Bidirectional Tailscale, the filter metric, both WAN guards and two real internal exporter routes passed before confirmation. Central Prometheus scraped all seven expected nodes as healthy.
+  rollback_test: The first attempt interrupted its own Tailscale SSH session. The stock daemon was restored through host-key-verified direct SSH and both routes were rechecked. The retry used that independent SSH path and succeeded.
+  storage: The RAID mirrors remained intact and IO pressure was low at apply time, but one NVMe device reports failed SMART health and requires separate attention.
+
+sender_filter_rollout:
+  applied_at_utc: '2026-11-17T21:54:00Z'
+  source_commit: 2542c5e0e900362ca39928a68303c4aebee969c1
+  scope: Six previously protected nodes including the work-board runtime, monitoring VM, container runtimes, and one subnet router.
+  change: Replaced the advertisement-only daemon with the pinned sender-filter build through a separately timed rollback-protected upgrade. Loaded the sender missing-guard alert after promtool validation.
+  verification: A live canary suppressed 12 off-link private discovery candidates while a guest-interface capture across restart contained zero packets to the tested off-link private subnet. An independent systemd rollback drill restored the previous filtered daemon. Each of the six nodes retained its LAN endpoint with no Docker bridge advertisements, passed Tailscale and guard checks, and reported the sender guard centrally. The work-board API, Prometheus readiness, a container service health endpoint, proxy health, and two real subnet routes passed where applicable. Prometheus returned no failed probes or down targets.
+  limitations: One registered runtime remains on the advertisement-only filter due to severe hypervisor I/O pressure. Other unregistered fleet peers have not been upgraded or fully inventoried. Package version drift falls back to the stock daemon. WAN guards remain required; production firewall reload and reboot survival and provider recheck are not established by this rollout.

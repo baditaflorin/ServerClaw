@@ -46,6 +46,26 @@ Verify the forward before running authenticated automation:
 curl -fsS http://127.0.0.1:18093/api/instances/
 ```
 
+### Unattended workstream sync
+
+For an SSH-reachable Plane runtime, an operator can configure a scoped, temporary
+forward without storing credentials in the configuration. In the main checkout,
+create `.local/plane/transport.json` with an SSH alias and the Plane port on
+that target, for example:
+
+```json
+{"ssh_target":"example-plane-runtime","remote_port":8093}
+```
+
+The auth file's `base_url` must be an explicit `http://127.0.0.1:<port>` URL.
+The Plane workstream sync and `plane_tool.py` open this loopback-only tunnel
+when needed and close the process they started afterward. A pre-existing
+listener is reused and is not stopped. Isolated git worktrees use the main
+checkout's existing auth and transport files; they do not copy credentials.
+An SSH failure or unavailable API is reported separately from a rejected key.
+The SSH alias must use the operator's existing access path to the intended
+runtime, and the forwarded port must listen on that target's loopback interface.
+
 ## Primary Commands
 
 Syntax-check the workflow:

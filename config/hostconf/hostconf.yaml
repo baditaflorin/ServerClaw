@@ -1278,7 +1278,7 @@ hosts:
   0pipe-runtime:
     hostname: 0pipe-runtime
     vm: {hypervisor: pve-0pipe, id: 101}
-    note: "0pipe runtime VM (VM 101, 4 vCPU, 8 GiB, 60 GiB disk, Debian 13; Docker + Compose; restricted canary fleet pool member, cluster 0pipe; LAN 10.80.10.11, tailnet tag:pool-runtime 100.83.124.115; rebuildable, no state but Docker images). No ssh alias on the operator's machine yet, so it is reached through the hypervisor's guest agent; give it `ssh:` (and `sudo: false` when the login is root) once the alias exists"
+    note: "0pipe runtime VM (VM 101, 4 vCPU, 8 GiB, 60 GiB disk, Debian 13; Docker + Compose; restricted canary fleet pool member, cluster 0pipe; LAN 10.80.10.11, tailnet tag:pool-runtime 100.64.0.25; rebuildable, no state but Docker images). No ssh alias on the operator's machine yet, so it is reached through the hypervisor's guest agent; give it `ssh:` (and `sudo: false` when the login is root) once the alias exists"
     files:
       - node-exporter-wait-for-tailscale
       - sysctl-hotplug-threads-max

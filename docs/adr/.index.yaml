@@ -6,22 +6,22 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-06'
+generated: '2026-11-17'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 518
+total_adrs: 519
 adr_number_range:
   first: '0001'
-  last: 0495
-  next_available: 0496
+  last: 0496
+  next_available: 0497
 implementation_status_summary:
   Implemented: 379
-  Partial: 5
+  Partial: 6
   Not Implemented: 34
   Deprecated: 14
   Accepted: 31
   Proposed: 55
 decision_status_summary:
-  Accepted: 366
+  Accepted: 367
   Proposed: 63
   Deprecated: 38
   Implemented: 51
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 86
+      count: 87
       first_adr: '0400'
-      last_adr: 0495
+      last_adr: 0496
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -88,7 +88,7 @@ facets:
       count: 34
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 155
+      count: 156
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -115,7 +115,7 @@ facets:
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 5
+      count: 6
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -137,8 +137,15 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0496
+  next_available_adr: 0497
 latest_adrs:
+  - adr: 0496
+    title: Filter container interfaces from Tailscale endpoint advertisements
+    implementation_status: Partial
+    currently_describes: mixed_state
+    concern: platform
+    path: docs/adr/0496-tailscale-endpoint-advertisement-filter.md
+    implemented_on: '2026-11-17'
   - adr: 0495
     title: The production Postgres VM701 bounds the shared memory its parallel queries can take
     implementation_status: Partial
@@ -195,12 +202,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: platform
     path: docs/adr/0484-self-verification-contracts.md
-  - adr: 0483
-    title: Hands-Off Bootstrap — Machine-to-Machine Deployment
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: bootstrap
-    path: docs/adr/0483-hands-off-bootstrap.md
 discovery_queries:
   how do we bootstrap:
     - '0001'
