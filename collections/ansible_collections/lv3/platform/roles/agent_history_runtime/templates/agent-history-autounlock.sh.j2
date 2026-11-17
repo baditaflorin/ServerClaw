@@ -1,0 +1,23 @@
+#!/bin/bash
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+# Unlock the agent-history data volume at boot without an operator (ADR 0494, amendment 2026-11-12): fetch the passphrase from
+# OpenBao with the dedicated unlock AppRole and pipe it into the owner's helper, which opens the volume, mounts it and starts the stack.
+#
+# The passphrase travels only through the pipe below: it is never in an argument, an environment variable, a file or a log.
+# Re-running is safe. If OpenBao is not reachable yet this exits non-zero and systemd retries (agent-history-autounlock.service),
+# so a reboot of the whole host recovers by itself in whichever order the guests come up.
+set -euo pipefail
+umask 077
+
+mount_point="{{ agent_history_data_mount }}"
+mapper="/dev/mapper/{{ agent_history_luks_name }}"
+unlock="{{ agent_history_helper_dir }}/agent-history-unlock"
+fetch="{{ agent_history_helper_dir }}/agent-history-luks-passphrase"
+
+# Already mounted, or opened but not mounted: the helper needs no passphrase and only makes sure the stack is up.
+if mountpoint -q "$mount_point" || [ -e "$mapper" ]; then
+  exec "$unlock" </dev/null
+fi
+
+echo "agent-history-autounlock: reading the LUKS passphrase from OpenBao (the value is never printed)"
+"$fetch" | "$unlock"

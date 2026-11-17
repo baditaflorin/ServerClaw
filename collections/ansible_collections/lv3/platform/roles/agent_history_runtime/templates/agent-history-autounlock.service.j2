@@ -1,0 +1,24 @@
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+# Unlocks the encrypted data volume at boot with a passphrase read from OpenBao, then starts agent-history.service (ADR 0494,
+# amendment 2026-11-12). It retries until OpenBao answers, so the order in which the guests of a rebooted host come up does not
+# matter. The owner's manual path (agent-history-unlock with the passphrase on standard input) keeps working beside it.
+#
+# agent-history.service is deliberately not ordered after this unit: the helper starts it with `systemctl start`, and an
+# ordering edge would make that call wait for this very unit.
+[Unit]
+Description=Unlock the agent-history data volume from OpenBao and start the stack
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart={{ agent_history_helper_dir }}/agent-history-autounlock
+Restart=on-failure
+RestartSec={{ agent_history_luks_autounlock_retry_seconds }}
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

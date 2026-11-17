@@ -78,14 +78,17 @@ guest, and the declarations differ from the live guests in several places, so it
    re-measuring, each its own approval right before provisioning with the service impact stated; **VM 180 (CI-critical,
    balloon 0) is never trimmed**. This ADR does not make the decision. Provisioning is run from the
    `platform_server` checkout whose `.local/active-deployment` is `0mcp`.
-9. The data volume needs a manual unlock after every reboot of the guest; the compose project starts only when
-   `/srv/agent-history` is mounted and the token files exist.
+9. The data volume is unlocked before the compose project starts, and the project starts only when
+   `/srv/agent-history` is mounted and the token files exist. Originally the owner unlocked it by hand after every reboot of
+   the guest; **since the amendment of 2026-11-12 a boot unit unlocks it from OpenBao** (`agent_history_luks_autounlock_enabled`),
+   and the manual unlock stays as the fallback.
 
 ## Consequences
 
 - New isolation and a clean rollback (stop the collectors, revoke the tokens, destroy the guest, prune `vm/155` from the
   PBS datastore), at the price of one more guest on an over-committed host.
-- A manual LUKS unlock after each guest reboot, and a restore needs the passphrase from OpenBao.
+- ~~A manual LUKS unlock after each guest reboot~~ (replaced by the unattended unlock, see the amendment below), and a restore
+  needs the passphrase from OpenBao.
 - The hub's read-token copy lives in a second secret system, with a second rotation step.
 - Backups hold ciphertext for the data disk (PBS cannot compress it); the OS disk holds container images and the
   OpenBao Agent's AppRole files (see the accepted trade-offs below).
@@ -116,6 +119,45 @@ The owner activated the guest by the change that deleted `lifecycle: planned` fr
 
 Activation does not provision anything. It removes the guards that kept the declaration inert, so provisioning is the next
 step, with the preconditions in the runbook (the tailnet policy applied, OpenBao prepared by the owner, the encrypted volume).
+
+## Amendment 2026-11-12: the data volume unlocks without an operator
+
+**Decision (owner, 2026-11-12).** A platform that needs a person to type a passphrase after every reboot cannot be restarted
+on short notice (an urgent security patch, a host restart at night): the store stays down until someone does it, which happened
+on 2026-11-11 after a planned memory resize restarted the guest. The data volume now unlocks at boot, unattended:
+
+- `agent-history-autounlock.service` runs at boot, reads the LUKS passphrase from OpenBao with a **dedicated unlock AppRole** (its
+  own two files on the guest) and pipes it into the owner's `agent-history-unlock`, which opens and mounts the volume
+  and starts `agent-history.service`. The passphrase travels through one pipe: never an argument, an environment variable, a
+  file or a log line, and never through Ansible.
+- It retries every 30 seconds without limit, so a reboot of the whole host recovers whichever guest comes up first
+  (OpenBao on `runtime-control` unseals itself, see below).
+- The passphrase is where the owner put it when the volume was formatted (2026-10-29): `kv/services/agent-history/luks`, key
+  `passphrase` (the OpenBao audit log shows one create and four reads that morning). The runtime AppRole's policy covers only
+  `services/agent-history/runtime`, so the unlock has its **own AppRole whose policy reads that one path**: the long-running
+  OpenBao Agent's token can never read the passphrase, and revoking the unlock AppRole cuts the unattended unlock off alone.
+- The manual unlock stays: `agent-history-unlock` with the passphrase on standard input still works, and is the fallback while
+  OpenBao is unreachable.
+- Fixed in the same change: `agent-history.service` used `ConditionPathIsMount=`, which systemd does not have. It was ignored
+  with a warning, so at boot the unit ran before the disk was unlocked, failed on the missing Postgres directory and stayed
+  failed (found 2026-11-11). The key is `ConditionPathIsMountPoint=`; a test guards it.
+
+**What this costs in security, stated plainly.** The accepted trade-off below already lets a copy of the OS disk (or of the
+PBS image) carry the runtime AppRole's `secret_id`. The unlock AppRole's files rest there too and can read the LUKS passphrase. A copy of the whole guest
+(OS disk, data disk and the AppRole files, which the nightly PBS job holds together) plus a network path to OpenBao can
+therefore decrypt the data disk, where before the data disk in a backup was ciphertext that needed the owner's passphrase.
+OpenBao's own unseal keys sit on the disk of its guest in the same way (`/opt/openbao/unseal-watcher.sh`), so this brings the
+agent-history guest to the level the platform already accepts for its secret authority; it does not exceed it. The controls that
+remain, and that the runbook asks for: bind the AppRole to the guest's address (`secret_id_bound_cidrs` and
+`token_bound_cidrs`) so a stolen copy cannot log in from elsewhere; revoke the `secret_id` to cut a copy off at once; the
+OpenBao audit log shows every read of the key (a read outside a boot window is the signal); the value never rests on disk or in
+a backup. The follow-up already named below, a short-lived response-wrapped `secret_id`, would remove the long-lived credential
+and is not done here.
+
+**Alternative not chosen:** a Tang key server on another guest (the volume unlocks only while the guest can reach it, so a stolen
+copy alone is useless). It protects better and adds a service to run; the owner chose the OpenBao read. It stays a candidate.
+
+**Answers question 6** (the manual unlock) in favour of an unattended unlock.
 
 ## Accepted trade-offs (recorded, not changed here)
 
@@ -150,7 +192,7 @@ controller is the `platform_server` checkout whose `.local/active-deployment` is
 14 (embeddings: the model is bge-m3, 1024 dimensions, run by Ollama on a Mac with an Apple GPU, never on the hypervisor; the store embeds
 each search question through that Mac and a worker on it fills the vectors with a separate embed token: ws-20261029-agent-history-embed-query).
 
-Still open: 7 (OpenBao AppRole and paths: the owner holds OpenBao admin, so it is a step at provisioning time), 6 (accept a
-manual unlock and no swap, no log shipping), 12 (adding the guest to the weekly restore drill), 13 (the pilot's end date and
+Still open: 7 (OpenBao AppRole and paths: the owner holds OpenBao admin, so it is a step at provisioning time), 6 (no swap, no log
+shipping; the manual unlock part is answered by the amendment of 2026-11-12: the volume unlocks unattended), 12 (adding the guest to the weekly restore drill), 13 (the pilot's end date and
 the decision at the end). The written capacity exception to the 15 % guard is no longer open: it is recorded in the activation record.
 18 (whether this ADR records the RAID1 and rebuildable-store assumption) is answered here: it does.

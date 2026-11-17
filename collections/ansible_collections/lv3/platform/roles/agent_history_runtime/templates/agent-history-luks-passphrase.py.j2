@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+"""Write the LUKS passphrase of the agent-history data volume to standard output, read from OpenBao (ADR 0494, amendment 2026-11-12).
+
+It logs in with the unlock AppRole (its own files, delivered by the owner; its policy reads only the passphrase entry), reads one key of one KV entry, and writes the value to
+standard output with no trailing newline, so that it can be piped straight into `agent-history-unlock`. The value is never put
+in an argument, an environment variable, a file or a log line; every error message names the step and the HTTP status only.
+The login token is revoked afterwards (best effort). Exit status: 0 on success, 1 on any failure, with nothing on standard output.
+"""
+
+import json
+import sys
+import urllib.error
+import urllib.request
+
+ADDRESS = "{{ agent_history_openbao_address }}".rstrip("/")
+ROLE_ID_FILE = "{{ agent_history_luks_role_id_file }}"
+SECRET_ID_FILE = "{{ agent_history_luks_secret_id_file }}"
+KV_PATH = "{{ agent_history_openbao_luks_kv_path }}".strip("/")
+KEY = "{{ agent_history_openbao_luks_key }}"
+TIMEOUT_SECONDS = {{ agent_history_luks_autounlock_http_timeout_seconds }}
+
+# An environment proxy must never see the AppRole login or the passphrase.
+OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
+def fail(step: str, detail: str = "") -> None:
+    sys.stderr.write("agent-history-luks-passphrase: " + step + (": " + detail if detail else "") + "\n")
+    sys.exit(1)
+
+
+def read_file(path: str, what: str) -> str:
+    try:
+        with open(path, encoding="utf-8") as handle:
+            value = handle.read().strip()
+    except OSError as error:
+        fail("cannot read the " + what + " file", error.__class__.__name__)
+    if not value:
+        fail("the " + what + " file is empty")
+    return value
+
+
+def call(step: str, method: str, path: str, body=None, token: str = ""):
+    data = None if body is None else json.dumps(body).encode("utf-8")
+    request = urllib.request.Request(ADDRESS + "/v1/" + path, data=data, method=method)
+    request.add_header("Content-Type", "application/json")
+    if token:
+        request.add_header("X-Vault-Token", token)
+    try:
+        with OPENER.open(request, timeout=TIMEOUT_SECONDS) as response:
+            payload = response.read()
+    except urllib.error.HTTPError as error:
+        fail(step, "HTTP " + str(error.code))
+    except (urllib.error.URLError, OSError) as error:
+        fail(step, error.__class__.__name__)
+    if not payload:
+        return {}
+    try:
+        return json.loads(payload)
+    except ValueError:
+        fail(step, "the answer is not JSON")
+
+
+def main() -> None:
+    role_id = read_file(ROLE_ID_FILE, "AppRole role_id")
+    secret_id = read_file(SECRET_ID_FILE, "AppRole secret_id")
+
+    login = call("AppRole login", "POST", "auth/approle/login", {"role_id": role_id, "secret_id": secret_id})
+    token = (login.get("auth") or {}).get("client_token", "")
+    if not token:
+        fail("AppRole login", "no token in the answer")
+
+    answer = call("KV read", "GET", KV_PATH, token=token)
+    value = ((answer.get("data") or {}).get("data") or {}).get(KEY)
+    if not isinstance(value, str) or not value:
+        fail("KV read", "the key " + KEY + " is missing or empty in " + KV_PATH)
+
+    try:
+        call("token revoke", "POST", "auth/token/revoke-self", token=token)
+    except SystemExit:
+        pass  # best effort: the token is short-lived and the value is already in hand
+
+    sys.stdout.buffer.write(value.encode("utf-8"))
+    sys.stdout.buffer.flush()
+
+
+if __name__ == "__main__":
+    main()

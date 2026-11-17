@@ -975,7 +975,7 @@ vms:
       purpose: imported from the live state, purpose not recorded yet
     - from: [10.10.10.40]
       proto: tcp
-      ports: ['1587', '4222', '4647', '8000', '8081', '8083', '8095', '8098', '8201', '9000', '9080', '9100', '9443']
+      ports: ['1587', '3003', '4222', '4647', '8000', '8081', '8083', '8095', '8098', '8201', '9000', '9080', '9100', '9443']
       layers: [pve, input]
       purpose: imported from the live state, purpose not recorded yet
     - from: [10.10.10.20, 10.10.10.21]

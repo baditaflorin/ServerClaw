@@ -1,0 +1,11 @@
+[Unit]
+Description=Check private WAN egress guards every minute
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=1min
+AccuracySec=5s
+Unit=private-wan-guard-health.service
+
+[Install]
+WantedBy=timers.target

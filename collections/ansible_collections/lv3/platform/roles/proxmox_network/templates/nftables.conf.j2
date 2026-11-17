@@ -11,10 +11,9 @@ table inet filter {
   chain forward {
     type filter hook forward priority 0;
     policy drop;
+    # Guard before conntrack acceptance, including for existing flows.
+    oifname "{{ proxmox_wan_bridge }}" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 } counter drop
     ct state related,established accept
-    # Never forward private space to the public uplink: a missing route would otherwise
-    # masquerade it onto the WAN and Hetzner reports it as a netscan (abuse 2610:Q6J2SHOZK9CK).
-    oifname "{{ proxmox_wan_bridge }}" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10 } counter drop
     ip saddr {{ proxmox_internal_network }} accept
     iifname "tailscale0" ip daddr {{ proxmox_internal_network }} accept
 {% if proxmox_staging_bridge_enabled | default(false) %}
@@ -42,6 +41,8 @@ table inet filter {
   chain output {
     type filter hook output priority 0;
     policy accept;
+    # Host-originated traffic needs the same WAN boundary as guest traffic.
+    oifname "{{ proxmox_wan_bridge }}" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 } counter drop
   }
 }
 
@@ -49,6 +50,10 @@ table ip nat {
   chain prerouting {
     type nat hook prerouting priority -100;
     policy accept;
+{% if proxmox_public_edge_ipv4 is defined and management_ipv4 is defined and proxmox_internal_ipv4 is defined %}
+    # Keep this host's public web names reachable from the private guest network.
+    iifname "{{ proxmox_internal_bridge }}" ip saddr {{ proxmox_internal_network }} ip daddr {{ management_ipv4 }} tcp dport { 80, 443 } dnat ip to {{ proxmox_public_edge_ipv4 }}
+{% endif %}
 {% if proxmox_public_ingress_tcp_forwards | default([]) | length > 0 %}
 {% for forward in proxmox_public_ingress_tcp_forwards %}
     iifname "{{ proxmox_wan_bridge }}" tcp dport {{ forward.listen_port }} dnat ip to {{ forward.target_host }}:{{ forward.target_port }}
@@ -70,6 +75,10 @@ table ip nat {
   chain postrouting {
     type nat hook postrouting priority 100;
     policy accept;
+{% if proxmox_public_edge_ipv4 is defined and management_ipv4 is defined and proxmox_internal_ipv4 is defined %}
+    # Same-subnet hairpin replies must return through conntrack on the gateway.
+    oifname "{{ proxmox_internal_bridge }}" ip saddr {{ proxmox_internal_network }} ip daddr {{ proxmox_public_edge_ipv4 }} ct original ip daddr {{ management_ipv4 }} tcp dport { 80, 443 } snat ip to {{ proxmox_internal_ipv4 }}
+{% endif %}
     ip saddr {{ proxmox_internal_network }} oifname "{{ proxmox_wan_bridge }}" masquerade
 {% if proxmox_staging_bridge_enabled | default(false) %}
     ip saddr {{ proxmox_staging_network }} oifname "{{ proxmox_wan_bridge }}" masquerade

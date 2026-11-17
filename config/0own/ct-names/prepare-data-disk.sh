@@ -46,8 +46,8 @@ if [ "$apply" = 1 ]; then
   mkdir -p "$BACKUP_DIR"; cp -a "$FSTAB" "${BACKUP_DIR}/fstab.pre-ct-names-$(date -u +%Y%m%dT%H%M%SZ)"
   if ! grep -qE "[[:space:]]${MOUNT}[[:space:]]" "$FSTAB"; then
     # noatime: no write per read; nofail + device timeout: a missing disk must not stop the VM (and the keystore replica) from booting;
-    # no online discard (it made the build worker's writes slow); trim by hand if ever needed
-    printf 'UUID=%s %s ext4 defaults,noatime,nofail,x-systemd.device-timeout=30 0 2\n' "$uuid" "$MOUNT" >> "$FSTAB"
+    # Exclude the capped CT disk from full weekly fstrim; see the reclaim runbook before trimming by hand.
+    printf 'UUID=%s %s ext4 defaults,noatime,nofail,x-systemd.device-timeout=30,X-fstrim.notrim 0 2\n' "$uuid" "$MOUNT" >> "$FSTAB"
   fi
   systemctl daemon-reload
   mountpoint -q "$MOUNT" || mount "$MOUNT"

@@ -7,7 +7,7 @@
   "recorded_by": "codex",
   "source_commit": "15480f8fa6465598af528c586a56b2f07a73091f",
   "repo_version_context": "0.179.59",
-  "workflow_id": "ws-20261107-vault-standby-scratch-warning",
+  "workflow_id": "adr-0100-vault-standby-scratch-warning-live-apply",
   "adr": "0100",
   "service_ids": [],
   "summary": "Publish measured standby source database sizes and their enforced limit, and warn before bounded RAM scratch is exhausted.",
@@ -23,6 +23,19 @@
     {"check": "Guarded sender installation", "result": "pass", "observed": "At 17:25 UTC the sender and unit were installed under the existing courier flock with private before-images. The timer remained active and the service was not restarted."},
     {"check": "Scheduled backup and telemetry", "result": "pass", "observed": "The 17:26 UTC scheduled run verified both standby databases, published source sizes 121667584 and 223035392 bytes against a 469762048-byte limit, and removed its runtime directory. The five-minute encrypted job verified both replicas."},
     {"check": "Live alert rules", "result": "pass", "observed": "At 17:27 UTC the primary Prometheus scraped both source sizes and loaded the warning, critical and missing-telemetry rules healthy; the original rule file was preserved in a private backup."}
+  ],
+  "evidence_refs": [
+    "config/prometheus/rules/tier0-standby.yml",
+    "config/0infer/tier0-vault-standby/ct108-courier/vault-standby-send",
+    "config/0infer/tier0-vault-standby/ct108-courier/vault-standby-send.service",
+    "config/0infer/tier0-vault-standby/README.md",
+    "tests/promtool/vault_standby_scratch_rules_test.yml",
+    "tests/test_vault_standby_scratch_promtool.py",
+    "tests/test_tier0_vault_standby_courier.py",
+    "docs/workstreams/ws-20261107-vault-standby-scratch-warning.md"
+  ],
+  "notes": [
+    "Corrected on 2026-11-09 (workstream ws-20261109-fix-1107-receipt-validation) so that scripts/live_apply_receipts.py --validate accepts this receipt: workflow_id was 'ws-20261107-vault-standby-scratch-warning' (the workstream id) when it was recorded and is now the adr-0100-...-live-apply form the validator accepts for applies that ran no catalog workflow; evidence_refs and this notes list were added (the validator requires both). No verification result, hash, time or target was changed."
   ],
   "limitations": [
     "The warning depends on the primary Prometheus scrape; the standby Prometheus does not currently scrape this courier.",

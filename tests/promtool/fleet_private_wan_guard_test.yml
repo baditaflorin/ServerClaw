@@ -1,0 +1,31 @@
+rule_files:
+  - ../../config/prometheus/rules/fleet-private-wan-guard.yml
+evaluation_interval: 1m
+tests:
+  - name: missing and degraded guards alert while healthy guards stay quiet
+    interval: 1m
+    input_series:
+      - series: 'up{instance="a:9100",role="hypervisor"}'
+        values: '1x15'
+      - series: 'up{instance="b:9100",role="hypervisor"}'
+        values: '1x15'
+      - series: 'fleet_private_wan_guard_tc_healthy{instance="a:9100"}'
+        values: '0x15'
+      - series: 'fleet_private_wan_guard_nft_healthy{instance="a:9100"}'
+        values: '1x15'
+      - series: 'fleet_private_wan_guard_last_check_seconds{instance="a:9100"}'
+        values: '0+60x15'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: FleetPrivateWanGuardDegraded
+        exp_alerts:
+          - exp_labels: {instance: 'a:9100', severity: critical, service: private_wan_guard}
+            exp_annotations:
+              summary: 'Private-address WAN protection is degraded on a:9100'
+              description: 'Inspect the nftables and physical-egress TC guard and the reconciliation service.'
+      - eval_time: 6m
+        alertname: FleetPrivateWanGuardMissing
+        exp_alerts:
+          - exp_labels: {instance: 'b:9100', role: hypervisor, severity: critical, service: private_wan_guard}
+            exp_annotations:
+              summary: 'Hypervisor b:9100 does not report a private WAN guard'

@@ -1,0 +1,28 @@
+groups:
+  - name: fleet-private-wan-guard
+    rules:
+      - alert: FleetPrivateWanGuardDegraded
+        expr: (fleet_private_wan_guard_nft_healthy == 0) or (fleet_private_wan_guard_tc_healthy == 0)
+        for: 2m
+        labels:
+          severity: critical
+          service: private_wan_guard
+        annotations:
+          summary: Private-address WAN protection is degraded on {{ $labels.instance }}
+          description: Inspect the nftables and physical-egress TC guard and the reconciliation service.
+      - alert: FleetPrivateWanGuardStale
+        expr: time() - fleet_private_wan_guard_last_check_seconds > 180
+        for: 2m
+        labels:
+          severity: critical
+          service: private_wan_guard
+        annotations:
+          summary: Private-address WAN guard verification is stale on {{ $labels.instance }}
+      - alert: FleetPrivateWanGuardMissing
+        expr: up{role="hypervisor",instance=~".*:9100"} unless on(instance) fleet_private_wan_guard_last_check_seconds
+        for: 5m
+        labels:
+          severity: critical
+          service: private_wan_guard
+        annotations:
+          summary: Hypervisor {{ $labels.instance }} does not report a private WAN guard

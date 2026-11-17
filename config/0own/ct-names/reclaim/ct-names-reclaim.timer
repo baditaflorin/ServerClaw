@@ -1,0 +1,10 @@
+[Unit]
+Description=Reclaim CT names disk gradually
+
+[Timer]
+OnBootSec=5min
+OnUnitInactiveSec=45s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

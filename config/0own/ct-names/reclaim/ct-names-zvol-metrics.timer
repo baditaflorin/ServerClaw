@@ -1,0 +1,10 @@
+[Unit]
+Description=Collect CT names thin-volume allocation
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=5min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

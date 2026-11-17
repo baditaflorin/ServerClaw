@@ -1,0 +1,14 @@
+[Unit]
+Description=Independent private IPv4 WAN egress guard on %i
+BindsTo=sys-subsystem-net-devices-%i.device
+After=sys-subsystem-net-devices-%i.device
+Before=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/wan-guard-tc.sh apply %i
+ExecStartPost=/usr/local/sbin/wan-guard-tc.sh verify %i
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sys-subsystem-net-devices-%i.device

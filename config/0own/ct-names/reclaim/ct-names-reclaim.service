@@ -1,0 +1,20 @@
+[Unit]
+Description=Safely reclaim one CT names filesystem block group
+After=docker.service prometheus-node-exporter.service
+RequiresMountsFor=/srv/ct-names
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/ct-names-reclaim.py
+TimeoutStartSec=35s
+TimeoutStopSec=15s
+KillMode=control-group
+Nice=15
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=yes
+ProtectHome=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=/srv/ct-names /var/lib/ct-names-reclaim /var/lib/prometheus/node-exporter/textfile
+StateDirectory=ct-names-reclaim

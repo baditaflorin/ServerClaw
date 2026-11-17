@@ -1,0 +1,8 @@
+# Replace WAN_INTERFACE with the verified public egress interface before loading.
+# Loading this file is transactional and does not flush unrelated tables.
+add table inet private_wan_guard
+flush table inet private_wan_guard
+add chain inet private_wan_guard output { type filter hook output priority -10; policy accept; }
+add chain inet private_wan_guard forward { type filter hook forward priority -10; policy accept; }
+add rule inet private_wan_guard output oifname "WAN_INTERFACE" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 } counter drop
+add rule inet private_wan_guard forward oifname "WAN_INTERFACE" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 } counter drop

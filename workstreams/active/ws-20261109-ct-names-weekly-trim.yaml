@@ -1,0 +1,69 @@
+id: ws-20261109-ct-names-weekly-trim
+adr: "0494"
+title: "Prevent weekly trim from stalling the CT names reader"
+status: in_progress
+ready_to_merge: false
+live_applied: true
+owner: codex
+branch: codex/ct-reclaim-live-evidence
+worktree_path: .worktrees/ct-reclaim-live-evidence
+doc: docs/workstreams/ws-20261109-ct-names-weekly-trim.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/0own/ct-names/README.md
+  - config/0own/ct-names/prepare-data-disk.sh
+  - config/0own/ct-names/exclude-weekly-trim.py
+  - tests/test_ct_names_trim_policy.py
+  - config/0own/ct-names/reclaim/**
+  - tests/test_ct_names_safe_reclaim.py
+  - .woodpecker.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261109-ct-names-weekly-trim.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261109-ct-names-weekly-trim.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ct_names_trim_policy
+      paths:
+        - config/0own/ct-names/README.md
+        - config/0own/ct-names/prepare-data-disk.sh
+        - config/0own/ct-names/exclude-weekly-trim.py
+        - tests/test_ct_names_trim_policy.py
+        - config/0own/ct-names/reclaim/**
+        - tests/test_ct_names_safe_reclaim.py
+        - docs/workstreams/ws-20261109-ct-names-weekly-trim.md
+      mode: exclusive
+    - id: ct_names_trim_ci
+      paths: [.woodpecker.yml]
+      mode: shared_contract
+      contract: woodpecker-workflow-v1
+    - id: ct_names_trim_diagram
+      paths: [docs/diagrams/agent-coordination-map.excalidraw]
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ct_names_trim_registry
+      paths: [workstreams/active/ws-20261109-ct-names-weekly-trim.yaml, workstreams.yaml]
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "Exclude the capped CT data volume from full weekly trim and document thin-volume reclamation."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  The full weekly trim competed for the capped CT data disk and the reader stopped on its IO guard.
+  The CT fstab exclusion was applied and its dry run verified on 2026-11-09. The exclusion and guarded reclaim follow-up are live. The timer deferred under IO pressure and advanced its first block-group checkpoint on 2026-11-09. Both exporter series and seven alert rules are visible in central Prometheus; the impact on actual ZFS allocation remains to be observed over a full sweep.
+tasks:
+  - id: t1
+    title: Apply and verify the scoped trim exclusion
+    status: completed
+  - id: t2
+    title: Validate and merge the exclusion
+    status: completed
+  - id: t3
+    title: Test, deploy and verify guarded reclamation and alerting
+    status: completed
+  - id: t4
+    title: Observe a full sweep and the real ZFS allocation trend
+    status: in_progress

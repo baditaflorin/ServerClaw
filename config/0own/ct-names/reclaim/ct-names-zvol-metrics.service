@@ -1,0 +1,16 @@
+[Unit]
+Description=Export CT names thin ZFS volume allocation
+After=pve-cluster.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/ct-names-zvol-metrics.py
+TimeoutStartSec=35s
+Nice=15
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=yes
+ProtectHome=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/prometheus/node-exporter/textfile

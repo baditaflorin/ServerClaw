@@ -27,6 +27,10 @@
       - >-
         not (agent_history_canary_scan_enabled | bool)
         or (agent_history_canary_scan_host is match('^canary-'))
+      - agent_history_luks_autounlock_http_timeout_seconds | int > 0
+      - agent_history_luks_autounlock_retry_seconds | int >= 5
+      - agent_history_openbao_luks_key is match('^[a-z][a-z0-9_]*$')
+      - agent_history_openbao_luks_kv_path is match('^[A-Za-z0-9_./-]+$')
     fail_msg: >-
       agent_history_runtime requires the store on the loopback address only, a tmpfs run directory, a data mount under
       /srv, the five OpenBao key names, a canary- host when the canary scan is enabled, and, when an embeddings endpoint is set,
@@ -232,6 +236,94 @@
     name: agent-history.service
     enabled: true
     daemon_reload: true
+
+# --- unattended unlock of the data volume (ADR 0494, amendment 2026-11-12) -------------------------------------------------
+# Only enabled here, never started by the play: the unit runs at boot, and a converge must not depend on OpenBao holding the
+# passphrase yet. The manual helper stays installed either way.
+- name: Install the unattended unlock helpers and unit
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - src: agent-history-luks-passphrase.py.j2
+      dest: "{{ agent_history_helper_dir }}/agent-history-luks-passphrase"
+      mode: "0750"
+    - src: agent-history-autounlock.sh.j2
+      dest: "{{ agent_history_helper_dir }}/agent-history-autounlock"
+      mode: "0750"
+    - src: agent-history-autounlock.service.j2
+      dest: /etc/systemd/system/agent-history-autounlock.service
+      mode: "0644"
+  when: agent_history_luks_autounlock_enabled | bool
+  notify: Reload systemd units for agent-history
+
+- name: Disable the unattended unlock unit when it is turned off (it may not exist yet)
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - disable
+      - agent-history-autounlock.service
+  register: agent_history_autounlock_disable
+  failed_when: false
+  changed_when: agent_history_autounlock_disable.rc == 0
+  when: not agent_history_luks_autounlock_enabled | bool
+
+- name: Remove the unattended unlock when it is turned off
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/agent-history-autounlock.service
+    - "{{ agent_history_helper_dir }}/agent-history-autounlock"
+    - "{{ agent_history_helper_dir }}/agent-history-luks-passphrase"
+  when: not agent_history_luks_autounlock_enabled | bool
+  notify: Reload systemd units for agent-history
+
+- name: Apply pending systemd changes before enabling the unattended unlock
+  ansible.builtin.meta: flush_handlers
+
+- name: Check for the unlock AppRole files the owner delivers (existence only, never read)
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    get_checksum: false
+  loop:
+    - "{{ agent_history_luks_role_id_file }}"
+    - "{{ agent_history_luks_secret_id_file }}"
+  register: agent_history_luks_approle_stat
+  when: agent_history_luks_autounlock_enabled | bool
+
+- name: Restrict the unlock AppRole files to root when they exist
+  ansible.builtin.file:
+    path: "{{ item.item }}"
+    owner: root
+    group: root
+    mode: "0400"
+  loop: "{{ agent_history_luks_approle_stat.results }}"
+  loop_control:
+    label: "{{ item.item | basename }}"
+  when:
+    - agent_history_luks_autounlock_enabled | bool
+    - item.stat.exists
+
+- name: Report that the unlock AppRole files are not delivered yet
+  ansible.builtin.debug:
+    msg: >-
+      The unattended unlock is enabled but the unlock AppRole files ({{ agent_history_luks_role_id_file | basename }},
+      {{ agent_history_luks_secret_id_file | basename }}) are missing, so the boot unit will fail and retry until the owner delivers them
+      (runbook, "Unattended unlock"). The manual unlock still works.
+  when:
+    - agent_history_luks_autounlock_enabled | bool
+    - agent_history_luks_approle_stat.results | selectattr('stat.exists') | list | length != 2
+
+- name: Enable the unattended unlock unit (it runs at boot and retries until OpenBao answers)
+  ansible.builtin.systemd:
+    name: agent-history-autounlock.service
+    enabled: true
+    daemon_reload: true
+  when: agent_history_luks_autounlock_enabled | bool
 
 - name: Enable and start the metrics bridge timer
   ansible.builtin.systemd:

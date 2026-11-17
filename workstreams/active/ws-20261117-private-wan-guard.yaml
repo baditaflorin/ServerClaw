@@ -1,0 +1,86 @@
+id: ws-20261117-private-wan-guard
+adr: "0014"
+title: "Investigate and contain private traffic leaking onto the public uplink"
+status: ready_for_merge
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/private-wan-guard-followup
+worktree_path: .codex/worktrees/private-wan-guard-followup
+doc: docs/workstreams/ws-20261117-private-wan-guard.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/templates/nftables.conf.j2
+  - tests/test_proxmox_network_role.py
+  - config/private-wan-guard/
+  - docs/workstreams/ws-20261117-private-wan-guard.md
+  - workstreams/active/ws-20261117-private-wan-guard.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: private_wan_guard
+      mode: exclusive
+      paths:
+        - config/private-wan-guard/**
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/templates/nftables.conf.j2
+        - tests/test_proxmox_network_role.py
+        - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/tasks/main.yml
+        - tests/test_public_edge_oidc_auth_role.py
+        - tests/test_private_wan_guard.py
+        - docs/workstreams/ws-20261117-private-wan-guard.md
+        - workstreams/active/ws-20261117-private-wan-guard.yaml
+        - receipts/live-applies/ws-20261117-private-wan-guard-apply-receipt.yaml
+        - scripts/netpolicy.py
+        - tests/test_netpolicy_apply.py
+        - workstreams/active/ws-20261112-agent-history-autounlock.yaml
+    - id: guest_network_policy
+      mode: shared_contract
+      contract: guest-network-policy-v1
+      paths:
+        - config/network-policy/0mcp.yaml
+        - inventory/host_vars/proxmox-host.yml
+    - id: monitoring_role
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+        - tests/test_adopted_prometheus_rules.py
+    - id: monitoring_alerts
+      mode: exclusive
+      paths:
+        - config/prometheus/rules/fleet-private-wan-guard.yml
+        - tests/promtool/fleet_private_wan_guard_test.yml
+    - id: generated_platform_vars
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+        - inventory/group_vars/platform.yml
+    - id: ci_workflow
+      mode: shared_contract
+      contract: woodpecker-ci-v1
+      paths:
+        - .woodpecker.yml
+    - id: active_workstream_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+        - workstreams.yaml
+    - id: release_integration
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+      paths:
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+        - README.md
+        - RELEASE.md
+        - build/platform-manifest.json
+        - docs/status/**
+        - docs/release-notes/**
+        - docs/diagrams/agent-coordination-map.excalidraw
+
+canonical_truth:
+  changelog_entry: Guard public uplinks against private IPv4 leakage with independent nftables and physical-egress filters, reconciliation and monitoring; restore the monitoring probe to Gitea and fix partial-layer network-policy verification.
+  release_bump: patch
+  included_in_repo_version: null
