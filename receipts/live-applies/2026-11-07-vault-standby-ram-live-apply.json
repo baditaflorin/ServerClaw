@@ -7,7 +7,7 @@
   "recorded_by": "codex",
   "source_commit": "5da314fa69b5a626964a48d342f747d87f8c216f",
   "repo_version_context": "0.179.58",
-  "workflow_id": "ws-20261107-vault-standby-ram-scratch",
+  "workflow_id": "adr-0100-vault-standby-ram-scratch-live-apply",
   "adr": "0100",
   "service_ids": [],
   "summary": "Use bounded non-swappable RAM for the standby courier's temporary SQLite snapshots while preserving the scheduled transfer and receiver integrity checks.",
@@ -22,6 +22,15 @@
     {"check": "Guarded installation", "result": "pass", "observed": "At 07:04:23 UTC the sender changed from SHA256 5c9a20c5aa0ea033512adfba7e151bbb243b15c7133cc19aca174651ddaff314 to 0d3350ec6f4bb67a370d6a9ad4908780c616f4e096119500f269154e6cc52bc9 under the existing courier flock. A root-private before-image was retained; service and timer were not restarted."},
     {"check": "Scheduled receiver verification", "result": "pass", "observed": "The 07:05 and 07:07 UTC scheduled runs exited successfully. The receiver reported successful SQLite integrity and nonempty-table checks for both databases; both standby last-sync timestamps advanced, the timer stayed active, and the textfile success metric was 1."},
     {"check": "Guest write comparison", "result": "pass", "observed": "A 135-second baseline and post-install window observed guest block writes of 494264320 and 169340928 bytes respectively. The old courier created two new disk scratch files totalling 339894272 logical bytes; the updated courier created none. The windows included other concurrent work."}
+  ],
+  "evidence_refs": [
+    "config/0infer/tier0-vault-standby/ct108-courier/vault-standby-send",
+    "config/0infer/tier0-vault-standby/README.md",
+    "tests/test_tier0_vault_standby_courier.py",
+    "docs/workstreams/ws-20261107-vault-standby-ram-scratch.md"
+  ],
+  "notes": [
+    "Corrected on 2026-11-09 (workstream ws-20261109-fix-1107-receipt-validation) so that scripts/live_apply_receipts.py --validate accepts this receipt: workflow_id was 'ws-20261107-vault-standby-ram-scratch' (the workstream id) when it was recorded and is now the adr-0100-...-live-apply form the validator accepts for applies that ran no catalog workflow; evidence_refs and this notes list were added (the validator requires both). No verification result, hash, time or target was changed."
   ],
   "limitations": [
     "Guest block and cgroup counters overlap and do not measure physical NAND writes; one comparison does not prove a sustained daily or fleet-wide reduction.",

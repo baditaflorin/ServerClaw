@@ -1,15 +1,54 @@
 import unittest
+import re
 from pathlib import Path
 
 import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULTS_PATH = REPO_ROOT / "roles" / "public_edge_oidc_auth" / "defaults" / "main.yml"
-TASKS_PATH = REPO_ROOT / "roles" / "public_edge_oidc_auth" / "tasks" / "main.yml"
-TEMPLATE_PATH = REPO_ROOT / "roles" / "public_edge_oidc_auth" / "templates" / "oauth2-proxy.cfg.j2"
+DEFAULTS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "public_edge_oidc_auth"
+    / "defaults"
+    / "main.yml"
+)
+TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "public_edge_oidc_auth"
+    / "tasks"
+    / "main.yml"
+)
+TEMPLATE_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "public_edge_oidc_auth"
+    / "templates"
+    / "oauth2-proxy.cfg.j2"
+)
 WATCHDOG_TEMPLATE_PATH = (
-    REPO_ROOT / "roles" / "public_edge_oidc_auth" / "templates" / "lv3-ops-portal-oauth2-proxy-watchdog.sh.j2"
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "public_edge_oidc_auth"
+    / "templates"
+    / "lv3-ops-portal-oauth2-proxy-watchdog.sh.j2"
 )
 
 
@@ -19,6 +58,19 @@ class PublicEdgeOidcAuthRoleTests(unittest.TestCase):
         self.tasks = TASKS_PATH.read_text()
         self.template = TEMPLATE_PATH.read_text()
         self.watchdog_template = WATCHDOG_TEMPLATE_PATH.read_text()
+
+    def test_identity_hosts_mapping_matches_and_survives_cloud_init(self) -> None:
+        tasks = yaml.safe_load(self.tasks)
+        task = next(t for t in tasks if t.get("name") == "Pin the Authentik issuer hostname to the local NGINX edge")
+        pattern = task["ansible.builtin.lineinfile"]["regexp"].replace(
+            "{{ public_edge_oidc_auth_issuer_hostname | regex_escape }}", re.escape("id.example.com")
+        )
+        self.assertIsNotNone(re.match(pattern, "10.0.0.10 id.example.com"))
+        self.assertIsNotNone(re.match(pattern, "  10.0.0.10   id.example.com # managed"))
+        self.assertIsNone(re.match(pattern, "10.0.0.10 idXexample.com"))
+        self.assertIsNone(re.match(pattern, "# 10.0.0.10 id.example.com"))
+        self.assertIn("/etc/cloud/templates/hosts.debian.tmpl", task["loop"])
+        self.assertIn("/etc/hosts", task["loop"])
 
     def test_ops_portal_proxy_requests_only_standard_oidc_scopes(self) -> None:
         self.assertEqual(self.defaults["public_edge_oidc_auth_scope"], "openid profile email")
@@ -38,14 +90,32 @@ class PublicEdgeOidcAuthRoleTests(unittest.TestCase):
 
     def test_role_pins_public_issuer_to_local_edge_for_oidc_discovery(self) -> None:
         self.assertIn("urlsplit('hostname')", self.tasks)
-        self.assertIn("path: /etc/hosts", self.tasks)
+        self.assertIn("/etc/cloud/templates/hosts.debian.tmpl", self.tasks)
         self.assertIn('line: "{{ ansible_host }} {{ public_edge_oidc_auth_issuer_hostname }}"', self.tasks)
 
     def test_oauth2_proxy_pins_authentik_jwks_and_rsa_algorithm(self) -> None:
         config_template = (
-            REPO_ROOT / "roles" / "public_edge_oidc_auth" / "templates" / "oauth2-proxy.cfg.j2"
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "public_edge_oidc_auth"
+            / "templates"
+            / "oauth2-proxy.cfg.j2"
         ).read_text()
-        defaults = (REPO_ROOT / "roles" / "public_edge_oidc_auth" / "defaults" / "main.yml").read_text()
+        defaults = (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "public_edge_oidc_auth"
+            / "defaults"
+            / "main.yml"
+        ).read_text()
         self.assertIn('oidc_jwks_url = "{{ public_edge_oidc_auth_jwks_url }}"', config_template)
         self.assertIn("oidc_enabled_signing_algs", config_template)
         self.assertIn("- RS256", defaults)

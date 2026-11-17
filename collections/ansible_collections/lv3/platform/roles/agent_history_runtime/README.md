@@ -1,7 +1,7 @@
 # agent_history_runtime
 
 ADR 0494. Converges the agent-history store on its dedicated guest (vmid 155): a compose project with Postgres 17 + pgvector,
-`agent-store` and an OpenBao Agent; a LUKS2 data volume the owner unlocks by hand after every reboot; token files rendered from
+`agent-store` and an OpenBao Agent; a LUKS2 data volume that a boot unit unlocks from OpenBao (`agent_history_luks_autounlock_enabled`; the owner's manual unlock is the fallback); token files rendered from
 OpenBao onto tmpfs; `tailscale serve` for the loopback listener; a metrics bridge and an optional nightly canary database scan.
 
 Run it only through `playbooks/agent-history-vm.yml` (`make provision-agent-history-vm`), which limits the guests role to this vmid.
@@ -10,8 +10,8 @@ The runbook is `docs/runbooks/configure-agent-history.md`.
 ## What the role never does
 
 - It never creates, copies, reads, prints or templates a secret value. The database password and the read, write and metrics tokens
-  (and the embed token of the embedding worker) are created by the OpenBao administrator; the LUKS passphrase is typed by the owner into `agent-history-unlock` (standard input
-  only); the tailnet join key and the AppRole files are delivered by the owner. Every template under `templates/*.ctmpl.j2` holds a
+  (and the embed token of the embedding worker) are created by the OpenBao administrator; the LUKS passphrase is created by the owner in OpenBao and reaches `agent-history-unlock` through one pipe (standard input
+  only), by hand or from `agent-history-autounlock`; the tailnet join key and the AppRole files are delivered by the owner. Every template under `templates/*.ctmpl.j2` holds a
   KV path and key names only.
 - It never formats a disk, and it never starts the compose project while `agent_history_data_mount` is not a mount point.
 - It never publishes anything but the store on the loopback address; Postgres is on the compose network only.
@@ -24,7 +24,8 @@ The runbook is `docs/runbooks/configure-agent-history.md`.
 | `/opt/agent-history/openbao/` | `agent.hcl`, the secret templates, and the owner-delivered `role_id` and `secret_id` |
 | `/run/<prefix>-secrets/agent-history/` | tmpfs: `db.env`, `store.env`, `read-tokens`, `write-tokens`, `metrics-token`, `embed-token`, `metrics.header` (all 0400, uid 65532) |
 | `/srv/agent-history` | mount point of the unlocked volume (immutable while empty); Postgres data in `postgres/` |
-| `/usr/local/sbin/agent-history-unlock` | the owner's unlock helper (passphrase on standard input) |
+| `/usr/local/sbin/agent-history-unlock` | the unlock helper (passphrase on standard input) |
+| `/usr/local/sbin/agent-history-autounlock`, `agent-history-luks-passphrase` | the unattended unlock: fetch the passphrase from OpenBao with the guest's AppRole and pipe it into the helper (`agent-history-autounlock.service`, runs at boot, retries) |
 | `/usr/local/sbin/agent-history-metrics` | metrics bridge, run by `agent-history-metrics.timer` |
 
 ## Variables

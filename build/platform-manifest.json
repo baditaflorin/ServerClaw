@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.60",
-  "platform_version": "0.179.62",
-  "generated_at": "2026-11-07T17:29:35Z",
-  "next_refresh_at": "2026-11-07T18:29:35Z",
+  "repo_version": "0.179.62",
+  "platform_version": "0.179.63",
+  "generated_at": "2026-11-17T18:03:44Z",
+  "next_refresh_at": "2026-11-17T19:03:44Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -5129,7 +5129,7 @@
         "id": "configure-agent-history",
         "title": "Configure the agent-history VM",
         "agent_trust_required": "T3",
-        "steps": 33,
+        "steps": 39,
         "path": "docs/runbooks/configure-agent-history.md",
         "workflow_ids": [
           "provision-agent-history-vm"

@@ -5,6 +5,7 @@ What must hold: nothing is touched before the rollback timer is armed; every fai
 does not load, a failed verification, a lost probe, a dead guest agent) leaves the old state in place and says so; a crash after the
 change is undone by the timer alone; the lockout guard, the removal opt-in and the change cap refuse a bad plan before it starts.
 """
+
 from __future__ import annotations
 
 import json
@@ -26,7 +27,7 @@ import netpolicy as np  # noqa: E402
 from test_netpolicy import CONF, NFT, VM_FW, F, snapshot  # noqa: E402
 
 SHIMS = {
-    "qm": '''
+    "qm": """
         import json, os, subprocess, sys
         a = sys.argv[1:]
         d = os.environ["FAKE_GUEST_DIR"]
@@ -38,8 +39,8 @@ SHIMS = {
         env = dict(os.environ, PATH=os.environ["SHIM_DIR"] + ":" + os.environ["PATH"])
         r = subprocess.run(cmd, capture_output=True, text=True, cwd=d, env=env)
         print(json.dumps({"exitcode": r.returncode, "out-data": r.stdout, "err-data": r.stderr, "exited": 1}))
-    ''',
-    "nft": '''
+    """,
+    "nft": """
         import os, sys
         d = os.environ["FAKE_GUEST_DIR"]; live = d + "/table.nft"; a = sys.argv[1:]
         open(d + "/nft.log", "a").write(" ".join(a) + "\\n")
@@ -59,8 +60,8 @@ SHIMS = {
                 open(live, "w").write(rest)
             sys.exit(0)
         sys.exit(2)
-    ''',
-    "pve-firewall": '''
+    """,
+    "pve-firewall": """
         import glob, os, sys
         if sys.argv[1] == "compile":
             for f in glob.glob(os.environ["NETPOLICY_PVE_DIR"] + "/*.fw"):
@@ -68,8 +69,8 @@ SHIMS = {
                     print("unable to parse rule", file=sys.stderr); sys.exit(255)
             sys.exit(0)
         sys.exit(2)
-    ''',
-    "systemd-run": '''
+    """,
+    "systemd-run": """
         import json, os, sys
         if os.environ.get("FAKE_SYSTEMD_FAIL"):
             print("Failed to start transient timer unit", file=sys.stderr); sys.exit(1)
@@ -77,8 +78,8 @@ SHIMS = {
         unit = a[a.index("--unit") + 1]
         cmd = a[a.index("--collect") + 1 + (2 if a[a.index("--collect") + 1] == "--description" else 0):]
         json.dump({"cmd": cmd, "state": "armed"}, open(os.environ["FAKE_SYSTEMD_DIR"] + "/" + unit + ".json", "w"))
-    ''',
-    "systemctl": '''
+    """,
+    "systemctl": """
         import glob, json, os, sys
         a = sys.argv[1:]; d = os.environ["FAKE_SYSTEMD_DIR"]
         unit = a[1].replace(".timer", "")
@@ -91,28 +92,28 @@ SHIMS = {
                 j = json.load(open(path)); j["state"] = "stopped"; json.dump(j, open(path, "w"))
         elif a[0] == "is-active":
             print(json.load(open(path))["state"] if os.path.exists(path) else "inactive")
-    ''',
-    "mv": '''
+    """,
+    "mv": """
         import os, sys
         src, dst = sys.argv[-2], sys.argv[-1]
         if os.environ.get("FAKE_MV_LIES") and dst.endswith("nftables.conf") and src.endswith(".netpolicy-rb"):
             sys.exit(0)  # reports success and moves nothing
         os.execv("/bin/mv", ["mv"] + sys.argv[1:])
-    ''',
-    "chmod": '''
+    """,
+    "chmod": """
         import os, sys
         if any(x.startswith("--reference") for x in sys.argv[1:]): sys.exit(0)
         os.execv("/bin/chmod", ["chmod"] + sys.argv[1:])
-    ''',
-    "chown": '''
+    """,
+    "chown": """
         import sys
         sys.exit(0)
-    ''',
-    "base64": '''
+    """,
+    "base64": """
         import base64, sys
         assert sys.argv[1] == "-d"
         sys.stdout.buffer.write(base64.b64decode(open(sys.argv[2], "rb").read()))
-    ''',
+    """,
 }
 
 
@@ -130,14 +131,22 @@ def box(tmp_path, monkeypatch):
     (guest / "table.nft").write_text(np._table_text(NFT))
     (guest / "nftables.conf").write_text(CONF)
     (pve / "191.fw").write_text(VM_FW)
-    env = {"PATH": f"{shim}:{os.environ['PATH']}", "SHIM_DIR": str(shim), "FAKE_GUEST_DIR": str(guest), "FAKE_SYSTEMD_DIR": str(systemd),
-           "NETPOLICY_PVE_DIR": str(pve), "NETPOLICY_STATE_DIR": str(state), "HOME": os.environ.get("HOME", str(tmp_path))}
+    env = {
+        "PATH": f"{shim}:{os.environ['PATH']}",
+        "SHIM_DIR": str(shim),
+        "FAKE_GUEST_DIR": str(guest),
+        "FAKE_SYSTEMD_DIR": str(systemd),
+        "NETPOLICY_PVE_DIR": str(pve),
+        "NETPOLICY_STATE_DIR": str(state),
+        "HOME": os.environ.get("HOME", str(tmp_path)),
+    }
     for k, v in env.items():
         monkeypatch.setenv(k, v)
     # something to probe: the hypervisor must still reach the VM's port 22
     srv = socket.socket()
     srv.bind(("127.0.0.1", 0))
     srv.listen(8)
+
     def serve():
         while True:
             try:
@@ -146,7 +155,15 @@ def box(tmp_path, monkeypatch):
                 return
 
     threading.Thread(target=serve, daemon=True).start()
-    yield {"guest": guest, "pve": pve, "state": state, "systemd": systemd, "env": env, "port": srv.getsockname()[1], "tmp": tmp_path}
+    yield {
+        "guest": guest,
+        "pve": pve,
+        "state": state,
+        "systemd": systemd,
+        "env": env,
+        "port": srv.getsockname()[1],
+        "tmp": tmp_path,
+    }
     srv.close()
 
 
@@ -179,8 +196,20 @@ def drop_flow(vm, src, port):
 
 def run_remote(box, plan, env_extra=None, **kw):
     kw.setdefault("hold", 120)
-    script = np.build_remote_script(plan, ipsets={"management": ["100.64.0.0/10", "10.10.10.0/24"]}, guest_conf_path=str(box["guest"] / "nftables.conf"), **kw)
-    return subprocess.run([sys.executable, "-"], input=script, capture_output=True, text=True, env=dict(box["env"], **(env_extra or {})), timeout=120)
+    script = np.build_remote_script(
+        plan,
+        ipsets={"management": ["100.64.0.0/10", "10.10.10.0/24"]},
+        guest_conf_path=str(box["guest"] / "nftables.conf"),
+        **kw,
+    )
+    return subprocess.run(
+        [sys.executable, "-"],
+        input=script,
+        capture_output=True,
+        text=True,
+        env=dict(box["env"], **(env_extra or {})),
+        timeout=120,
+    )
 
 
 def events(box):
@@ -189,7 +218,11 @@ def events(box):
 
 
 def state_of(box):
-    return {"fw": (box["pve"] / "191.fw").read_text(), "table": (box["guest"] / "table.nft").read_text(), "conf": (box["guest"] / "nftables.conf").read_text()}
+    return {
+        "fw": (box["pve"] / "191.fw").read_text(),
+        "table": (box["guest"] / "table.nft").read_text(),
+        "conf": (box["guest"] / "nftables.conf").read_text(),
+    }
 
 
 def unit_state(box):
@@ -209,9 +242,16 @@ def test_a_vm_that_matches_its_policy_has_nothing_to_apply(box):
 
 def test_the_plan_lists_live_and_persisted_changes_separately_and_builds_the_new_texts(box):
     _, plan = plan_for(box, NEW_PVE)
-    assert plan["refusals"] == [] and set(plan["layers"]) == {"pve", "input", "forward"} and set(plan["conf"]) == {"input", "forward"}
+    assert (
+        plan["refusals"] == []
+        and set(plan["layers"]) == {"pve", "input", "forward"}
+        and set(plan["conf"]) == {"input", "forward"}
+    )
     assert plan["layers"]["pve"]["add"] == ["10.10.10.77 tcp/8080"] and plan["changes"] == 5
-    assert "10.10.10.77 tcp dport 8080 accept" in plan["texts"]["table"] and "ip saddr 10.10.10.77 tcp dport 8080 accept" in plan["texts"]["conf"]
+    assert (
+        "10.10.10.77 tcp dport 8080 accept" in plan["texts"]["table"]
+        and "ip saddr 10.10.10.77 tcp dport 8080 accept" in plan["texts"]["conf"]
+    )
     assert plan["texts"]["conf"].count("flush ruleset") == 1 and set(plan["old_sha"]) == {"pve", "table", "conf"}
 
 
@@ -220,13 +260,20 @@ def test_a_conf_that_lacks_live_rules_gives_a_persist_only_plan_that_touches_no_
     pol = policy_wanting(lambda vm: None)
     snap = snapshot(conf=live_only)
     plan = np.plan_apply(pol, snap, "191")
-    assert plan["refusals"] == [] and plan["layers"] == {} and set(plan["conf"]) == {"input"} and "table" not in plan["texts"] and "pve" not in plan["texts"]
+    assert (
+        plan["refusals"] == []
+        and plan["layers"] == {}
+        and set(plan["conf"]) == {"input"}
+        and "table" not in plan["texts"]
+        and "pve" not in plan["texts"]
+    )
     assert plan["conf"]["input"]["add"] == ["10.10.10.1 tcp/22"] and "10.10.10.1 tcp dport 22" in plan["texts"]["conf"]
 
 
 def test_removals_need_an_explicit_yes_and_so_does_a_big_change(box):
     def stale(vm):
         drop_flow(vm, "10.10.10.51", "*")
+
     pol, plan = plan_for(box, stale)
     assert any("--allow-remove" in r for r in plan["refusals"])
     _, plan = plan_for(box, stale, allow_remove=True)
@@ -239,6 +286,7 @@ def test_the_lockout_guard_refuses_a_plan_that_would_cut_the_hypervisor_off(box)
     def cut(vm):
         drop_flow(vm, "10.10.10.1", "22")
         NEW_PVE(vm)
+
     _, plan = plan_for(box, cut, allow_remove=True)
     refusals = [r for r in plan["refusals"] if r.startswith("lockout guard")]
     assert any("pve layer" in r for r in refusals) and any("input layer" in r for r in refusals)
@@ -250,7 +298,11 @@ def test_the_plan_refuses_what_it_cannot_do_safely(box):
     pol = policy_wanting(NEW_PVE)
     unreadable = np.plan_apply(pol, snapshot(guest_ok=False), "191", ["input"])
     assert any("guest agent" in r for r in unreadable["refusals"])
-    snap = snapshot(nft=NFT.replace("udp dport 41641 counter packets 12 bytes 3400 accept", "udp dport 41641 meta l4proto gre accept"))
+    snap = snapshot(
+        nft=NFT.replace(
+            "udp dport 41641 counter packets 12 bytes 3400 accept", "udp dport 41641 meta l4proto gre accept"
+        )
+    )
     assert any("does not model" in r for r in np.plan_apply(pol, snap, "191")["refusals"])
     nofw = snapshot()
     nofw["vms"]["191"]["fw"] = None
@@ -258,7 +310,9 @@ def test_the_plan_refuses_what_it_cannot_do_safely(box):
     assert any("not both in the policy" in r for r in np.plan_apply(pol, snapshot(), "999")["refusals"])
     with pytest.raises(np.PolicyError, match="docker_user"):
         np.plan_apply(pol, snapshot(), "191", ["docker_user"])
-    only_du = np.plan_apply(policy_wanting(lambda vm: add_group(vm, "10.10.10.55", "tcp", 18021, ["docker_user"])), snapshot(), "191")
+    only_du = np.plan_apply(
+        policy_wanting(lambda vm: add_group(vm, "10.10.10.55", "tcp", 18021, ["docker_user"])), snapshot(), "191"
+    )
     assert only_du["changes"] == 0 and any("managed by its own unit" in n for n in only_du["notes"])
 
 
@@ -271,14 +325,33 @@ def test_a_good_apply_changes_all_three_files_verifies_disarms_and_keeps_the_bac
     r = run_remote(box, plan)
     assert r.returncode == 0, r.stdout + r.stderr
     after = state_of(box)
-    assert "10.10.10.77" in after["fw"] and "10.10.10.77 tcp dport 8080" in after["table"] and "10.10.10.77/32" not in after["conf"] and "10.10.10.77 tcp dport 8080" in after["conf"]
-    assert np.parse_nft(after["table"])["chains"]["input"]["flows"] == np.parse_nft(after["conf"])["chains"]["input"]["flows"] or True
+    assert (
+        "10.10.10.77" in after["fw"]
+        and "10.10.10.77 tcp dport 8080" in after["table"]
+        and "10.10.10.77/32" not in after["conf"]
+        and "10.10.10.77 tcp dport 8080" in after["conf"]
+    )
+    assert (
+        np.parse_nft(after["table"])["chains"]["input"]["flows"]
+        == np.parse_nft(after["conf"])["chains"]["input"]["flows"]
+        or True
+    )
     assert unit_state(box) == ["stopped"], "the timer is disarmed only at the very end"
     runs = list((box["state"] / "apply").glob("*-vm191"))
-    assert len(runs) == 1 and (runs[0] / "fw.bak").read_text() == before["fw"] and (runs[0] / "nftables.conf.bak").read_text() == before["conf"]
+    assert (
+        len(runs) == 1
+        and (runs[0] / "fw.bak").read_text() == before["fw"]
+        and (runs[0] / "nftables.conf.bak").read_text() == before["conf"]
+    )
     assert (runs[0] / "rollback.py").exists() and not (runs[0] / "rolled-back").exists()
     names = [e["event"] for e in events(box)]
-    assert names.index("armed") < names.index("conf_written") < names.index("table_loaded") < names.index("pve_written") < names.index("applied")
+    assert (
+        names.index("armed")
+        < names.index("conf_written")
+        < names.index("table_loaded")
+        < names.index("pve_written")
+        < names.index("applied")
+    )
     assert list(box["guest"].glob("nftables.conf.bak-netpolicy-*")), "the guest keeps its own copy of the conf too"
 
 
@@ -305,12 +378,23 @@ def test_a_file_that_changed_since_the_plan_is_refused_before_any_change(box, wh
     assert state_of(box) == before and unit_state(box) == [], "no timer was even armed"
 
 
-@pytest.mark.parametrize("tamper,needle", [
-    (lambda p: p["texts"].__setitem__("conf", p["texts"]["conf"] + "SYNTAXERROR"), "does not pass nft -c"),
-    (lambda p: p["texts"].__setitem__("table", p["texts"]["table"].replace("accept\n}", "accept\n}", 1) + "SYNTAXERROR"), "does not pass nft -c"),
-    (lambda p: p["texts"].__setitem__("table", p["texts"]["table"] + "REJECT_LOAD"), "loading the new table failed"),
-    (lambda p: p["texts"].__setitem__("pve", p["texts"]["pve"] + "INVALID_RULE\n"), "pve-firewall compile refused"),
-])
+@pytest.mark.parametrize(
+    "tamper,needle",
+    [
+        (lambda p: p["texts"].__setitem__("conf", p["texts"]["conf"] + "SYNTAXERROR"), "does not pass nft -c"),
+        (
+            lambda p: p["texts"].__setitem__(
+                "table", p["texts"]["table"].replace("accept\n}", "accept\n}", 1) + "SYNTAXERROR"
+            ),
+            "does not pass nft -c",
+        ),
+        (
+            lambda p: p["texts"].__setitem__("table", p["texts"]["table"] + "REJECT_LOAD"),
+            "loading the new table failed",
+        ),
+        (lambda p: p["texts"].__setitem__("pve", p["texts"]["pve"] + "INVALID_RULE\n"), "pve-firewall compile refused"),
+    ],
+)
 def test_a_failure_while_changing_restores_everything_that_was_already_changed(box, tamper, needle):
     before = state_of(box)
     _, plan = plan_for(box, NEW_PVE)
@@ -345,9 +429,15 @@ def test_a_probe_that_no_longer_connects_rolls_back(box):
 def test_a_result_that_differs_from_the_intended_flows_rolls_back(box):
     before = state_of(box)
     _, plan = plan_for(box, NEW_PVE)
-    plan["expect_after"]["input"] = plan["expect_after"]["input"][:-1]  # the plan predicts something the written text will not be
+    plan["expect_after"]["input"] = plan["expect_after"]["input"][
+        :-1
+    ]  # the plan predicts something the written text will not be
     r = run_remote(box, plan)
-    assert r.returncode == 6 and "live input flows after the change are not the intended ones" in r.stdout and state_of(box) == before
+    assert (
+        r.returncode == 6
+        and "live input flows after the change are not the intended ones" in r.stdout
+        and state_of(box) == before
+    )
 
 
 def test_a_crash_after_the_change_is_undone_by_the_armed_timer_alone(box):
@@ -357,7 +447,9 @@ def test_a_crash_after_the_change_is_undone_by_the_armed_timer_alone(box):
     assert r.returncode == 9 and state_of(box) != before, "the process died with the change in place"
     assert unit_state(box) == ["armed"], "and the timer is still armed"
     unit = json.loads(next(box["systemd"].glob("*.json")).read_text())
-    fired = subprocess.run(unit["cmd"], capture_output=True, text=True, env=box["env"])  # what systemd does when the timer elapses
+    fired = subprocess.run(
+        unit["cmd"], capture_output=True, text=True, env=box["env"]
+    )  # what systemd does when the timer elapses
     assert fired.returncode == 0, fired.stdout + fired.stderr
     assert state_of(box) == before
     assert (next((box["state"] / "apply").glob("*-vm191")) / "rolled-back").exists()
@@ -384,7 +476,27 @@ def test_a_pve_only_apply_never_talks_to_the_guest(box):
     assert set(plan["texts"]) == {"pve"}
     r = run_remote(box, plan)
     assert r.returncode == 0, r.stdout + r.stderr
-    assert "10.10.10.77" in (box["pve"] / "191.fw").read_text() and (box["guest"] / "table.nft").read_text() == np._table_text(NFT)
+    assert "10.10.10.77" in (box["pve"] / "191.fw").read_text() and (
+        box["guest"] / "table.nft"
+    ).read_text() == np._table_text(NFT)
+
+
+@pytest.mark.parametrize("selected,untouched", [("input", "forward"), ("forward", "input")])
+def test_partial_guest_apply_preserves_and_verifies_unselected_chain(box, selected, untouched):
+    def changes(vm):
+        add_group(vm, "10.10.10.77", "tcp", 8080, [selected])
+        # An unrelated policy difference must not affect the unselected chain.
+        add_group(vm, "10.10.10.78", "tcp", 8081, [untouched])
+
+    _, plan = plan_for(box, changes, layers=[selected])
+    before = state_of(box)
+    assert plan["refusals"] == [] and plan["changes"] == 2
+    r = run_remote(box, plan)
+    assert r.returncode == 0, r.stdout + r.stderr
+    after = state_of(box)
+    for key in ("table", "conf"):
+        assert np.parse_nft(after[key])["chains"][untouched] == np.parse_nft(before[key])["chains"][untouched]
+        assert "10.10.10.77" in after[key] and "10.10.10.78" not in after[key]
 
 
 def test_the_conf_is_persisted_and_never_reloaded(box):
@@ -395,7 +507,9 @@ def test_the_conf_is_persisted_and_never_reloaded(box):
     conf = str(box["guest"] / "nftables.conf")
     assert not [c for c in calls if conf in c], f"the conf was handed to nft: {calls}"
     loads = [c for c in calls if c.startswith("-f ")]
-    assert len(loads) == 1 and loads[0].startswith("-f /var/tmp/netpolicy-live"), "exactly one load: the new table, as one atomic file"
+    assert len(loads) == 1 and loads[0].startswith("-f /var/tmp/netpolicy-live"), (
+        "exactly one load: the new table, as one atomic file"
+    )
 
 
 SHARED_RULE = "ip saddr { 100.64.0.9, 100.64.0.21 } tcp dport 60072 accept"  # the 0mcp shape: one rule, several tailnet sources
@@ -405,20 +519,37 @@ RETIRE_PVE01 = lambda vm: drop_flow(vm, "100.64.0.9", "60072")  # noqa: E731
 def test_a_shared_rule_that_loses_one_source_is_replaced_in_place_live_and_persisted(box):
     before = state_of(box)
     _, plan = plan_for(box, RETIRE_PVE01, allow_remove=True)
-    assert plan["refusals"] == [] and set(plan["layers"]) == {"input"} and set(plan["conf"]) == {"input"} and "pve" not in plan["texts"]
-    assert plan["layers"]["input"]["replace"] == [{"old": SHARED_RULE, "new": "ip saddr 100.64.0.21 tcp dport 60072 accept"}]
+    assert (
+        plan["refusals"] == []
+        and set(plan["layers"]) == {"input"}
+        and set(plan["conf"]) == {"input"}
+        and "pve" not in plan["texts"]
+    )
+    assert plan["layers"]["input"]["replace"] == [
+        {"old": SHARED_RULE, "new": "ip saddr 100.64.0.21 tcp dport 60072 accept"}
+    ]
     r = run_remote(box, plan)
     assert r.returncode == 0, r.stdout + r.stderr
     after = state_of(box)
-    for key, old, new in (("table", SHARED_RULE, "ip saddr 100.64.0.21 tcp dport 60072 accept"),
-                          ("conf", "ip saddr { 100.64.0.9, 100.64.0.21 } tcp dport { 60072 } accept", "ip saddr 100.64.0.21 tcp dport { 60072 } accept")):
+    for key, old, new in (
+        ("table", SHARED_RULE, "ip saddr 100.64.0.21 tcp dport 60072 accept"),
+        (
+            "conf",
+            "ip saddr { 100.64.0.9, 100.64.0.21 } tcp dport { 60072 } accept",
+            "ip saddr 100.64.0.21 tcp dport { 60072 } accept",
+        ),
+    ):
         a, b = before[key].split("\n"), after[key].split("\n")
-        assert len(a) == len(b) and [(x, y) for x, y in zip(a, b) if x != y] == [(x, x.replace(old, new)) for x in a if old in x], key
+        assert len(a) == len(b) and [(x, y) for x, y in zip(a, b) if x != y] == [
+            (x, x.replace(old, new)) for x in a if old in x
+        ], key
     assert after["fw"] == before["fw"]
     flows = np.parse_nft(after["table"])["chains"]["input"]["flows"]
     assert F("100.64.0.9", "tcp", "60072") not in flows and F("100.64.0.21", "tcp", "60072") in flows
     calls = (box["guest"] / "nft.log").read_text().splitlines()
-    assert [c for c in calls if c.startswith("-f ")] == ["-f /var/tmp/netpolicy-live.nft"] and not [c for c in calls if "nftables.conf" in c]
+    assert [c for c in calls if c.startswith("-f ")] == ["-f /var/tmp/netpolicy-live.nft"] and not [
+        c for c in calls if "nftables.conf" in c
+    ]
     names = [e["event"] for e in events(box)]
     assert names.index("armed") < names.index("conf_written") < names.index("table_loaded") < names.index("applied")
     run = next((box["state"] / "apply").glob("*-vm191"))
@@ -428,7 +559,9 @@ def test_a_shared_rule_that_loses_one_source_is_replaced_in_place_live_and_persi
 def test_a_replace_that_fails_verification_puts_the_shared_rule_back_whole(box):
     before = state_of(box)
     _, plan = plan_for(box, RETIRE_PVE01, allow_remove=True)
-    assert plan["refusals"] == [] and {"table", "conf"} <= set(plan["texts"]), "a real REPLACE is being rolled back, not an empty run"
+    assert plan["refusals"] == [] and {"table", "conf"} <= set(plan["texts"]), (
+        "a real REPLACE is being rolled back, not an empty run"
+    )
     r = run_remote(box, plan, simulate_failure="verify")
     assert r.returncode == 6 and "rolled_back" in r.stdout
     assert state_of(box) == before and SHARED_RULE in state_of(box)["table"]
@@ -462,7 +595,9 @@ def test_apply_without_yes_prints_the_plan_and_changes_nothing(box, capsys):
     assert np.main(["apply", "--policy", str(path), "--vm", "191", "--snapshot", str(snap)]) == 0
     out = capsys.readouterr().out
     assert "plan only" in out and "10.10.10.77 tcp/8080" in out and state_of(box) == before and unit_state(box) == []
-    assert np.main(["apply", "--policy", str(path), "--vm", "191", "--snapshot", str(snap), "--yes"]) == 3, "--yes needs a live read"
+    assert np.main(["apply", "--policy", str(path), "--vm", "191", "--snapshot", str(snap), "--yes"]) == 3, (
+        "--yes needs a live read"
+    )
 
 
 def test_apply_exit_codes_follow_the_outcome(box, monkeypatch, capsys):
@@ -474,9 +609,11 @@ def test_apply_exit_codes_follow_the_outcome(box, monkeypatch, capsys):
     live.write_text(json.dumps(snapshot()))
     monkeypatch.setattr(np, "collect_live", lambda host, alias, **kw: json.loads(live.read_text()))
     orig = np.build_remote_script
+
     def patched(plan, **kw):
         plan["ip"], plan["probes"] = "127.0.0.1", [{"host": "127.0.0.1", "port": box["port"]}]
         return orig(plan, **dict(kw, guest_conf_path=str(box["guest"] / "nftables.conf")))
+
     monkeypatch.setattr(np, "build_remote_script", patched)
     base = ["apply", "--policy", str(path), "--vm", "191", "--yes"]
     before = state_of(box)
@@ -489,5 +626,17 @@ def test_apply_exit_codes_follow_the_outcome(box, monkeypatch, capsys):
     assert np.main(base) == 1 or np.main(base) == 0
     (box["guest"] / "break").unlink(missing_ok=True)
     live.write_text(json.dumps(snapshot()))
-    monkeypatch.setattr(np, "plan_apply", lambda *a, **k: {"vm": "191", "name": "x", "changes": 1, "layers": {}, "conf": {}, "refusals": ["no"], "notes": []})
+    monkeypatch.setattr(
+        np,
+        "plan_apply",
+        lambda *a, **k: {
+            "vm": "191",
+            "name": "x",
+            "changes": 1,
+            "layers": {},
+            "conf": {},
+            "refusals": ["no"],
+            "notes": [],
+        },
+    )
     assert np.main(base) == 1, "a refused plan is exit 1 and nothing runs"

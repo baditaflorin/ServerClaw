@@ -1,0 +1,60 @@
+id: ws-20261112-agent-history-autounlock
+adr: '0494'
+title: Unlock the agent-history data volume from OpenBao at boot, unattended
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/agent-history-autounlock
+worktree_path: .
+doc: docs/workstreams/ws-20261112-agent-history-autounlock.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: agent_history_autounlock
+      mode: read_only
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/agent_history_runtime/**
+        - inventory/host_vars/agent-history.yml
+        - docs/adr/0494-agent-history.md
+        - docs/runbooks/configure-agent-history.md
+        - tests/test_agent_history_autounlock.py
+        - docs/workstreams/ws-20261112-agent-history-autounlock.md
+        - workstreams/active/ws-20261112-agent-history-autounlock.yaml
+    - id: active_workstream_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+        - workstreams.yaml
+    - id: agent_history_autounlock_release_integration
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+      paths:
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+        - README.md
+        - RELEASE.md
+        - build/platform-manifest.json
+        - docs/status/**
+        - docs/release-notes/**
+        - docs/diagrams/agent-coordination-map.excalidraw
+canonical_truth:
+  changelog_entry: Unlock the agent-history data volume from OpenBao at boot (agent-history-autounlock), and fix its compose unit's condition key.
+  release_bump: patch
+tasks:
+  - id: t1
+    title: Add the boot unit, the OpenBao fetcher and the pipe into the existing unlock helper
+    status: completed
+  - id: t2
+    title: Fix ConditionPathIsMount (not a systemd key) to ConditionPathIsMountPoint and guard it with a test
+    status: completed
+  - id: t3
+    title: Amend ADR 0494 and the runbook, including the security cost and the AppRole hardening
+    status: completed
+  - id: t4
+    title: OpenBao administrator creates the unlock policy and AppRole and the owner delivers its files, then the guest is converged and a reboot is proved
+    status: pending

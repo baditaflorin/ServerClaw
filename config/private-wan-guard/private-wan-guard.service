@@ -1,0 +1,14 @@
+[Unit]
+Description=Block private IPv4 destinations on public uplink
+DefaultDependencies=no
+After=local-fs.target
+Before=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/nft -f /etc/private-wan-guard/rules.nft
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

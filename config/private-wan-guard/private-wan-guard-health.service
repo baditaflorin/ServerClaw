@@ -1,0 +1,8 @@
+[Unit]
+Description=Reconcile and report private WAN egress guards
+After=network.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/private-wan-guard/interfaces.env
+ExecStart=/usr/local/sbin/wan-guard-health.sh ${PHYSICAL_INTERFACE} ${NFT_INTERFACE}

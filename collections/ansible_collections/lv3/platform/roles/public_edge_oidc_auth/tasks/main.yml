@@ -43,13 +43,22 @@
   ansible.builtin.set_fact:
     public_edge_oidc_auth_issuer_hostname: "{{ public_edge_oidc_auth_issuer_url | urlsplit('hostname') }}"
 
+- name: Check the cloud-init hosts template
+  ansible.builtin.stat:
+    path: /etc/cloud/templates/hosts.debian.tmpl
+  register: public_edge_oidc_auth_cloud_hosts_template
+
 - name: Pin the Authentik issuer hostname to the local NGINX edge
   ansible.builtin.lineinfile:
-    path: /etc/hosts
-    regexp: '^\\s*[^#\\s]+\\s+{{ public_edge_oidc_auth_issuer_hostname | regex_escape }}(?:\\s|$)'
+    path: "{{ item }}"
+    regexp: '^\s*[^#\s]+\s+{{ public_edge_oidc_auth_issuer_hostname | regex_escape }}(?:\s|$)'
     line: "{{ ansible_host }} {{ public_edge_oidc_auth_issuer_hostname }}"
     state: present
     create: false
+  loop: >-
+    {{ ['/etc/hosts'] +
+       (['/etc/cloud/templates/hosts.debian.tmpl']
+        if public_edge_oidc_auth_cloud_hosts_template.stat.exists else []) }}
   when:
     - public_edge_oidc_auth_issuer_hostname | length > 0
     - ansible_host | default('') | length > 0

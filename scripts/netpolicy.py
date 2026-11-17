@@ -307,7 +307,7 @@ def parse_nft(text: str) -> dict[str, Any]:
             line = _nft_line(raw)
             if not line or line.startswith("type filter") or line.startswith("policy "):
                 continue
-            if line in ("ct state established,related accept", "iifname \"lo\" accept"):
+            if line in ("ct state established,related accept", 'iifname "lo" accept'):
                 baseline.append(line)
                 continue
             try:
@@ -315,11 +315,18 @@ def parse_nft(text: str) -> dict[str, Any]:
             except PolicyError as exc:
                 unparsed.append(f"{name}: {line}  <- {exc}")
                 continue
-            if parsed is None:  # a drop, reject, log, jump...: never silently filed as harmless, the policy cannot see what it does
+            if (
+                parsed is None
+            ):  # a drop, reject, log, jump...: never silently filed as harmless, the policy cannot see what it does
                 unparsed.append(f"{name}: {line}  <- not an accept rule (drop, reject, log, jump...): not modelled")
             else:
                 flows.extend(parsed)
-        chains[name] = {"hook": hook.group(1) if hook else "", "policy": policy.group(1) if policy else "", "flows": flows, "baseline": baseline}
+        chains[name] = {
+            "hook": hook.group(1) if hook else "",
+            "policy": policy.group(1) if policy else "",
+            "flows": flows,
+            "baseline": baseline,
+        }
     return {"present": bool(block), "chains": chains, "unparsed": unparsed}
 
 
@@ -344,9 +351,9 @@ def _nft_rule(line: str) -> list[Flow] | None:
         proto = "icmp"
     elif core == "ip protocol vrrp":
         proto = "vrrp"
-    elif (m := re.fullmatch(r"(tcp|udp) dport (\{[^}]*\}|\S+)", core)):
+    elif m := re.fullmatch(r"(tcp|udp) dport (\{[^}]*\}|\S+)", core):
         proto, ports = m.group(1), split_ports(m.group(2))
-    elif (m := re.fullmatch(r"ct original proto-dst (\{[^}]*\}|\S+)", core)):
+    elif m := re.fullmatch(r"ct original proto-dst (\{[^}]*\}|\S+)", core):
         ports = split_ports(m.group(1))
     else:
         raise PolicyError("rule shape is not modelled")
@@ -469,8 +476,10 @@ def _one_product(keep: list[Flow], rule: str, total: int) -> tuple[set[str], set
     """The sources and the (protocol, port) pairs of `keep`, if every source goes with every pair (one rule can say exactly that)."""
     srcs, kinds = {f.src for f in keep}, {(f.proto, f.port) for f in keep}
     if {(s, k) for s in srcs for k in kinds} != {(f.src, (f.proto, f.port)) for f in keep}:
-        raise PolicyError(f"the rule `{rule}` carries {total} flows and the {len(set(keep))} that stay are not one set of sources times one set "
-                          "of ports, so no single rule can hold them: split it by hand first")
+        raise PolicyError(
+            f"the rule `{rule}` carries {total} flows and the {len(set(keep))} that stay are not one set of sources times one set "
+            "of ports, so no single rule can hold them: split it by hand first"
+        )
     return srcs, kinds
 
 
@@ -483,7 +492,9 @@ def _shrink_nft_rule(raw: str, flows: list[Flow], keep: list[Flow]) -> str:
         code = _shrink_set(code, "ip saddr ", lambda t: norm_src(t) in srcs, clean)
     if kinds != {(f.proto, f.port) for f in flows}:
         ports = {p for _, p in kinds}
-        code = _shrink_set(code, "(?:tcp|udp) dport |ct original proto-dst ", lambda t: t.replace(":", "-") in ports, clean)
+        code = _shrink_set(
+            code, "(?:tcp|udp) dport |ct original proto-dst ", lambda t: t.replace(":", "-") in ports, clean
+        )
     new = code + sep + comment
     try:
         got = set(_nft_rule(_nft_line(new)) or [])
@@ -494,8 +505,12 @@ def _shrink_nft_rule(raw: str, flows: list[Flow], keep: list[Flow]) -> str:
     return new
 
 
-def edit_nft(text: str, removals: dict[str, set[Flow]] | None = None, adds: dict[str, list[Flow]] | None = None,
-             replaced: list[dict[str, str]] | None = None) -> str:
+def edit_nft(
+    text: str,
+    removals: dict[str, set[Flow]] | None = None,
+    adds: dict[str, list[Flow]] | None = None,
+    replaced: list[dict[str, str]] | None = None,
+) -> str:
     """Remove and add rule lines in the chains of `table inet filter`, in `nft list` output or in the hand written conf alike.
 
     A rule that carries flows to remove and flows that stay is rewritten where it is; each such rule is appended to `replaced`."""
@@ -551,8 +566,14 @@ def edit_nft(text: str, removals: dict[str, set[Flow]] | None = None, adds: dict
     for chain, info in before["chains"].items():
         want = (set(info["flows"]) - removals.get(chain, set())) | set(adds.get(chain, []))
         got = set(after["chains"][chain]["flows"])
-        if got != want or after["chains"][chain]["policy"] != info["policy"] or after["chains"][chain]["baseline"] != info["baseline"]:
-            raise PolicyError(f"self-check failed on chain {chain}: the edited text does not hold exactly the intended flows")
+        if (
+            got != want
+            or after["chains"][chain]["policy"] != info["policy"]
+            or after["chains"][chain]["baseline"] != info["baseline"]
+        ):
+            raise PolicyError(
+                f"self-check failed on chain {chain}: the edited text does not hold exactly the intended flows"
+            )
     if after["unparsed"] != before["unparsed"]:
         raise PolicyError("self-check failed: the edit changed what the parser cannot read")
     return out
@@ -588,16 +609,20 @@ def _shrink_pve_rule(raw: str, flows: list[Flow], keep: list[Flow], sets: dict[s
     if kinds != {(f.proto, f.port) for f in flows}:
         if re.fullmatch(r"\w+\(ACCEPT\)", tok[1]):
             have = ", ".join(f"{p}/{port}" for p, port in sorted({(f.proto, f.port) for f in flows}))
-            raise PolicyError(f"the rule `{stripped}` uses the macro {tok[1]} ({have}): a macro cannot be cut to some of its protocols and ports, "
-                              "split it by hand first")
+            raise PolicyError(
+                f"the rule `{stripped}` uses the macro {tok[1]} ({have}): a macro cannot be cut to some of its protocols and ports, "
+                "split it by hand first"
+            )
         ports = {p for _, p in kinds}
         body = _shrink_pve_opt(body, "-dport", lambda t: t.replace(":", "-") in ports)
     if srcs != {f.src for f in flows}:
         names = [t for t in tok[tok.index("-source") + 1].split(",") if t.startswith("+")]
         for name in names:
             if not set(sets.get(name[1:], [])) <= srcs:
-                raise PolicyError(f"the rule `{stripped}` takes sources from the ipset {name[1:]}, which other rules and VMs share: "
-                                  "change the ipset or the rule by hand")
+                raise PolicyError(
+                    f"the rule `{stripped}` takes sources from the ipset {name[1:]}, which other rules and VMs share: "
+                    "change the ipset or the rule by hand"
+                )
         body = _shrink_pve_opt(body, "-source", lambda t: t.startswith("+") or norm_src(t) in srcs)
     new = body + sep + comment
     try:
@@ -609,8 +634,13 @@ def _shrink_pve_rule(raw: str, flows: list[Flow], keep: list[Flow], sets: dict[s
     return new
 
 
-def edit_pve(text: str, remove: set[Flow], add: list[tuple[Flow, str]], ipsets: dict[str, list[str]] | None = None,
-             replaced: list[dict[str, str]] | None = None) -> str:
+def edit_pve(
+    text: str,
+    remove: set[Flow],
+    add: list[tuple[Flow, str]],
+    ipsets: dict[str, list[str]] | None = None,
+    replaced: list[dict[str, str]] | None = None,
+) -> str:
     """Remove and add `IN ACCEPT` rule lines of a /etc/pve/firewall/<vmid>.fw; everything else stays byte for byte.
 
     A rule that carries flows to remove and flows that stay is rewritten where it is; each such rule is appended to `replaced`."""
@@ -662,7 +692,11 @@ def edit_pve(text: str, remove: set[Flow], add: list[tuple[Flow, str]], ipsets: 
         result += "\n"
     after = parse_pve(result, ipsets)
     want = ({f for f, _ in before["flows"]} - remove) | {f for f, _ in add}
-    if {f for f, _ in after["flows"]} != want or after["options"] != before["options"] or after["unparsed"] != before["unparsed"]:
+    if (
+        {f for f, _ in after["flows"]} != want
+        or after["options"] != before["options"]
+        or after["unparsed"] != before["unparsed"]
+    ):
         raise PolicyError("self-check failed: the edited firewall file does not hold exactly the intended flows")
     return result
 
@@ -676,8 +710,14 @@ def observe(snapshot: dict[str, Any]) -> dict[str, Any]:
     sets = cluster["ipsets"]
     out: dict[str, Any] = {}
     for vmid, vm in snapshot.get("vms", {}).items():
-        entry: dict[str, Any] = {"name": vm.get("name", ""), "status": vm.get("status", ""), "layers": {l: set() for l in LAYERS},
-                                 "comments": {}, "unparsed": [], "attrs": {}}
+        entry: dict[str, Any] = {
+            "name": vm.get("name", ""),
+            "status": vm.get("status", ""),
+            "layers": {l: set() for l in LAYERS},
+            "comments": {},
+            "unparsed": [],
+            "attrs": {},
+        }
         if vm.get("fw") is not None:
             pve = parse_pve(vm["fw"], sets)
             entry["attrs"]["pve_options"] = pve["options"]
@@ -771,7 +811,11 @@ def load_policy(path: Path) -> dict[str, Any]:
         group_flows({"from": [g["src"]], "proto": g.get("proto", "tcp"), "ports": [str(g.get("port", "22"))]})
     data["guard"] = guard
     if "lan_networks" not in data:
-        nets = {str(ipaddress.ip_network(f"{v['ip']}/24", strict=False)) for v in data["vms"].values() if (v or {}).get("ip")}
+        nets = {
+            str(ipaddress.ip_network(f"{v['ip']}/24", strict=False))
+            for v in data["vms"].values()
+            if (v or {}).get("ip")
+        }
         data["lan_networks"] = sorted(nets)
     for net in data["lan_networks"]:
         norm_src(net)
@@ -800,8 +844,11 @@ def expected(vm: dict[str, Any]) -> dict[str, set[Flow]]:
     return out
 
 
-def compact_groups(layer_flows: dict[str, set[Flow]], comments: dict[tuple[str, Flow], str] | None = None,
-                   previous: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+def compact_groups(
+    layer_flows: dict[str, set[Flow]],
+    comments: dict[tuple[str, Flow], str] | None = None,
+    previous: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     """Group flows into readable policy groups: flows that share layers, protocol and port set share one entry with many sources."""
     comments = comments or {}
     layers_of: dict[Flow, frozenset[str]] = {}
@@ -818,7 +865,9 @@ def compact_groups(layer_flows: dict[str, set[Flow]], comments: dict[tuple[str, 
     for g in previous or []:
         old_meta[(tuple(sorted(g["layers"])), g.get("proto", "any"), tuple(sorted(group_flows_key(g))))] = g
     groups: list[dict[str, Any]] = []
-    for (layers, proto, ports, iif), srcs in sorted(per_ports.items(), key=lambda kv: (sorted(kv[0][0]), kv[0][1], kv[0][2], kv[0][3])):
+    for (layers, proto, ports, iif), srcs in sorted(
+        per_ports.items(), key=lambda kv: (sorted(kv[0][0]), kv[0][1], kv[0][2], kv[0][3])
+    ):
         g: dict[str, Any] = {"from": sorted(srcs, key=_src_key)}
         if proto != "any":
             g["proto"] = proto
@@ -863,9 +912,14 @@ def _src_key(s: str) -> tuple:
 
 def build_policy(snapshot: dict[str, Any], previous: dict[str, Any] | None = None) -> dict[str, Any]:
     obs = observe(snapshot)
-    policy: dict[str, Any] = {"version": 1, "host": snapshot.get("host", ""), "collect": {"ssh": ((previous or {}).get("collect") or {}).get("ssh") or snapshot.get("ssh", "")},
-                              "ipsets": {k: v for k, v in obs["ipsets"].items()},
-                              "inner_sources": list((previous or {}).get("inner_sources", DEFAULT_INNER_SOURCES)), "vms": {}}
+    policy: dict[str, Any] = {
+        "version": 1,
+        "host": snapshot.get("host", ""),
+        "collect": {"ssh": ((previous or {}).get("collect") or {}).get("ssh") or snapshot.get("ssh", "")},
+        "ipsets": {k: v for k, v in obs["ipsets"].items()},
+        "inner_sources": list((previous or {}).get("inner_sources", DEFAULT_INNER_SOURCES)),
+        "vms": {},
+    }
     policy["guard"] = list((previous or {}).get("guard") or [])
     lan = (previous or {}).get("lan_networks")
     if not lan:
@@ -876,9 +930,12 @@ def build_policy(snapshot: dict[str, Any], previous: dict[str, Any] | None = Non
         o = obs["vms"][vmid]
         prev = (previous or {}).get("vms", {}).get(vmid, {})
         pve_opts = o["attrs"].get("pve_options", {})
-        entry: dict[str, Any] = {"name": o["name"], "ip": snapshot["vms"][vmid].get("ip", "") or prev.get("ip", ""),
-                                 "pve": {k: pve_opts[k] for k in ("enable", "policy_in", "policy_out") if k in pve_opts},
-                                 "guest": {}}
+        entry: dict[str, Any] = {
+            "name": o["name"],
+            "ip": snapshot["vms"][vmid].get("ip", "") or prev.get("ip", ""),
+            "pve": {k: pve_opts[k] for k in ("enable", "policy_in", "policy_out") if k in pve_opts},
+            "guest": {},
+        }
         entry["guest"]["nft"] = "managed" if o["attrs"].get("guest_nft") else "absent"
         if o["attrs"].get("guest_nft"):
             entry["guest"]["input_policy"] = o["attrs"].get("input_policy", "")
@@ -916,12 +973,26 @@ def diff_layers(exp: dict[str, set[Flow]], obs: dict[str, set[Flow]]) -> dict[st
 
 def drift(policy: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
     obs = observe(snapshot)
-    result: dict[str, Any] = {"host": policy["host"], "vms": {}, "summary": {"vms": 0, "vms_drifted": 0, "flows_missing": 0, "flows_extra": 0, "conf_flows_missing": 0, "conf_flows_extra": 0}}
+    result: dict[str, Any] = {
+        "host": policy["host"],
+        "vms": {},
+        "summary": {
+            "vms": 0,
+            "vms_drifted": 0,
+            "flows_missing": 0,
+            "flows_extra": 0,
+            "conf_flows_missing": 0,
+            "conf_flows_extra": 0,
+        },
+    }
     for vmid in sorted(set(policy["vms"]) | set(obs["vms"]), key=int):
         res: dict[str, Any] = {"layers": {}, "attrs": [], "unparsed": [], "state": "in_sync"}
         pv, ov = policy["vms"].get(vmid), obs["vms"].get(vmid)
         if pv is None:
-            res.update(state="not_in_policy", attrs=[f"VM {vmid} ({ov['name']}) exists on the hypervisor and is not in the policy"])
+            res.update(
+                state="not_in_policy",
+                attrs=[f"VM {vmid} ({ov['name']}) exists on the hypervisor and is not in the policy"],
+            )
         elif ov is None:
             res.update(state="not_on_host", attrs=[f"VM {vmid} is in the policy and not on the hypervisor"])
         else:
@@ -934,11 +1005,15 @@ def drift(policy: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
             if ov["attrs"].get("guest_readable"):
                 want_nft = guest.get("nft", "managed")
                 if (want_nft == "managed") != bool(ov["attrs"].get("guest_nft")):
-                    res["attrs"].append(f"guest nftables: policy {want_nft}, live {'present' if ov['attrs'].get('guest_nft') else 'absent'}")
+                    res["attrs"].append(
+                        f"guest nftables: policy {want_nft}, live {'present' if ov['attrs'].get('guest_nft') else 'absent'}"
+                    )
                 for chain in ("input", "forward"):
                     want = guest.get(f"{chain}_policy")
                     if want and ov["attrs"].get(f"{chain}_policy") != want:
-                        res["attrs"].append(f"guest {chain} policy: policy {want}, live {ov['attrs'].get(f'{chain}_policy', '(none)')}")
+                        res["attrs"].append(
+                            f"guest {chain} policy: policy {want}, live {ov['attrs'].get(f'{chain}_policy', '(none)')}"
+                        )
             else:
                 res["attrs"].append("guest not readable (guest agent): guest layers not compared")
                 for layer in GUEST_LAYERS:
@@ -947,16 +1022,23 @@ def drift(policy: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
             if ov.get("conf") is not None and guest.get("nft", "managed") == "managed":
                 exp = expected(pv)
                 if not ov["attrs"].get("conf_present"):
-                    res["attrs"].append("guest /etc/nftables.conf has no table inet filter: a reboot would load no rules")
+                    res["attrs"].append(
+                        "guest /etc/nftables.conf has no table inet filter: a reboot would load no rules"
+                    )
                 else:
                     for chain in ("input", "forward"):
                         missing = sorted(exp[chain] - ov["conf"][chain], key=_flow_sort)
                         extra = sorted(ov["conf"][chain] - exp[chain], key=_flow_sort)
                         if missing or extra:
-                            res["conf"][chain] = {"missing": [f.text() for f in missing], "extra": [f.text() for f in extra]}
+                            res["conf"][chain] = {
+                                "missing": [f.text() for f in missing],
+                                "extra": [f.text() for f in extra],
+                            }
                         want = guest.get(f"{chain}_policy")
                         if want and ov["attrs"].get(f"conf_{chain}_policy") != want:
-                            res["attrs"].append(f"guest /etc/nftables.conf {chain} policy: policy {want}, conf {ov['attrs'].get(f'conf_{chain}_policy') or '(none)'}")
+                            res["attrs"].append(
+                                f"guest /etc/nftables.conf {chain} policy: policy {want}, conf {ov['attrs'].get(f'conf_{chain}_policy') or '(none)'}"
+                            )
             res["unparsed"] = ov["unparsed"]
             if res["layers"] or res["conf"] or [a for a in res["attrs"] if "not compared" not in a]:
                 res["state"] = "drift"
@@ -988,7 +1070,9 @@ def overlaps(flows: Iterable[Flow], fl: Flow) -> bool:
             continue
         if "any" not in (c.proto, fl.proto) and c.proto != fl.proto:
             continue
-        if "any" not in (c.src, fl.src) and not ipaddress.ip_network(c.src, strict=False).overlaps(ipaddress.ip_network(fl.src, strict=False)):
+        if "any" not in (c.src, fl.src) and not ipaddress.ip_network(c.src, strict=False).overlaps(
+            ipaddress.ip_network(fl.src, strict=False)
+        ):
             continue
         if _ports_overlap(c.port, fl.port):
             return True
@@ -1024,30 +1108,61 @@ def check(policy: dict[str, Any], baseline: set[str] | None = None) -> list[dict
         if str(pve.get("policy_in", "")).upper() != "DROP":
             add(f"{vmid}:pve-policy", "high", f"{label}: pve policy_in is {pve.get('policy_in', '(unset)')}, not DROP")
         if not managed and not vm.get("exception"):
-            add(f"{vmid}:no-guest-nft", "medium", f"{label}: no guest nftables (only the Proxmox layer filters this VM)")
+            add(
+                f"{vmid}:no-guest-nft", "medium", f"{label}: no guest nftables (only the Proxmox layer filters this VM)"
+            )
         for chain in ("input", "forward"):
             if managed and str(guest.get(f"{chain}_policy", "drop")).lower() != "drop":
-                add(f"{vmid}:guest-{chain}-policy", "high", f"{label}: guest {chain} policy is {guest.get(f'{chain}_policy')}, not drop")
+                add(
+                    f"{vmid}:guest-{chain}-policy",
+                    "high",
+                    f"{label}: guest {chain} policy is {guest.get(f'{chain}_policy')}, not drop",
+                )
         exp = expected(vm)
         stale = sorted({fl.src for layer in LAYERS for fl in exp[layer] if foreign(fl.src)}, key=_src_key)
         for src in stale:
             layers = sorted(layer for layer in LAYERS if any(fl.src == src for fl in exp[layer]))
-            add(f"{vmid}:foreign-source:{src}", "medium",
-                f"{label}: rules for source {src}, which is on no network of this host ({', '.join(lan)}), in {', '.join(layers)}: stale?")
+            add(
+                f"{vmid}:foreign-source:{src}",
+                "medium",
+                f"{label}: rules for source {src}, which is on no network of this host ({', '.join(lan)}), in {', '.join(layers)}: stale?",
+            )
         for gi, g in enumerate(vm.get("groups", [])):
-            if not str(g.get("purpose", "")).strip() or str(g.get("purpose", "")).startswith("imported from the live state"):
+            if not str(g.get("purpose", "")).strip() or str(g.get("purpose", "")).startswith(
+                "imported from the live state"
+            ):
                 add(f"{vmid}:purpose:{_gid(g)}", "info", f"{label}: group {_gid(g)} has no recorded purpose")
             for fl in group_flows(g):
-                if fl.src == "any" and fl.proto == "any" and fl.port == "*" and not fl.iif and set(g["layers"]) & {"input", "forward"}:
+                if (
+                    fl.src == "any"
+                    and fl.proto == "any"
+                    and fl.port == "*"
+                    and not fl.iif
+                    and set(g["layers"]) & {"input", "forward"}
+                ):
                     layer = "forward" if "forward" in g["layers"] else "input"
-                    add(f"{vmid}:open-chain:{layer}", "high",
-                        f"{label}: the guest {layer} chain accepts every packet (a bare `accept`); the rules after it never apply")
+                    add(
+                        f"{vmid}:open-chain:{layer}",
+                        "high",
+                        f"{label}: the guest {layer} chain accepts every packet (a bare `accept`); the rules after it never apply",
+                    )
                 elif fl.src == "any" and not g.get("public"):
-                    add(f"{vmid}:any-source:{fl.proto}/{fl.port}", "high", f"{label}: {fl.proto}/{fl.port} is open to any source without `public: true`")
-                elif fl.src != "any" and not _inner(fl.src, inner) and ipaddress.ip_network(fl.src, strict=False).prefixlen < WIDE_PREFIX \
-                        and not g.get("wide_ok"):
-                    add(f"{vmid}:wide:{fl.src}:{fl.proto}/{fl.port}", "medium",
-                        f"{label}: source {fl.src} is wider than /{WIDE_PREFIX} for {fl.proto}/{fl.port} without `wide_ok`")
+                    add(
+                        f"{vmid}:any-source:{fl.proto}/{fl.port}",
+                        "high",
+                        f"{label}: {fl.proto}/{fl.port} is open to any source without `public: true`",
+                    )
+                elif (
+                    fl.src != "any"
+                    and not _inner(fl.src, inner)
+                    and ipaddress.ip_network(fl.src, strict=False).prefixlen < WIDE_PREFIX
+                    and not g.get("wide_ok")
+                ):
+                    add(
+                        f"{vmid}:wide:{fl.src}:{fl.proto}/{fl.port}",
+                        "medium",
+                        f"{label}: source {fl.src} is wider than /{WIDE_PREFIX} for {fl.proto}/{fl.port} without `wide_ok`",
+                    )
         if not managed:
             continue
         # a Proxmox-allowed flow that no guest chain accepts at all never reaches anything; a specific guest rule that Proxmox drops entirely never fires
@@ -1055,7 +1170,11 @@ def check(policy: dict[str, Any], baseline: set[str] | None = None) -> list[dict
             if foreign(fl.src):
                 continue
             if not overlaps(list(exp["input"]) + list(exp["forward"]), fl):
-                add(f"{vmid}:dead-at-guest:{fl.text()}", "medium", f"{label}: {fl.text()} passes the Proxmox firewall and no guest chain accepts it")
+                add(
+                    f"{vmid}:dead-at-guest:{fl.text()}",
+                    "medium",
+                    f"{label}: {fl.text()} passes the Proxmox firewall and no guest chain accepts it",
+                )
         for layer in ("input", "forward"):
             for fl in sorted(exp[layer], key=_flow_sort):
                 if fl.port == "*" and fl.proto == "any":
@@ -1063,8 +1182,11 @@ def check(policy: dict[str, Any], baseline: set[str] | None = None) -> list[dict
                 if _inner(fl.src, inner) or foreign(fl.src) or fl.iif:
                     continue
                 if not overlaps(exp["pve"], fl):
-                    add(f"{vmid}:shadowed:{layer}:{fl.text()}", "medium",
-                        f"{label}: the guest {layer} chain allows {fl.text()} but the Proxmox firewall drops it first")
+                    add(
+                        f"{vmid}:shadowed:{layer}:{fl.text()}",
+                        "medium",
+                        f"{label}: the guest {layer} chain allows {fl.text()} but the Proxmox firewall drops it first",
+                    )
     if baseline is not None:
         for f in findings:
             f["known"] = "yes" if f["id"] in baseline else "no"
@@ -1075,7 +1197,9 @@ def _gid(g: dict[str, Any]) -> str:
     return f"{','.join(g.get('from', []))[:60]}|{g.get('proto', 'any')}|{g.get('ports', '*')}"
 
 
-def why(policy: dict[str, Any], vmid: str, src: str, proto: str, port: int, snapshot: dict[str, Any] | None = None) -> dict[str, Any]:
+def why(
+    policy: dict[str, Any], vmid: str, src: str, proto: str, port: int, snapshot: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Verdict per layer for one flow, from the policy and (if given) from the live snapshot.
 
     A layer only drops what it filters: the Proxmox layer when the VM firewall is enabled with `policy_in: DROP`, a guest chain when the guest
@@ -1130,7 +1254,10 @@ def why(policy: dict[str, Any], vmid: str, src: str, proto: str, port: int, snap
                 out["layers"][layer]["live"] = "VM not found live"
         else:
             attrs = obs["attrs"]
-            live = {"pve": pve_unfiltered(attrs.get("pve_options", {}), ""), "docker_user": du_unfiltered(obs["layers"]["docker_user"])}
+            live = {
+                "pve": pve_unfiltered(attrs.get("pve_options", {}), ""),
+                "docker_user": du_unfiltered(obs["layers"]["docker_user"]),
+            }
             for chain in ("input", "forward"):
                 if not attrs.get("guest_readable"):
                     live[chain] = "guest not readable"
@@ -1143,7 +1270,9 @@ def why(policy: dict[str, Any], vmid: str, src: str, proto: str, port: int, snap
     for side in ("policy", "live"):
         if all(side in d for d in out["layers"].values()):
             dropped = [l for l, d in out["layers"].items() if d[side] == "NOT allowed"]
-            out.setdefault("verdict", {})[side] = f"dropped by {', '.join(dropped)}" if dropped else "passes every layer"
+            out.setdefault("verdict", {})[side] = (
+                f"dropped by {', '.join(dropped)}" if dropped else "passes every layer"
+            )
     return out
 
 
@@ -1172,8 +1301,15 @@ def _table_text(raw_ruleset: str) -> str:
     return raw_ruleset[head : span[1] + 1] + "\n"
 
 
-def plan_apply(policy: dict[str, Any], snapshot: dict[str, Any], vmid: str, layers: Iterable[str] | None = None, *,
-               allow_remove: bool = False, max_changes: int = DEFAULT_MAX_CHANGES) -> dict[str, Any]:
+def plan_apply(
+    policy: dict[str, Any],
+    snapshot: dict[str, Any],
+    vmid: str,
+    layers: Iterable[str] | None = None,
+    *,
+    allow_remove: bool = False,
+    max_changes: int = DEFAULT_MAX_CHANGES,
+) -> dict[str, Any]:
     """What an apply would change on one VM so that the live Proxmox rules, the live guest table and the guest conf equal the policy.
 
     Pure: nothing is read from or written to a host. `refusals` non-empty means the plan must not be run; the guards are the lockout
@@ -1183,10 +1319,20 @@ def plan_apply(policy: dict[str, Any], snapshot: dict[str, Any], vmid: str, laye
     wanted = list(layers) if layers else list(APPLY_LAYERS)
     bad = [l for l in wanted if l not in APPLY_LAYERS]
     if bad:
-        raise PolicyError(f"layers that can be applied: {', '.join(APPLY_LAYERS)} (docker_user is managed by its own unit); got {', '.join(bad)}")
+        raise PolicyError(
+            f"layers that can be applied: {', '.join(APPLY_LAYERS)} (docker_user is managed by its own unit); got {', '.join(bad)}"
+        )
     pv = policy["vms"].get(vmid)
     raw = snapshot.get("vms", {}).get(vmid)
-    plan: dict[str, Any] = {"vm": vmid, "name": (pv or {}).get("name", ""), "layers": {}, "conf": {}, "refusals": [], "notes": [], "changes": 0}
+    plan: dict[str, Any] = {
+        "vm": vmid,
+        "name": (pv or {}).get("name", ""),
+        "layers": {},
+        "conf": {},
+        "refusals": [],
+        "notes": [],
+        "changes": 0,
+    }
     if pv is None or raw is None:
         plan["refusals"].append(f"VM {vmid} is not both in the policy and on the hypervisor")
         return plan
@@ -1194,13 +1340,17 @@ def plan_apply(policy: dict[str, Any], snapshot: dict[str, Any], vmid: str, laye
     exp = expected(pv)
     plan["ip"] = raw.get("ip", "")
     if ov["unparsed"]:
-        plan["refusals"].append(f"the live state has {len(ov['unparsed'])} rule line(s) this tool does not model (first: {ov['unparsed'][0][:120]}): it would edit blind")
+        plan["refusals"].append(
+            f"the live state has {len(ov['unparsed'])} rule line(s) this tool does not model (first: {ov['unparsed'][0][:120]}): it would edit blind"
+        )
     if exp["docker_user"] != ov["layers"]["docker_user"]:
         units = sorted({str(g["unit"]) for g in pv.get("groups", []) if "docker_user" in g["layers"] and g.get("unit")})
         missing = sorted(f.text() for f in exp["docker_user"] - ov["layers"]["docker_user"])
         extra = sorted(f.text() for f in ov["layers"]["docker_user"] - exp["docker_user"])
-        plan["notes"].append(f"docker_user differs ({len(missing)} missing, {len(extra)} extra): it is managed by its own unit "
-                             f"({', '.join(units) or 'see the group'}), not applied here")
+        plan["notes"].append(
+            f"docker_user differs ({len(missing)} missing, {len(extra)} extra): it is managed by its own unit "
+            f"({', '.join(units) or 'see the group'}), not applied here"
+        )
         plan["docker_user"] = {"missing": missing, "extra": extra, "units": units}
     guest_layers = [l for l in wanted if l in ("input", "forward")]
     texts: dict[str, str] = {}
@@ -1217,11 +1367,19 @@ def plan_apply(policy: dict[str, Any], snapshot: dict[str, Any], vmid: str, laye
         rem = ov["layers"]["pve"] - exp["pve"]
         add = exp["pve"] - ov["layers"]["pve"]
         if (rem or add) and raw.get("fw") is None:
-            plan["refusals"].append("this VM has no /etc/pve/firewall file: create it by hand first (enabling a firewall is not done by apply)")
+            plan["refusals"].append(
+                "this VM has no /etc/pve/firewall file: create it by hand first (enabling a firewall is not done by apply)"
+            )
         elif rem or add:
             try:
                 rep: list[dict[str, str]] = []
-                texts["pve"] = edit_pve(raw["fw"], rem, [(f, comments.get(f, "")) for f in sorted(add, key=_flow_sort)], observe(snapshot)["ipsets"], rep)
+                texts["pve"] = edit_pve(
+                    raw["fw"],
+                    rem,
+                    [(f, comments.get(f, "")) for f in sorted(add, key=_flow_sort)],
+                    observe(snapshot)["ipsets"],
+                    rep,
+                )
                 old_sha["pve"] = sha(raw["fw"])
                 plan["layers"]["pve"] = {"remove": sorted(f.text() for f in rem), "add": sorted(f.text() for f in add)}
                 if rep:
@@ -1232,10 +1390,13 @@ def plan_apply(policy: dict[str, Any], snapshot: dict[str, Any], vmid: str, laye
     if guest_layers:
         g = raw.get("guest") or {}
         guest_diff = any(exp[l] != ov["layers"][l] for l in guest_layers) or any(
-            ov.get("conf") is not None and exp[l] != ov["conf"][l] for l in guest_layers)
+            ov.get("conf") is not None and exp[l] != ov["conf"][l] for l in guest_layers
+        )
         if guest_diff and not g.get("ok"):
             plan["refusals"].append("the guest is not readable through the guest agent: guest layers cannot be planned")
-        elif guest_diff and (pv.get("guest", {}).get("nft", "managed") != "managed" or not ov["attrs"].get("guest_nft")):
+        elif guest_diff and (
+            pv.get("guest", {}).get("nft", "managed") != "managed" or not ov["attrs"].get("guest_nft")
+        ):
             plan["refusals"].append("this VM has no guest nftables to edit (enabling one is not done by apply)")
         elif guest_diff:
             table = g.get("nft_table") or _table_text(g.get("nft", ""))
@@ -1246,18 +1407,26 @@ def plan_apply(policy: dict[str, Any], snapshot: dict[str, Any], vmid: str, laye
                     rem, add = ov["layers"][l] - exp[l], exp[l] - ov["layers"][l]
                     if rem or add:
                         live_removals[l], live_adds[l] = rem, sorted(add, key=_flow_sort)
-                        plan["layers"][l] = {"remove": sorted(f.text() for f in rem), "add": sorted(f.text() for f in add)}
+                        plan["layers"][l] = {
+                            "remove": sorted(f.text() for f in rem),
+                            "add": sorted(f.text() for f in add),
+                        }
                 conf_rem: dict[str, set[Flow]] = {}
                 conf_add: dict[str, list[Flow]] = {}
                 if ov.get("conf") is None or not ov["attrs"].get("conf_present"):
                     if any(exp[l] != ov["layers"][l] for l in guest_layers):
-                        plan["refusals"].append("the guest has no readable /etc/nftables.conf with a table inet filter: the change could not be made to survive a reboot")
+                        plan["refusals"].append(
+                            "the guest has no readable /etc/nftables.conf with a table inet filter: the change could not be made to survive a reboot"
+                        )
                 else:
                     for l in guest_layers:
                         rem, add = ov["conf"][l] - exp[l], exp[l] - ov["conf"][l]
                         if rem or add:
                             conf_rem[l], conf_add[l] = rem, sorted(add, key=_flow_sort)
-                            plan["conf"][l] = {"remove": sorted(f.text() for f in rem), "add": sorted(f.text() for f in add)}
+                            plan["conf"][l] = {
+                                "remove": sorted(f.text() for f in rem),
+                                "add": sorted(f.text() for f in add),
+                            }
                 try:
                     # a rule that keeps some of its flows is rewritten in its place: live through the same one-file load of the table, persisted
                     # as an edited line of the conf (never reloaded)
@@ -1266,41 +1435,59 @@ def plan_apply(policy: dict[str, Any], snapshot: dict[str, Any], vmid: str, laye
                         texts["table"] = edit_nft(table, live_removals, live_adds, rep)
                         old_sha["table"] = sha(table)
                         for r in rep:
-                            plan["layers"][r["chain"]].setdefault("replace", []).append({"old": r["old"], "new": r["new"]})
+                            plan["layers"][r["chain"]].setdefault("replace", []).append(
+                                {"old": r["old"], "new": r["new"]}
+                            )
                     if conf_rem or conf_add:
                         rep = []
                         texts["conf"] = edit_nft(g["conf"], conf_rem, conf_add, rep)
                         old_sha["conf"] = sha(g["conf"])
                         for r in rep:
-                            plan["conf"][r["chain"]].setdefault("replace", []).append({"old": r["old"], "new": r["new"]})
+                            plan["conf"][r["chain"]].setdefault("replace", []).append(
+                                {"old": r["old"], "new": r["new"]}
+                            )
                 except PolicyError as exc:
                     plan["refusals"].append(f"guest: {exc}")
-    plan["changes"] = sum(len(d["remove"]) + len(d["add"]) for d in list(plan["layers"].values()) + list(plan["conf"].values()))
+    plan["changes"] = sum(
+        len(d["remove"]) + len(d["add"]) for d in list(plan["layers"].values()) + list(plan["conf"].values())
+    )
     removals = sum(len(d["remove"]) for d in list(plan["layers"].values()) + list(plan["conf"].values()))
     if removals and not allow_remove:
         plan["refusals"].append(f"{removals} rule(s) would be removed: pass --allow-remove if that is intended")
     if plan["changes"] > max_changes:
-        plan["refusals"].append(f"{plan['changes']} changes exceed the cap of {max_changes} for one run: raise --max-changes only after reading the plan")
+        plan["refusals"].append(
+            f"{plan['changes']} changes exceed the cap of {max_changes} for one run: raise --max-changes only after reading the plan"
+        )
     # the lockout guard: after the change the hypervisor must still reach the VM, in every layer that is touched
     for guard in policy.get("guard", []):
-        gflows = group_flows({"from": [guard["src"]], "proto": guard.get("proto", "tcp"), "ports": [str(guard.get("port", "22"))]})
+        gflows = group_flows(
+            {"from": [guard["src"]], "proto": guard.get("proto", "tcp"), "ports": [str(guard.get("port", "22"))]}
+        )
         touched = [l for l in guard["layers"] if l in plan["layers"] or (l == "input" and plan["conf"])]
         for l in touched:
             for gf in gflows:
                 if not overlaps(exp[l], gf) or gf not in exp[l]:
-                    plan["refusals"].append(f"lockout guard: after this change the {l} layer would no longer allow {gf.text()}")
+                    plan["refusals"].append(
+                        f"lockout guard: after this change the {l} layer would no longer allow {gf.text()}"
+                    )
     plan["texts"], plan["old_sha"] = texts, old_sha
     after: dict[str, Any] = {}
     if "pve" in texts:
         after["pve"] = [_flow_tuple(f) for f in sorted(exp["pve"], key=_flow_sort)]
     if "table" in texts:
-        for l in guest_layers:
-            after[l] = [_flow_tuple(f) for f in sorted(exp[l], key=_flow_sort)]
+        for l in ("input", "forward"):
+            flows = exp[l] if l in guest_layers else ov["layers"][l]
+            after[l] = [_flow_tuple(f) for f in sorted(flows, key=_flow_sort)]
     if "conf" in texts:
-        for l in guest_layers:
-            after["conf_" + l] = [_flow_tuple(f) for f in sorted(exp[l], key=_flow_sort)]
+        for l in ("input", "forward"):
+            flows = exp[l] if l in guest_layers else ov["conf"][l]
+            after["conf_" + l] = [_flow_tuple(f) for f in sorted(flows, key=_flow_sort)]
     plan["expect_after"] = after
-    plan["probes"] = [{"host": plan["ip"], "port": int(g.get("port", 22))} for g in policy.get("guard", []) if g.get("proto", "tcp") == "tcp" and plan["ip"]]
+    plan["probes"] = [
+        {"host": plan["ip"], "port": int(g.get("port", 22))}
+        for g in policy.get("guard", [])
+        if g.get("proto", "tcp") == "tcp" and plan["ip"]
+    ]
     if not plan["changes"] and not plan["refusals"]:
         plan["notes"].append("nothing to apply: the VM already matches the policy in the layers asked for")
     return plan
@@ -1353,8 +1540,13 @@ print(json.dumps(out))
 def collect_live(host: str, ssh_alias: str, timeout: int = 600, only: list[str] | None = None) -> dict[str, Any]:
     script = (f"ONLY = {json.dumps([str(o) for o in only])}\n" if only else "") + COLLECTOR
     try:
-        proc = subprocess.run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", ssh_alias, "python3", "-"],
-                              input=script, capture_output=True, text=True, timeout=timeout)
+        proc = subprocess.run(
+            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", ssh_alias, "python3", "-"],
+            input=script,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
     except (subprocess.TimeoutExpired, OSError) as exc:
         raise PolicyError(f"could not read {ssh_alias}: {exc}") from exc
     if proc.returncode != 0 or not proc.stdout.strip().startswith("{"):
@@ -1677,12 +1869,21 @@ sys.exit(1 if failed else 0)
 """
 
 
-def build_remote_script(plan: dict[str, Any], *, hold: int = 180, simulate_failure: str = "", ipsets: dict[str, list[str]] | None = None,
-                        guest_conf_path: str = "/etc/nftables.conf", source: str | None = None) -> str:
+def build_remote_script(
+    plan: dict[str, Any],
+    *,
+    hold: int = 180,
+    simulate_failure: str = "",
+    ipsets: dict[str, list[str]] | None = None,
+    guest_conf_path: str = "/etc/nftables.conf",
+    source: str | None = None,
+) -> str:
     """The script `apply` sends to the hypervisor: the plan, this module as `np`, then APPLY_REMOTE."""
     src = source if source is not None else Path(__file__).read_text()
     payload = {k: plan[k] for k in ("vm", "ip", "texts", "old_sha", "expect_after", "probes")}
-    payload.update({"hold": hold, "simulate_failure": simulate_failure, "ipsets": ipsets or {}, "guest_conf_path": guest_conf_path})
+    payload.update(
+        {"hold": hold, "simulate_failure": simulate_failure, "ipsets": ipsets or {}, "guest_conf_path": guest_conf_path}
+    )
     # pure ASCII (json escapes everything else): `python3 -` decodes stdin with the locale, which on a host without UTF-8 would choke on the module
     return (
         "# -*- coding: utf-8 -*-\n"
@@ -1710,24 +1911,38 @@ def metrics_text(result: dict[str, Any] | None, host: str, could_not_look: bool,
         f'netpolicy_could_not_look{{hypervisor="{host}"}} {1 if could_not_look else 0}',
     ]
     if result is not None and not could_not_look:
-        lines += ["# HELP netpolicy_flows Flows that differ between the policy file and the live state.", "# TYPE netpolicy_flows gauge"]
+        lines += [
+            "# HELP netpolicy_flows Flows that differ between the policy file and the live state.",
+            "# TYPE netpolicy_flows gauge",
+        ]
         for vmid, res in result["vms"].items():
             name = res.get("name", "")
             for layer in LAYERS:
                 d = res["layers"].get(layer, {"missing": [], "extra": []})
                 for kind in ("missing", "extra"):
-                    lines.append(f'netpolicy_flows{{hypervisor="{host}",vm="{vmid}",layer="{layer}",kind="{kind}"}} {len(d[kind])}')
-        lines += ["# HELP netpolicy_conf_flows Flows that differ between the policy file and the guest's /etc/nftables.conf (what a reboot would load).",
-                  "# TYPE netpolicy_conf_flows gauge"]
+                    lines.append(
+                        f'netpolicy_flows{{hypervisor="{host}",vm="{vmid}",layer="{layer}",kind="{kind}"}} {len(d[kind])}'
+                    )
+        lines += [
+            "# HELP netpolicy_conf_flows Flows that differ between the policy file and the guest's /etc/nftables.conf (what a reboot would load).",
+            "# TYPE netpolicy_conf_flows gauge",
+        ]
         for vmid, res in result["vms"].items():
             for chain in ("input", "forward"):
                 d = res.get("conf", {}).get(chain, {"missing": [], "extra": []})
                 for kind in ("missing", "extra"):
-                    lines.append(f'netpolicy_conf_flows{{hypervisor="{host}",vm="{vmid}",chain="{chain}",kind="{kind}"}} {len(d[kind])}')
+                    lines.append(
+                        f'netpolicy_conf_flows{{hypervisor="{host}",vm="{vmid}",chain="{chain}",kind="{kind}"}} {len(d[kind])}'
+                    )
         lines += ["# HELP netpolicy_vm_in_sync 1 when the VM matches the policy.", "# TYPE netpolicy_vm_in_sync gauge"]
         for vmid, res in result["vms"].items():
-            lines.append(f'netpolicy_vm_in_sync{{hypervisor="{host}",vm="{vmid}"}} {1 if res["state"] == "in_sync" else 0}')
-        lines += ["# HELP netpolicy_unparsed_lines Live rules the parser does not model (never silently ignored).", "# TYPE netpolicy_unparsed_lines gauge"]
+            lines.append(
+                f'netpolicy_vm_in_sync{{hypervisor="{host}",vm="{vmid}"}} {1 if res["state"] == "in_sync" else 0}'
+            )
+        lines += [
+            "# HELP netpolicy_unparsed_lines Live rules the parser does not model (never silently ignored).",
+            "# TYPE netpolicy_unparsed_lines gauge",
+        ]
         for vmid, res in result["vms"].items():
             lines.append(f'netpolicy_unparsed_lines{{hypervisor="{host}",vm="{vmid}"}} {len(res["unparsed"])}')
     return "\n".join(lines) + "\n"
@@ -1738,7 +1953,10 @@ def metrics_text(result: dict[str, Any] | None, host: str, could_not_look: bool,
 
 def _print_plan(plan: dict[str, Any]) -> None:
     print(f"VM {plan['vm']} {plan.get('name', '')}: {plan['changes']} change(s)")
-    for title, block in (("live", plan["layers"]), ("persisted in /etc/nftables.conf (a reboot loads this)", plan["conf"])):
+    for title, block in (
+        ("live", plan["layers"]),
+        ("persisted in /etc/nftables.conf (a reboot loads this)", plan["conf"]),
+    ):
         for layer, d in block.items():
             for kind, sign in (("remove", "-"), ("add", "+")):
                 for item in d[kind][:12]:
@@ -1780,7 +1998,9 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("check")
     p.add_argument("--policy")
-    p.add_argument("--baseline", help="JSON list of finding ids accepted as known (default: <policy>.baseline.json if it exists)")
+    p.add_argument(
+        "--baseline", help="JSON list of finding ids accepted as known (default: <policy>.baseline.json if it exists)"
+    )
     p.add_argument("--json", action="store_true")
     p = sub.add_parser("snapshot")
     p.add_argument("--host", required=True)
@@ -1814,11 +2034,18 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--layers", help="comma separated subset of pve,input,forward (default: all that differ)")
     p.add_argument("--allow-remove", action="store_true")
     p.add_argument("--max-changes", type=int, default=DEFAULT_MAX_CHANGES)
-    p.add_argument("--hold", type=int, default=180, help="seconds before the timer on the hypervisor rolls back by itself")
+    p.add_argument(
+        "--hold", type=int, default=180, help="seconds before the timer on the hypervisor rolls back by itself"
+    )
     p.add_argument("--yes", action="store_true", help="really apply (without it only the plan is printed)")
     p.add_argument("--snapshot", help="plan from a saved snapshot (plan only: --yes always reads the live state)")
     p.add_argument("--ssh", help="ssh alias of the hypervisor (default: collect.ssh of the policy file)")
-    p.add_argument("--simulate-failure", choices=["verify", "crash"], default="", help="drill: fail the verification, or die after applying")
+    p.add_argument(
+        "--simulate-failure",
+        choices=["verify", "crash"],
+        default="",
+        help="drill: fail the verification, or die after applying",
+    )
     p.add_argument("--guest-conf-path", default="/etc/nftables.conf", help=argparse.SUPPRESS)
     a = ap.parse_args(argv)
 
@@ -1839,7 +2066,9 @@ def main(argv: list[str] | None = None) -> int:
                 report.append({"policy": path.name, "findings": findings, "new": len(new)})
                 if not a.json:
                     by = collections.Counter((f["severity"], f["known"]) for f in findings)
-                    print(f"{path.name}: {len(policy['vms'])} VMs, {sum(len(v['groups']) for v in policy['vms'].values())} groups, findings {dict(by)}")
+                    print(
+                        f"{path.name}: {len(policy['vms'])} VMs, {sum(len(v['groups']) for v in policy['vms'].values())} groups, findings {dict(by)}"
+                    )
                     for f in new:
                         print(f"  NEW {f['severity']}: {f['message']}")
             if a.json:
@@ -1866,7 +2095,13 @@ def main(argv: list[str] | None = None) -> int:
         if a.cmd == "drift":
             policy = load_policy(_policy_path(a.policy))
             try:
-                snap = _load_snapshot(a.snapshot) if a.snapshot else collect_live(policy["host"], a.ssh or policy.get("collect", {}).get("ssh") or f"hv-{policy['host']}")
+                snap = (
+                    _load_snapshot(a.snapshot)
+                    if a.snapshot
+                    else collect_live(
+                        policy["host"], a.ssh or policy.get("collect", {}).get("ssh") or f"hv-{policy['host']}"
+                    )
+                )
             except PolicyError as exc:
                 print(f"could not look: {exc}", file=sys.stderr)
                 if a.textfile_dir:
@@ -1881,8 +2116,14 @@ def main(argv: list[str] | None = None) -> int:
                 print(json.dumps(result, indent=1))
             else:
                 s = result["summary"]
-                print(f"{policy['host']}: {s['vms']} VMs, {s['vms_drifted']} drifted, {s['flows_missing']} flows missing, {s['flows_extra']} extra"
-                      + (f"; reboot hazard: {s['conf_flows_missing']} missing from and {s['conf_flows_extra']} extra in /etc/nftables.conf" if s["conf_flows_missing"] or s["conf_flows_extra"] else ""))
+                print(
+                    f"{policy['host']}: {s['vms']} VMs, {s['vms_drifted']} drifted, {s['flows_missing']} flows missing, {s['flows_extra']} extra"
+                    + (
+                        f"; reboot hazard: {s['conf_flows_missing']} missing from and {s['conf_flows_extra']} extra in /etc/nftables.conf"
+                        if s["conf_flows_missing"] or s["conf_flows_extra"]
+                        else ""
+                    )
+                )
                 for vmid, res in result["vms"].items():
                     if res["state"] == "in_sync":
                         continue
@@ -1917,19 +2158,44 @@ def main(argv: list[str] | None = None) -> int:
             if a.yes and a.snapshot:
                 raise PolicyError("--yes reads the live state itself; --snapshot is for planning only")
             snap = _load_snapshot(a.snapshot) if a.snapshot else collect_live(policy["host"], alias, only=[a.vm])
-            plan = plan_apply(policy, snap, a.vm, a.layers.split(",") if a.layers else None, allow_remove=a.allow_remove, max_changes=a.max_changes)
+            plan = plan_apply(
+                policy,
+                snap,
+                a.vm,
+                a.layers.split(",") if a.layers else None,
+                allow_remove=a.allow_remove,
+                max_changes=a.max_changes,
+            )
             _print_plan(plan)
             if plan["refusals"]:
                 return 1
             if not plan["changes"] or not a.yes:
-                print("nothing to apply" if not plan["changes"] else "plan only: nothing was changed (add --yes to apply it)")
+                print(
+                    "nothing to apply"
+                    if not plan["changes"]
+                    else "plan only: nothing was changed (add --yes to apply it)"
+                )
                 return 0
-            script = build_remote_script(plan, hold=a.hold, simulate_failure=a.simulate_failure, ipsets=observe(snap)["ipsets"], guest_conf_path=a.guest_conf_path)
-            proc = subprocess.run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", alias, "python3", "-"], input=script, capture_output=True, text=True)
+            script = build_remote_script(
+                plan,
+                hold=a.hold,
+                simulate_failure=a.simulate_failure,
+                ipsets=observe(snap)["ipsets"],
+                guest_conf_path=a.guest_conf_path,
+            )
+            proc = subprocess.run(
+                ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", alias, "python3", "-"],
+                input=script,
+                capture_output=True,
+                text=True,
+            )
             for line in proc.stdout.splitlines():
                 try:
                     ev = json.loads(line)
-                    print(f"  [{ev.get('event')}] " + ", ".join(f"{k}={v}" for k, v in ev.items() if k not in ("ts", "vm", "event")))
+                    print(
+                        f"  [{ev.get('event')}] "
+                        + ", ".join(f"{k}={v}" for k, v in ev.items() if k not in ("ts", "vm", "event"))
+                    )
                 except ValueError:
                     print("  " + line)
             if proc.stderr.strip():
@@ -1941,7 +2207,9 @@ def main(argv: list[str] | None = None) -> int:
             if a.snapshot:
                 snap = _load_snapshot(a.snapshot)
             elif a.live:
-                snap = collect_live(policy["host"], a.ssh or policy.get("collect", {}).get("ssh") or f"hv-{policy['host']}")
+                snap = collect_live(
+                    policy["host"], a.ssh or policy.get("collect", {}).get("ssh") or f"hv-{policy['host']}"
+                )
             res = why(policy, a.vm, a.src, a.proto, a.port, snap)
             print(f"VM {a.vm}: {res['flow']}")
             for layer in LAYERS:

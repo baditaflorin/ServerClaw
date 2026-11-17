@@ -12,6 +12,13 @@ agent_history_canary_scan_enabled: true
 # canary collector on one laptop, with its own write token, so everything stored under it is a canary by construction.
 agent_history_canary_scan_host: canary-mac14
 
+# Unattended unlock of the LUKS data volume (ADR 0494, amendment 2026-11-12). A boot unit reads the passphrase from OpenBao with
+# a dedicated unlock AppRole (read access to kv/data/services/agent-history/luks only), so a reboot needs no operator (security
+# patching, a host restart). Converge only AFTER the OpenBao administrator has created that AppRole and the owner has delivered its
+# two files (docs/runbooks/configure-agent-history.md, "Unattended unlock"): until then the unit fails and retries, and the manual
+# unlock still works. Set it to false to go back to the manual unlock.
+agent_history_luks_autounlock_enabled: true
+
 # Semantic search (ADR 0494, ws-20261029-agent-history-embed-query). The store embeds each search question through bge-m3 on mac14: Ollama listens
 # on the Mac's loopback only and `tailscale serve --tcp=8443 tcp://127.0.0.1:11434` forwards it to the Mac's tailnet address, which the tailnet
 # policy opens to this guest on that one port (config/tailscale/policy.hujson). Plain http by tailnet IP, because Ollama answers 403 to the

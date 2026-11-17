@@ -93,6 +93,7 @@ change sets the guest's `status` in `config/capacity-model.json` from `planned` 
 3. Deliver the AppRole files (owner, over ssh, never in a transcript): `/opt/agent-history/openbao/role_id` and `secret_id`. The role sets them to the OpenBao Agent's uid, mode 0400, and never reads them.
 4. Join the tailnet with the one-time key for the enrolment tag `tag:pool-runtime` (the owner types it; never in a transcript), then re-advertise as `tailscale up --hostname agent-history --advertise-tags tag:agent-history`, after the policy of precondition 5 is applied. Then re-run the play so the role publishes `tailscale serve --https` (certificates are enabled on the tailnet), and make the follow-up policy change of precondition 6.
 5. Unlock and start: pipe the passphrase into `/usr/local/sbin/agent-history-unlock` over ssh. It opens the volume, mounts it, creates the Postgres directory and starts `agent-history.service`. After every reboot of the guest the volume is locked and the stack is down until this step is repeated.
+   With the unattended unlock enabled (`agent_history_luks_autounlock_enabled`, see "Unattended unlock" below) this step is done once by hand for the first start and is then done by the guest itself at every boot.
 6. Verify (the role's `verify.yml` runs these when it starts the stack): `GET /healthz` on loopback answers 200, the store listens on `127.0.0.1` only, nothing listens on 5432, the secret files are `0400` owned by uid 65532, the Postgres directory is on `/dev/mapper/agent-history-data`, and there is no swap.
 7. First backup: wait for 02:00 or, with approval, one `vzdump 155 --storage own-pbs --mode snapshot`; the PBS group `vm/155` must exist before any stale-backup alert can fire.
 
@@ -182,7 +183,73 @@ Postgres or the LUKS volume (nothing to unlock):
    conflicting package, so the guest no longer lists `docker.io` in its cloud-init packages. On a guest already hit, one normal reboot makes
    `cloud-init status` `done`.
 6. **The play's Docker converge can drop loaded images.** Reload the `agent-store` tarball afterwards (`docker save | gzip | ssh <guest> docker load`).
-7. **After every reboot the LUKS volume is locked.** Unlock with the passphrase on standard input (step 5 of "Provision"); the stack is down until then.
+7. **After every reboot the LUKS volume is locked, and `agent-history-autounlock.service` unlocks it.** With the unattended unlock enabled nothing is needed; if it is off, or OpenBao is unreachable, unlock by hand with the passphrase on standard input (step 5 of "Provision"). Check `systemctl status agent-history-autounlock` and `journalctl -u agent-history-autounlock`: the unit retries every 30 seconds and its messages never contain the value.
+
+## Unattended unlock (ADR 0494, amendment 2026-11-12)
+
+A reboot of the guest, or of its whole host, brings the store back by itself: `agent-history-autounlock.service` reads the LUKS
+passphrase from OpenBao with a dedicated unlock AppRole, pipes it into `agent-history-unlock` and starts the stack. It retries every
+30 seconds until OpenBao answers (OpenBao on `runtime-control` unseals itself through its own watcher). The manual unlock stays as
+the fallback. The security cost is in the ADR amendment: a copy of the whole guest plus a network path to OpenBao can now decrypt
+the data disk, so do the AppRole hardening in step 2 (a dedicated AppRole that reads only that entry, bound to the guest's address).
+
+### Turn it on (owner and OpenBao administrator, in this order)
+
+The passphrase already exists: the owner created it when the volume was formatted (2026-10-29). It is the KV entry
+`kv/services/agent-history/luks`, key `passphrase` (the OpenBao audit log shows one create and four reads that morning, and
+nothing since). Nothing has to be added to it. The `runtime` entry the OpenBao Agent reads is a different entry, and the runtime
+AppRole's policy does not cover the `luks` entry, so the unlock gets its own AppRole.
+
+0. **Unlock by hand once, now (also the fallback at any time).** Run, on the operator's Mac, with nothing to install and nothing to type:
+   `bash scripts/agent-history-unlock-from-openbao.sh`
+   It goes through the existing ssh aliases (`0mcp_runtime_control`, `0mcp_agent_history`, both routed by the Proxmox host), reads the
+   OpenBao `ops` password from the primary checkout's `.local/openbao/ops-password.txt` (the one the OpenBao converge uses; other
+   checkouts may hold older copies, and OpenBao may lock a user out for a while after several rejected logins) and sends it to the remote reader on standard input, reads the
+   passphrase there and pipes it into `agent-history-unlock` on the guest. The passphrase is never printed, never an argument or an
+   environment variable, never written to a file. The helper opens the volume, mounts it, creates the Postgres directory and starts
+   `agent-history.service`. The `ops` user's policy (`kv/*`) already covers the entry; it is the identity that created and read it
+   on 2026-10-29. A tool that needs the `bao` command is not needed.
+Steps 1 and 2 are done together by one command on the operator's Mac, which needs nothing typed and prints no secret:
+   `bash scripts/agent-history-setup-unattended-unlock.sh`
+   (it logs in as `ops`, writes the policy and AppRole below, pipes a fresh login into the two guest files, and prints only the number of
+   bytes the guest then fetched). The manual commands below are the committed record of what it does.
+
+1. **Create the unlock policy and AppRole** (OpenBao administrator). The policy reads that one path and nothing else:
+   ```hcl
+   path "kv/data/services/agent-history/luks" {
+     capabilities = ["read"]
+   }
+   ```
+   `bao policy write <prefix>-service-agent-history-luks <that file>`, then an AppRole `agent-history-unlock` on that policy with a
+   short token (`token_ttl=5m`, `token_max_ttl=10m`), a **reusable** `secret_id` (`secret_id_num_uses=0`, `secret_id_ttl=0`: the unit
+   logs in at every boot) and both `secret_id_bound_cidrs` and `token_bound_cidrs` set to the guest's address, so a stolen copy
+   cannot log in from anywhere else. (Making `openbao_runtime` create this policy and AppRole is a follow-up; until then these are
+   the exact manual steps, and the policy text above is the committed record.)
+2. **Deliver the two files** (owner, over ssh, never in a transcript): the AppRole's `role_id` and a fresh `secret_id` go to
+   `/opt/agent-history/openbao/luks_role_id` and `luks_secret_id` on the guest, `root:root`, mode `0400`. The role never creates or
+   reads them; it only checks that they exist and sets their owner and mode.
+3. **Converge the guest** with `make provision-agent-history-vm` (it installs the two helpers and the unit and enables the unit;
+   it does not start it). `agent_history_luks_autounlock_enabled: true` is set in `inventory/host_vars/agent-history.yml`.
+4. **Prove it before relying on it**, in a quiet window, one step at a time:
+   - Lock the volume on purpose: `systemctl stop agent-history.service`, `umount /srv/agent-history`,
+     `cryptsetup close agent-history-data`.
+   - `systemctl start agent-history-autounlock.service`, then `journalctl -u agent-history-autounlock -n 30`; the volume is
+     mounted, `agent-history.service` is active and `GET /healthz` on loopback answers 200.
+   - Reboot the guest (`qm reboot 155` on the hypervisor) and wait: the store must answer without anyone touching it.
+   - Reboot with OpenBao stopped, then start OpenBao: the unit must keep retrying and finish once OpenBao answers.
+5. **Watch the key.** Every read of `kv/data/services/agent-history/luks` is in the OpenBao audit log. One outside a boot window
+   is the signal that a copy of the AppRole is in use; revoke the `secret_id` first and ask questions second.
+
+### Turn it off
+
+Set `agent_history_luks_autounlock_enabled: false` and converge: the unit is disabled and the two helpers are removed. The
+manual unlock (`agent-history-unlock`) is unchanged. Revoke the unlock AppRole's `secret_id` and delete its two files if the passphrase should
+be readable by the administrator only.
+
+### If the volume is locked and the unit cannot unlock it
+
+OpenBao unreachable or sealed, the key missing, or the AppRole rejected: `journalctl -u agent-history-autounlock` names the step
+and the HTTP status. Unlock by hand (step 5 of "Provision") and fix the cause; the next boot tries again by itself.
 
 ## The redaction canary (daily, unattended)
 

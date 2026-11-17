@@ -7,7 +7,7 @@
   "recorded_by": "codex",
   "source_commit": "d486d02754a41ad88f9376376541c0c280b6fde0",
   "repo_version_context": "0.179.57",
-  "workflow_id": "adr-0250-log-shipping-label-repair-and-main-replay",
+  "workflow_id": "adr-0250-log-shipping-label-repair-and-main-replay-live-apply",
   "adr": "0250",
   "service_ids": [],
   "summary": "Restore five-hypervisor log-shipping alert coverage by separating shipper identity from the collector guest scrape labels; verify exact merged source against the installed alert and existing collector.",
@@ -48,6 +48,17 @@
       "result": "pass",
       "observed": "2026-11-07 00:08:13 UTC fresh-main hashes equal installed bytes: alertc68b94171d0581a95c5f832dac58553b23aed26a4603b8a6c7490bc70d6bab11; collectorf5dfe9ff36a8bfe2936b0ca407e26d83751f5772ff3589b3ce2d2bdccba727cd. Replay changed zero files. Collector timeractive and natural00:03:51run Resultsuccess/exit0."
     }
+  ],
+  "evidence_refs": [
+    "config/prometheus/rules/fleet-log-shipping.yml",
+    "config/0own/openobserve/log-freshness/openobserve-log-freshness.py",
+    "tests/promtool/fleet_log_shipping_rules_test.yml",
+    "tests/test_fleet_log_shipping_rules.py",
+    "docs/runbooks/fleet-observability.md",
+    "docs/workstreams/ws-20261107-log-shipping-labels.md"
+  ],
+  "notes": [
+    "Corrected on 2026-11-09 (workstream ws-20261109-fix-1107-receipt-validation) so that scripts/live_apply_receipts.py --validate accepts this receipt: workflow_id was 'adr-0250-log-shipping-label-repair-and-main-replay' when it was recorded and now carries the -live-apply suffix the historical id form requires; evidence_refs and this notes list were added (the validator requires both). No verification result, hash, time or target was changed."
   ],
   "limitations": [
     "Global release_manager.py refused101 unrelated in_progress workstreams and repeated pre_existing_gate_failures waiver blockersx12 before any version mutation. Scoped patch metadata uses the documented WS0514 workflow, enforced release readiness, and primary CI. Release-gate configuration/waivers unchanged; no global product-readiness claim."

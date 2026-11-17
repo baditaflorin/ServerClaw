@@ -1,6 +1,8 @@
 #!/bin/bash
 # managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
-# Unlock the LUKS2 data volume, mount it and start the compose project (ADR 0494). Run by the owner after every reboot.
+# Unlock the LUKS2 data volume, mount it and start the compose project (ADR 0494). With the unattended unlock enabled
+# (agent_history_luks_autounlock_enabled) agent-history-autounlock pipes the passphrase from OpenBao into this helper at boot;
+# the owner can still run it by hand, which is the fallback when OpenBao is unreachable.
 #
 # The passphrase is read from standard input and nowhere else: never put it in an argument, an environment variable or a
 # file. cryptsetup does not strip a trailing newline when the key comes from a pipe, so pipe it without one:

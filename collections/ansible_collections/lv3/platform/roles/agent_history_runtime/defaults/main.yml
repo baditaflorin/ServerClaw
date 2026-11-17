@@ -69,6 +69,24 @@ agent_history_openbao_keys:
   metrics_token: metrics_token
   embed_tokens: embed_tokens
 
+# --- unattended unlock of the data volume (ADR 0494, amendment 2026-11-12) ---------------------------------------------
+# On: a boot unit reads the LUKS passphrase from OpenBao with a dedicated unlock AppRole and unlocks the volume, so a reboot needs
+# no operator. Off: the owner pipes the passphrase into agent-history-unlock by hand after every reboot (the original design).
+# Turn it on only after the administrator has added the key below to the KV entry (the runbook, "Unattended unlock").
+agent_history_luks_autounlock_enabled: false
+# The KV entry and key that hold the passphrase: created by the owner on 2026-10-29 when the volume was formatted (it is in the
+# OpenBao audit log: one create, then four reads during provisioning). It is NOT the runtime entry the OpenBao Agent reads, and the
+# runtime AppRole's policy covers only that entry, so the unlock uses its own AppRole with a read policy on this one path: the
+# long-running OpenBao Agent's token can then never read the passphrase.
+agent_history_openbao_luks_kv_path: kv/data/services/agent-history/luks
+agent_history_openbao_luks_key: passphrase
+# The unlock AppRole's files, delivered by the owner like the runtime AppRole's (root:root 0400; the role never reads them).
+agent_history_luks_role_id_file: "{{ agent_history_agent_dir }}/luks_role_id"
+agent_history_luks_secret_id_file: "{{ agent_history_agent_dir }}/luks_secret_id"
+agent_history_luks_autounlock_http_timeout_seconds: 10
+# Pause between two attempts while OpenBao is not reachable (a rebooted host brings its guests up in no fixed order).
+agent_history_luks_autounlock_retry_seconds: 30
+
 # --- tailnet (the guest joins as tag:agent-history with a one-time key the owner mints; this role never sees it; HTTPS certificates are enabled on the tailnet) ---
 agent_history_tailscale_serve_enabled: true
 agent_history_tailscale_https_port: 443

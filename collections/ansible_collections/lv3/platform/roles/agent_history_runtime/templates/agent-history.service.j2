@@ -1,12 +1,15 @@
 # managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
 # Starts the compose project only while the encrypted data volume is mounted (ADR 0494). At boot the condition is false,
-# the unit is skipped, and agent-history-unlock starts it after the owner unlocks the volume.
+# the unit is skipped, and agent-history-unlock starts it once the volume is unlocked (by agent-history-autounlock.service when
+# the unattended unlock is enabled, otherwise by the owner).
+# The key is ConditionPathIsMountPoint: systemd has no ConditionPathIsMount, ignores it with a warning, and the unit then ran at
+# boot, failed on the missing Postgres directory and stayed failed (found 2026-11-11).
 [Unit]
 Description=agent-history store and Postgres (compose project)
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
-ConditionPathIsMount={{ agent_history_data_mount }}
+ConditionPathIsMountPoint={{ agent_history_data_mount }}
 
 [Service]
 Type=oneshot
