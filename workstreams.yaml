@@ -13259,6 +13259,94 @@ workstreams:
       on the build server (26 of 26), open the pull request (nothing is applied, nothing
       is merged)
     status: in_progress
+- id: ws-20261117-tailscale-endpoint-filter
+  adr: '0014'
+  title: Stop unusable Tailscale discovery endpoints and repair Plane automation
+  status: ready_for_merge
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/tailscale-endpoint-discovery
+  worktree_path: .codex/worktrees/tailscale-endpoint-discovery
+  doc: docs/workstreams/ws-20261117-tailscale-endpoint-filter.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/tailscale-endpoint-filter/
+  - docs/workstreams/ws-20261117-tailscale-endpoint-filter.md
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: endpoint_filter_implementation
+      mode: exclusive
+      paths:
+      - config/tailscale-endpoint-filter/**
+      - platform/ansible/plane_access.py
+      - platform/ansible/plane.py
+      - scripts/sync_plane_agent_issues.py
+      - scripts/plane_tool.py
+      - tests/test_plane_access.py
+      - tests/test_plane_client.py
+      - docs/runbooks/configure-plane.md
+      - config/prometheus/rules/fleet-tailscale-endpoint-filter.yml
+      - tests/promtool/fleet_tailscale_endpoint_filter_test.yml
+      - docs/adr/0496-tailscale-endpoint-advertisement-filter.md
+      - docs/workstreams/ws-20261117-tailscale-endpoint-filter.md
+      - receipts/live-applies/ws-20261117-tailscale-endpoint-filter-apply-receipt.yaml
+      - workstreams/active/ws-20261117-tailscale-endpoint-filter.yaml
+    - id: active_workstream_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - workstreams.yaml
+    - id: monitoring_role
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+      - tests/test_adopted_prometheus_rules.py
+    - id: monitoring_targets
+      mode: shared_contract
+      contract: monitoring-vm-targets-v1
+      paths:
+      - inventory/host_vars/monitoring.yml
+      - tests/test_monitoring_prometheus_codification.py
+    - id: publication_sanitization
+      mode: shared_contract
+      contract: tier-c-sanitization-replacements-v1
+      paths:
+      - config/publication-sanitization.yaml
+    - id: ci_workflow
+      mode: shared_contract
+      contract: woodpecker-ci-v1
+      paths:
+      - .woodpecker.yml
+    - id: agent_coordination_diagram
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+    - id: adr_index
+      mode: shared_contract
+      contract: adr-index-v1
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+    - id: release_integration
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+      paths:
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - README.md
+      - build/platform-manifest.json
+  canonical_truth:
+    changelog_entry: Prepare monitored Tailscale endpoint-advertisement and off-link
+      private discovery filters, and repair private Plane automation access.
+    release_bump: patch
+    included_in_repo_version: null
+  plane_issue_id: 3b8d8811-c285-466a-a1b0-29001bb7a78f
 - id: ws-20261117-private-wan-guard
   adr: '0014'
   title: Investigate and contain private traffic leaking onto the public uplink

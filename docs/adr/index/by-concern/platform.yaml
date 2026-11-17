@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-06'
+generated: '2026-11-17'
 facet: concern
 concern: platform
-total_adrs: 155
+total_adrs: 156
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2931,3 +2931,23 @@ adrs:
       the Proxmox host:'
     filename: 0490-netplan-mac-mismatch-recovery.md
     path: docs/adr/0490-netplan-mac-mismatch-recovery.md
+  - adr: 0496
+    title: Filter container interfaces from Tailscale endpoint advertisements
+    status: Accepted
+    implementation_status: Partial
+    currently_describes: mixed_state
+    date: '2026-11-17'
+    concern: platform
+    keywords:
+      - filter
+      - container
+      - interfaces
+      - from
+      - tailscale
+      - endpoint
+      - advertisements
+    summary: Evaluate the pinned upstream proposal on the exact installed upstream release.
+    filename: 0496-tailscale-endpoint-advertisement-filter.md
+    path: docs/adr/0496-tailscale-endpoint-advertisement-filter.md
+    implemented_in_repo_version: 0.179.63
+    implemented_on: '2026-11-17'

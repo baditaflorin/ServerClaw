@@ -18,6 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 RULES = REPO_ROOT / "config" / "prometheus" / "rules"
 ROLE = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "monitoring_vm"
 ADOPTED = [
+    "fleet-tailscale-endpoint-filter.yml",
     "fleet-private-wan-guard.yml",
     "fleet-edge-probe.yml",
     "node-placement.yml",

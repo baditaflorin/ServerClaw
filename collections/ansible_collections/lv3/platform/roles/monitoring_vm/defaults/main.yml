@@ -354,6 +354,7 @@ monitoring_prometheus_fleet_loops_rules_file: "{{ monitoring_prometheus_rules_di
 # Rule files that were running on the monitoring VM with no copy in git (found 2026-10-14: a rebuilt VM would have lost them).
 # Each is shipped as is from config/prometheus/rules/<name>; tests/test_adopted_prometheus_rules.py pins this list.
 monitoring_prometheus_adopted_rule_files:
+  - fleet-tailscale-endpoint-filter.yml
   - fleet-private-wan-guard.yml
   - fleet-edge-probe.yml
   - node-placement.yml

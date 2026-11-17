@@ -137,9 +137,11 @@ def test_scanopy_relabel_keeps_cleanup_alert_inputs_without_broad_systemd_cardin
     assert retained("node_systemd_unit_state", name="builder-disk-gc-other.service", state="failed") is None
     assert retained("node_systemd_unit_state", name="postgresql@17-main.service", state="failed") is None
     assert retained("node_systemd_unit_state", name="postgresql.service", state="active") is None
-    for metric, name in (("node_systemd_unit_state", "unrelated.service"),
-                         ("node_systemd_unit_start_time_seconds", "fleet-image-gc-infer.service"),
-                         ("node_systemd_timer_last_trigger_seconds", "unrelated.timer")):
+    for metric, name in (
+        ("node_systemd_unit_state", "unrelated.service"),
+        ("node_systemd_unit_start_time_seconds", "fleet-image-gc-infer.service"),
+        ("node_systemd_timer_last_trigger_seconds", "unrelated.timer"),
+    ):
         assert retained(metric, name=name) is None
     assert retained("node_network_receive_bytes_total", device="veth123") is None
     assert retained("node_network_receive_bytes_total", device="eth0")
@@ -171,28 +173,43 @@ def test_production_render_static_jobs_are_exactly_the_reviewed_set() -> None:
     static_jobs = {job["job_name"] for job in config["scrape_configs"] if "static_configs" in job}
 
     # Anything added here must be a reviewed, reachable target; node_exporter targets come from Scanopy file_sd.
-    assert static_jobs == {
-        "infer_node_exporter_via_tailscale",  # 0infer hypervisor + PostgreSQL VM: Scanopy SD has no 10.70.10.0/24 fleet yet
-        "pipe_node_exporter_via_tailscale",  # 0pipe Proxmox host + build VM 100 + runtime VM 101: Scanopy SD does not cover its 10.80.10.0/24 LAN; tailnet only (host and build VM up 2026-10-29)
-        "tier0_node_exporter",  # tier-0 VM (infer-tier0) node_exporter through the 0infer host forward :9101
-        "alertmanager_tier0",  # Alertmanager #2 (HA mesh replica) on the tier-0 VM; kept out of job "alertmanager" on purpose
-        "prometheus",
-        "tempo",
-        "otelcol-contrib",
-        "loki-canary",
-        "postgres-audit-alloy",
-        "alertmanager",
-        "alertmanager-liveness",
-        "alertmanager-readiness",
-        "gitea-liveness",
-        "grafana-liveness",
-        "grafana-readiness",
-        "openbao-liveness",
-        "openbao-readiness",
-        "pve_0docker_via_tailscale",
-        "cadvisor-runtime-general-lv3",
-    }
+    assert (
+        static_jobs
+        == {
+            "infer_node_exporter_via_tailscale",  # 0infer hypervisor + PostgreSQL VM: Scanopy SD has no 10.70.10.0/24 fleet yet
+            "tailscale_endpoint_filter_expected",  # explicitly registered nodes; textfile-only scrape for missing-filter alerts
+            "pipe_node_exporter_via_tailscale",  # 0pipe Proxmox host + build VM 100 + runtime VM 101: Scanopy SD does not cover its 10.80.10.0/24 LAN; tailnet only (host and build VM up 2026-10-29)
+            "tier0_node_exporter",  # tier-0 VM (infer-tier0) node_exporter through the 0infer host forward :9101
+            "alertmanager_tier0",  # Alertmanager #2 (HA mesh replica) on the tier-0 VM; kept out of job "alertmanager" on purpose
+            "prometheus",
+            "tempo",
+            "otelcol-contrib",
+            "loki-canary",
+            "postgres-audit-alloy",
+            "alertmanager",
+            "alertmanager-liveness",
+            "alertmanager-readiness",
+            "gitea-liveness",
+            "grafana-liveness",
+            "grafana-readiness",
+            "openbao-liveness",
+            "openbao-readiness",
+            "pve_0docker_via_tailscale",
+            "cadvisor-runtime-general-lv3",
+        }
+    )
     assert not any(job["job_name"] == "node_exporter" and "static_configs" in job for job in config["scrape_configs"])
+    expected_filter = jobs_by_name(config)["tailscale_endpoint_filter_expected"]
+    assert expected_filter["params"] == {"collect[]": ["textfile"]}
+    assert expected_filter["metric_relabel_configs"] == [
+        {
+            "source_labels": ["__name__"],
+            "regex": "fleet_tailscale_endpoint_filter_.*",
+            "action": "keep",
+        }
+    ]
+    targets = [target for group in expected_filter["static_configs"] for target in group["targets"]]
+    assert targets and len(targets) == len(set(targets))
 
 
 def test_production_render_keeps_only_reachable_catalog_probe_jobs() -> None:
@@ -850,8 +867,12 @@ def test_the_switched_off_domainscope_replica_is_ignored_by_the_node_exporter_in
     defaults = yaml.safe_load((MONITORING_ROLE / "defaults" / "main.yml").read_text())
     host_vars = yaml.safe_load(MONITORING_HOST_VARS.read_text())
     context = _context(MONITORING_ROLE / "defaults" / "main.yml", host_vars)
-    rendered = json.loads(_environment(MONITORING_ROLE / "templates").get_template("scanopy-sd-ignored-hosts.json.j2").render(**context))
-    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"]["options"]
+    rendered = json.loads(
+        _environment(MONITORING_ROLE / "templates").get_template("scanopy-sd-ignored-hosts.json.j2").render(**context)
+    )
+    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"][
+        "options"
+    ]
     tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "scanopy_sd.yml").read_text())
 
     assert defaults["monitoring_scanopy_sd_ignored_hosts"] == []
@@ -866,7 +887,9 @@ def test_scanopy_standby_is_wired_hardened_alerted_and_its_server_never_starts_b
     main_tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "main.yml").read_text())
     include = next(task for task in main_tasks if task.get("name") == "Keep a warm standby of the Scanopy server")
     tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "scanopy_standby.yml").read_text())
-    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"]["options"]
+    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"][
+        "options"
+    ]
     context = _context(MONITORING_ROLE / "defaults" / "main.yml", host_vars)
     env = _environment(MONITORING_ROLE / "templates")
     compose = yaml.safe_load(env.get_template("scanopy-standby-compose.yml.j2").render(**context))
@@ -878,26 +901,64 @@ def test_scanopy_standby_is_wired_hardened_alerted_and_its_server_never_starts_b
     group = next(group for group in inventory["groups"] if group["name"] == "scanopy_standby")
     rules = {rule["alert"]: rule for rule in group["rules"]}
 
-    assert defaults["monitoring_scanopy_standby_enabled"] is False and host_vars["monitoring_scanopy_standby_enabled"] is True
-    assert include["ansible.builtin.include_tasks"] == "scanopy_standby.yml" and include["when"] == "monitoring_scanopy_standby_enabled | bool"
-    keygen = next(task for task in tasks if task["name"] == "Generate the standby database password (only when missing)")
+    assert (
+        defaults["monitoring_scanopy_standby_enabled"] is False
+        and host_vars["monitoring_scanopy_standby_enabled"] is True
+    )
+    assert (
+        include["ansible.builtin.include_tasks"] == "scanopy_standby.yml"
+        and include["when"] == "monitoring_scanopy_standby_enabled | bool"
+    )
+    keygen = next(
+        task for task in tasks if task["name"] == "Generate the standby database password (only when missing)"
+    )
     assert keygen["ansible.builtin.shell"]["creates"] == "{{ monitoring_scanopy_standby_env_file }}"
-    for name in ("monitoring_scanopy_standby_enabled", "monitoring_scanopy_standby_server_image", "monitoring_scanopy_standby_postgres_image",
-                 "monitoring_scanopy_standby_sync_on_calendar", "monitoring_scanopy_standby_boot_test_on_calendar"):
+    for name in (
+        "monitoring_scanopy_standby_enabled",
+        "monitoring_scanopy_standby_server_image",
+        "monitoring_scanopy_standby_postgres_image",
+        "monitoring_scanopy_standby_sync_on_calendar",
+        "monitoring_scanopy_standby_boot_test_on_calendar",
+    ):
         assert name in specs
     # the server only exists in the failover profile (never started by `up`), the database runs and is not published
-    assert compose["services"]["server"]["profiles"] == ["failover"] and compose["services"]["server"]["restart"] == "no"
+    assert (
+        compose["services"]["server"]["profiles"] == ["failover"] and compose["services"]["server"]["restart"] == "no"
+    )
     assert "profiles" not in compose["services"]["postgres"] and "ports" not in compose["services"]["postgres"]
-    assert compose["services"]["server"]["ports"] == ["${STANDBY_BIND:-127.0.0.1}:${STANDBY_PORT:-60072}:60072"]  # localhost unless told otherwise
-    assert compose["services"]["server"]["image"].endswith(":v0.17.22") and compose["services"]["postgres"]["image"] == "postgres:17-alpine"
+    assert compose["services"]["server"]["ports"] == [
+        "${STANDBY_BIND:-127.0.0.1}:${STANDBY_PORT:-60072}:60072"
+    ]  # localhost unless told otherwise
+    assert (
+        compose["services"]["server"]["image"].endswith(":v0.17.22")
+        and compose["services"]["postgres"]["image"] == "postgres:17-alpine"
+    )
     for unit in (sync, boot):
-        for hardening in ("NoNewPrivileges=yes", "ProtectSystem=strict", "PrivateTmp=yes", "ProtectHome=yes", "UMask=0077"):
+        for hardening in (
+            "NoNewPrivileges=yes",
+            "ProtectSystem=strict",
+            "PrivateTmp=yes",
+            "ProtectHome=yes",
+            "UMask=0077",
+        ):
             assert hardening in unit
     assert "ReadOnlyPaths=/opt/scanopy-standby /var/backups/scanopy" in sync  # the sync never writes to the dumps
-    assert "OnCalendar=*-*-* *:35:00 UTC" in sync_timer and "OnCalendar=Sun *-*-* 04:40:00 UTC" in boot_timer  # after the :20 dump
-    assert set(rules) == {"ScanopyStandbyStale", "ScanopyStandbyBootTestStale", "ScanopyStandbyMetricsAbsent", "ScanopyStandbyFailoverActive"}
-    assert rules["ScanopyStandbyStale"]["expr"] == "(time() - scanopy_standby_last_success_timestamp_seconds) > 6 * 3600"
-    assert rules["ScanopyStandbyBootTestStale"]["expr"] == "(time() - scanopy_standby_boot_test_last_success_timestamp_seconds) > 10 * 86400"
+    assert (
+        "OnCalendar=*-*-* *:35:00 UTC" in sync_timer and "OnCalendar=Sun *-*-* 04:40:00 UTC" in boot_timer
+    )  # after the :20 dump
+    assert set(rules) == {
+        "ScanopyStandbyStale",
+        "ScanopyStandbyBootTestStale",
+        "ScanopyStandbyMetricsAbsent",
+        "ScanopyStandbyFailoverActive",
+    }
+    assert (
+        rules["ScanopyStandbyStale"]["expr"] == "(time() - scanopy_standby_last_success_timestamp_seconds) > 6 * 3600"
+    )
+    assert (
+        rules["ScanopyStandbyBootTestStale"]["expr"]
+        == "(time() - scanopy_standby_boot_test_last_success_timestamp_seconds) > 10 * 86400"
+    )
     assert rules["ScanopyStandbyFailoverActive"]["expr"] == "scanopy_standby_failover_active == 1"
 
 
@@ -1014,7 +1075,9 @@ def test_alertmanager_has_a_load_test_route_and_collapses_edge_storms() -> None:
 
 def test_replica_alertmanager_is_an_alert_target_but_not_part_of_the_alertmanager_scrape_job() -> None:
     config = render_prometheus(use_host_vars=True)
-    targets = [t for block in config["alerting"]["alertmanagers"] for sc in block["static_configs"] for t in sc["targets"]]
+    targets = [
+        t for block in config["alerting"]["alertmanagers"] for sc in block["static_configs"] for t in sc["targets"]
+    ]
     assert targets == ["127.0.0.1:9093", "100.64.0.21:9093"]
     jobs = jobs_by_name(config)
     # AlertmanagerMeshDegraded counts members of job "alertmanager"; the replica has its own job for Tier0SiteAlertmanagerDown
@@ -1025,5 +1088,7 @@ def test_replica_alertmanager_is_an_alert_target_but_not_part_of_the_alertmanage
 
 def test_without_host_vars_prometheus_sends_alerts_only_to_the_local_alertmanager() -> None:
     config = render_prometheus(use_host_vars=False)
-    targets = [t for block in config["alerting"]["alertmanagers"] for sc in block["static_configs"] for t in sc["targets"]]
+    targets = [
+        t for block in config["alerting"]["alertmanagers"] for sc in block["static_configs"] for t in sc["targets"]
+    ]
     assert targets == ["127.0.0.1:9093"]

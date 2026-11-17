@@ -1,0 +1,87 @@
+rule_files:
+  - ../../config/prometheus/rules/fleet-tailscale-endpoint-filter.yml
+evaluation_interval: 1m
+tests:
+  - name: inactive filter alerts and healthy filter stays quiet
+    interval: 1m
+    input_series:
+      - series: 'fleet_tailscale_endpoint_filter_healthy{instance="a:9100"}'
+        values: '0x10'
+      - series: 'fleet_tailscale_endpoint_filter_healthy{instance="b:9100"}'
+        values: '1x10'
+      - series: 'fleet_tailscale_endpoint_filter_last_check_seconds{instance="a:9100"}'
+        values: '0+60x10'
+      - series: 'fleet_tailscale_endpoint_filter_last_check_seconds{instance="b:9100"}'
+        values: '0x10'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: TailscaleEndpointFilterDegraded
+        exp_alerts:
+          - exp_labels: {instance: 'a:9100', severity: critical, service: tailscale_endpoint_filter}
+            exp_annotations:
+              summary: 'Tailscale endpoint filter is inactive on a:9100'
+              description: 'Check the daemon version, patched executable, health timer, and private WAN egress guard.'
+      - eval_time: 6m
+        alertname: TailscaleEndpointFilterStale
+        exp_alerts:
+          - exp_labels: {instance: 'b:9100', severity: critical, service: tailscale_endpoint_filter}
+            exp_annotations:
+              summary: 'Tailscale endpoint filter verification is stale on b:9100'
+  - name: missing previously observed filter metric alerts
+    interval: 1m
+    input_series:
+      - series: 'fleet_tailscale_endpoint_filter_last_check_seconds{instance="c:9100",job="node"}'
+        values: '0 60 stale _x12'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: TailscaleEndpointFilterMetricMissing
+        exp_alerts:
+          - exp_labels: {instance: 'c:9100', job: node, severity: critical, service: tailscale_endpoint_filter}
+            exp_annotations:
+              summary: 'Tailscale endpoint filter metric disappeared on c:9100'
+              description: 'A previously observed filter metric is missing. Check the exporter, scrape target, health timer, and WAN guard. This alert remembers the series for 24 hours.'
+  - name: registered missing metrics alert even without prior observations
+    interval: 1m
+    input_series:
+      - series: 'up{instance="missing:9100",job="tailscale_endpoint_filter_expected"}'
+        values: '0x10'
+      - series: 'up{instance="healthy:9100",job="tailscale_endpoint_filter_expected"}'
+        values: '1x10'
+      - series: 'fleet_tailscale_endpoint_filter_last_check_seconds{instance="healthy:9100",job="tailscale_endpoint_filter_expected"}'
+        values: '0+60x10'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: TailscaleEndpointFilterExpectedMetricMissing
+        exp_alerts:
+          - exp_labels: {instance: 'missing:9100', job: tailscale_endpoint_filter_expected, severity: critical, service: tailscale_endpoint_filter}
+            exp_annotations:
+              summary: 'Expected Tailscale filter metric missing on missing:9100'
+              description: 'A registered runtime is unreachable or its filter metric is missing. Check the exporter, health timer, and WAN guard.'
+  - name: missing expected target inventory alerts
+    interval: 1m
+    input_series: []
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: TailscaleEndpointFilterExpectedTargetsMissing
+        exp_alerts:
+          - exp_labels: {job: tailscale_endpoint_filter_expected, severity: critical, service: tailscale_endpoint_filter}
+            exp_annotations:
+              summary: 'Tailscale filter target inventory is missing'
+              description: 'No expected-runtime scrape targets are present. Restore the managed Prometheus scrape configuration and verify every protected runtime.'
+  - name: expected nodes must expose an active sender guard
+    interval: 1m
+    input_series:
+      - series: 'up{instance="old:9100",job="tailscale_endpoint_filter_expected"}'
+        values: '1x10'
+      - series: 'up{instance="healthy:9100",job="tailscale_endpoint_filter_expected"}'
+        values: '1x10'
+      - series: 'fleet_tailscale_endpoint_filter_sender_guard_active{instance="healthy:9100",job="tailscale_endpoint_filter_expected"}'
+        values: '1x10'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: TailscalePrivateDiscoverySenderGuardMissing
+        exp_alerts:
+          - exp_labels: {instance: 'old:9100', job: tailscale_endpoint_filter_expected, severity: critical, service: tailscale_endpoint_filter}
+            exp_annotations:
+              summary: 'Private discovery sender guard missing on old:9100'
+              description: 'The registered node is unreachable or has not confirmed the off-link discovery sender guard. Check the daemon, health timer, and WAN guard.'

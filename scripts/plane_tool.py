@@ -14,9 +14,10 @@ if str(REPO_ROOT) not in sys.path:
 
 from controller_automation_toolkit import emit_cli_error, load_operator_auth
 from platform.ansible.plane import PlaneClient, PlaneError, PlaneSessionClient, bootstrap_plane
+from platform.ansible.plane_access import plane_local_dir, plane_transport
 
 
-DEFAULT_AUTH_FILE = REPO_ROOT / ".local" / "plane" / "admin-auth.json"
+DEFAULT_AUTH_FILE = plane_local_dir(REPO_ROOT) / "admin-auth.json"
 
 
 def build_client(auth_file: str) -> tuple[PlaneClient, dict]:
@@ -177,7 +178,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
-        return args.func(args)
+        with plane_transport(Path(args.auth_file).expanduser()):
+            return args.func(args)
     except (OSError, KeyError, PlaneError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
         return emit_cli_error("Plane", exc)
 

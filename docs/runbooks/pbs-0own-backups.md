@@ -163,8 +163,8 @@ This isolation is stricter than the bridge-based checks in `backup-restore-verif
   a minute, Vector flushed its buffer. The compose files are copies of the live ones, kept in `config/0own/openobserve/` (they hold
   only `${...}` references). Compose variables: `OO_PG_PASSWORD`, `OO_ROOT_PASSWORD`, `ZO_META_POSTGRES_DSN`. With 100 MB x 5 the log
   window is a few hours; set `ZO_LOG_LEVEL=warn` if more history is wanted.
-* **node_exporter on VM 660 and VM 670**: 660 binds `10.60.10.60:9100` (reached over the hypervisor's new `10.60.10.60/32` Tailscale
-  route: `tailscale set --advertise-routes=10.60.10.50/32,10.60.10.60/32` on the 0own hypervisor, autoApprover and Prometheus grant in
+* **node_exporter on VM 660 and VM 670**: 660 binds `10.10.60.60:9100` (reached over the hypervisor's new `10.10.60.60/32` Tailscale
+  route: `tailscale set --advertise-routes=10.60.10.50/32,10.10.60.60/32` on the 0own hypervisor, autoApprover and Prometheus grant in
   `config/tailscale/policy.hujson`); 670 binds its tailnet address `100.65.106.57:9100`, and its nftables input chain
   (`/etc/nftables.conf`) opens tcp 9100 on `tailscale0` for `100.64.0.4` only. Both are scraped by 0mcp Prometheus through Scanopy
   discovery (job `node_exporter`). 670 was configured through `qm guest exec` because our SSH key is not accepted there.

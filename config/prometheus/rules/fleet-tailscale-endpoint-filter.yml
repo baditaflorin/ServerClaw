@@ -1,0 +1,56 @@
+groups:
+  - name: fleet-tailscale-endpoint-filter
+    rules:
+      - alert: TailscaleEndpointFilterDegraded
+        expr: fleet_tailscale_endpoint_filter_healthy == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: tailscale_endpoint_filter
+        annotations:
+          summary: Tailscale endpoint filter is inactive on {{ $labels.instance }}
+          description: Check the daemon version, patched executable, health timer, and private WAN egress guard.
+      - alert: TailscaleEndpointFilterStale
+        expr: time() - fleet_tailscale_endpoint_filter_last_check_seconds > 180
+        for: 2m
+        labels:
+          severity: critical
+          service: tailscale_endpoint_filter
+        annotations:
+          summary: Tailscale endpoint filter verification is stale on {{ $labels.instance }}
+      - alert: TailscaleEndpointFilterMetricMissing
+        expr: max_over_time(fleet_tailscale_endpoint_filter_last_check_seconds[24h]) unless on (instance, job) fleet_tailscale_endpoint_filter_last_check_seconds
+        for: 5m
+        labels:
+          severity: critical
+          service: tailscale_endpoint_filter
+        annotations:
+          summary: Tailscale endpoint filter metric disappeared on {{ $labels.instance }}
+          description: A previously observed filter metric is missing. Check the exporter, scrape target, health timer, and WAN guard. This alert remembers the series for 24 hours.
+      - alert: TailscaleEndpointFilterExpectedMetricMissing
+        expr: up{job="tailscale_endpoint_filter_expected"} unless on (instance, job) fleet_tailscale_endpoint_filter_last_check_seconds
+        for: 5m
+        labels:
+          severity: critical
+          service: tailscale_endpoint_filter
+        annotations:
+          summary: Expected Tailscale filter metric missing on {{ $labels.instance }}
+          description: A registered runtime is unreachable or its filter metric is missing. Check the exporter, health timer, and WAN guard.
+      - alert: TailscaleEndpointFilterExpectedTargetsMissing
+        expr: absent(up{job="tailscale_endpoint_filter_expected"})
+        for: 5m
+        labels:
+          severity: critical
+          service: tailscale_endpoint_filter
+        annotations:
+          summary: Tailscale filter target inventory is missing
+          description: No expected-runtime scrape targets are present. Restore the managed Prometheus scrape configuration and verify every protected runtime.
+      - alert: TailscalePrivateDiscoverySenderGuardMissing
+        expr: (up{job="tailscale_endpoint_filter_expected"} unless on (instance, job) fleet_tailscale_endpoint_filter_sender_guard_active) or (fleet_tailscale_endpoint_filter_sender_guard_active{job="tailscale_endpoint_filter_expected"} == 0)
+        for: 5m
+        labels:
+          severity: critical
+          service: tailscale_endpoint_filter
+        annotations:
+          summary: Private discovery sender guard missing on {{ $labels.instance }}
+          description: The registered node is unreachable or has not confirmed the off-link discovery sender guard. Check the daemon, health timer, and WAN guard.

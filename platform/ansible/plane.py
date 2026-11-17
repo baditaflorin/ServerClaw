@@ -20,6 +20,14 @@ class PlaneError(RuntimeError):
     """Raised when Plane bootstrap or API actions fail."""
 
 
+class PlaneHTTPError(PlaneError):
+    """An HTTP response that was not accepted by the Plane client."""
+
+    def __init__(self, message: str, status: int):
+        super().__init__(message)
+        self.status = status
+
+
 def _json_dumps(payload: Any) -> bytes:
     return json.dumps(payload, sort_keys=True).encode("utf-8")
 
@@ -144,7 +152,7 @@ class PlaneClient:
             except (TimeoutError, socket.timeout, urllib.error.URLError) as exc:
                 if _is_timeout_error(exc):
                     raise
-                raise PlaneError(f"{method} {path} timed out: {exc}") from exc
+                raise PlaneError(f"{method} {path} connection failed: {exc}") from exc
 
         try:
             status, raw = with_retry(
@@ -157,7 +165,9 @@ class PlaneClient:
             last_error = exc.last_error
             if isinstance(last_error, urllib.error.HTTPError):
                 raw = getattr(last_error, "_lv3_raw_body", "")
-                raise PlaneError(f"{method} {path} returned HTTP {last_error.code}: {raw}") from exc
+                raise PlaneHTTPError(
+                    f"{method} {path} returned HTTP {last_error.code}: {raw}", last_error.code
+                ) from exc
             if last_error is not None and _is_timeout_error(last_error):
                 raise PlaneError(f"{method} {path} timed out: {last_error}") from exc
             raise
@@ -169,13 +179,15 @@ class PlaneClient:
                 return status, json.loads(raw)
             return status, raw
 
-        raise PlaneError(f"{method} {path} returned HTTP {status}: {raw}")
+        raise PlaneHTTPError(f"{method} {path} returned HTTP {status}: {raw}", status)
 
     def verify_api_key(self) -> bool:
         try:
             self._request("/api/v1/users/me/")
-        except PlaneError:
-            return False
+        except PlaneHTTPError as exc:
+            if exc.status in (401, 403):
+                return False
+            raise
         return True
 
     def whoami(self) -> dict[str, Any]:

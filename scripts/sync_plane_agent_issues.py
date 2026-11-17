@@ -51,7 +51,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
+from controller_automation_toolkit import emit_cli_error, load_json, write_json
+from platform.ansible.plane_access import plane_local_dir, plane_transport
 from platform.ansible.plane import (
     PlaneClient,
     PlaneError,
@@ -65,14 +66,14 @@ from platform.ansible.plane import (
 # Constants
 # ---------------------------------------------------------------------------
 
-DEFAULT_AUTH_FILE = repo_path(".local", "plane", "admin-auth.json")
+DEFAULT_AUTH_FILE = plane_local_dir(REPO_ROOT) / "admin-auth.json"
 DEFAULT_AW_IDENTIFIER = "AW"
 DEFAULT_AW_NAME = "Agent Work"
 DEFAULT_AW_DESCRIPTION = (
     "Live task board for all LLM agent sessions. One issue per worktree. See ADR 0360 for the full protocol."
 )
 WORKSTREAMS_ACTIVE = REPO_ROOT / "workstreams" / "active"
-AW_AUTH_FILE = repo_path(".local", "plane", "aw-auth.json")
+AW_AUTH_FILE = plane_local_dir(REPO_ROOT) / "aw-auth.json"
 ALL_LABELS = list(AW_LABEL_COLORS.keys())
 
 
@@ -391,6 +392,11 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     auth_file = Path(args.auth_file).expanduser()
 
+    with plane_transport(auth_file):
+        return _dispatch(args, auth_file)
+
+
+def _dispatch(args: argparse.Namespace, auth_file: Path) -> int:
     if args.sync_members:
         members = json.loads(args.sync_members)
         result = sync_workspace_members(auth_file=auth_file, members=members)
