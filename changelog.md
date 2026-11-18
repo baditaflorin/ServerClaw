@@ -31,6 +31,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - Keep sanitized ServerClaw snapshots compatible with validation without publishing deployment-specific firewall exceptions.
 - Allow an explicitly configured operator email to access Plausible through a dedicated Authentik OAuth client and proxy.
 - Cap Plausible ClickHouse diagnostic system logs at one day without changing analytics event retention.
+- Document the active temporary external build worker's monitoring and Woodpecker integration, its fail-closed Buildx exclusion, and manual sunset process.
 
 ## Latest Release
 

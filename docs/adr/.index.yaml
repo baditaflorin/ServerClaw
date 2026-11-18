@@ -6,22 +6,22 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-17'
+generated: '2026-11-18'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 519
+total_adrs: 521
 adr_number_range:
   first: '0001'
-  last: 0496
-  next_available: 0497
+  last: 0497
+  next_available: 0498
 implementation_status_summary:
-  Implemented: 379
+  Implemented: 381
   Partial: 6
   Not Implemented: 34
   Deprecated: 14
   Accepted: 31
   Proposed: 55
 decision_status_summary:
-  Accepted: 367
+  Accepted: 369
   Proposed: 63
   Deprecated: 38
   Implemented: 51
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 87
+      count: 89
       first_adr: '0400'
-      last_adr: 0496
+      last_adr: 0497
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -76,7 +76,7 @@ facets:
       count: 23
     - concern: host-os
       path: docs/adr/index/by-concern/host-os.yaml
-      count: 11
+      count: 12
     - concern: identity
       path: docs/adr/index/by-concern/identity.yaml
       count: 10
@@ -106,12 +106,12 @@ facets:
       count: 6
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 50
+      count: 51
   by_status:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 379
+      count: 381
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -137,8 +137,22 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0497
+  next_available_adr: 0498
 latest_adrs:
+  - adr: 0497
+    title: Admit expiring external guests to shared build pools
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: vm-topology
+    path: docs/adr/0497-expiring-external-build-worker-pool-admission.md
+    implemented_on: '2026-11-18'
+  - adr: 0496
+    title: Use a direct Debian worker for short-lived external build capacity
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: host-os
+    path: docs/adr/0496-temporary-external-build-worker-lifecycle.md
+    implemented_on: '2026-11-18'
   - adr: 0496
     title: Filter container interfaces from Tailscale endpoint advertisements
     implementation_status: Partial
@@ -190,18 +204,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: resilience
     path: docs/adr/0488-single-deployment-per-repo-checkout.md
-  - adr: 0485
-    title: Convergence Idempotency Tests
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: testing
-    path: docs/adr/0485-convergence-idempotency-tests.md
-  - adr: 0484
-    title: Self-Verification Contracts
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: platform
-    path: docs/adr/0484-self-verification-contracts.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

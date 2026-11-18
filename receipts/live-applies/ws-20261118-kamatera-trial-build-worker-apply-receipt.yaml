@@ -1,0 +1,94 @@
+workstream_id: ws-20261118-kamatera-trial-build-worker
+state: completed
+schema_version: 1.1.0
+started_at: '2026-11-17T23:28:59Z'
+completed_at: '2026-11-18T07:29:46Z'
+applied_by: codex
+repo_version: 0.179.65
+adr: 0496
+summary: Apply and verify the Tailscale, Docker, monitoring, and general
+  Woodpecker worker baseline for a temporary external Debian build worker,
+  including successful general CI execution and historical host attribution.
+targets:
+- type: external-worker
+  actions:
+  - install official stable Tailscale package
+  - enable tailscaled
+  - request interactive tagged login
+  - complete user-approved login and Tailnet Lock signing
+  - install Docker CE, Buildx, and Compose from the official Docker repository
+  - create the named ops account with key access, Docker access, and sudo
+  - configure bounded Docker logs and daily seven-day image/cache pruning
+  - disable root and password SSH and bind the listener to the Tailscale address
+  - install node exporter and verify its tailnet-only monitoring scrape
+  - reconcile the general Woodpecker controller mirror before agent registration
+  - register a bounded Docker agent with its credential delivered from Fleet Secrets
+  - verify a fresh agent heartbeat and task assignment
+  - verify successful pipeline use and map the worker to its physical host
+  - remove temporary bootstrap files after verification
+errors: []
+notes:
+- Tailscale 1.104.7 installed from the official Debian trixie package source; tailscaled
+  is enabled and active.
+- The user confirmed login and Tailnet Lock signing. Current tailnet status shows
+  the tagged node online; a ping from the Mac succeeded.
+- Docker CE 29.10.0, Buildx 0.39.0, and Compose 5.8.0 are installed; the Docker
+  daemon listens on its local Unix socket only. The prune timer is active.
+- SSH was verified on 2026-11-18 at 00:35:03 UTC; only the Tailscale IPv4 address
+  listens on port 22; effective policy disables root, password, and keyboard-
+  interactive login and allows `ops`. The ops key and non-interactive sudo
+  checks pass. SSH, Tailscale, Docker, and the prune timer are active.
+- The provider image had active SSH settings in the main config and a commented
+  drop-in include. Early hardening revisions exposed an incorrect temporary-
+  file reuse and recovery-guard bugs. They were corrected in merged Fleet-state
+  PRs 759 and 760; the final version recovered the marked partial config,
+  passed effective-policy/listener checks, and preserved the original provider
+  config as a rollback copy. Temporary root staging files were removed.
+- Node exporter 1.9.0 is active on the tailnet only; a controller-side metrics
+  fetch returned HTTP 200.
+- The live general Woodpecker controller mirror was reconciled before enabling
+  a Docker agent. At 2026-11-18 03:08 UTC, the agent had a fresh heartbeat and
+  one task assigned. Its two-workflow ceiling and 5-GiB per-step memory/swap
+  limit were verified; its labels do not include `lv3`.
+- Fleet-state PR 762 reconciled the controller mirror and added the guarded
+  worker configuration. Fleet-state PR 763 recorded the active lifecycle and
+  worker registration. Fleet-host-sunset PR 37 added and validated the
+  optional UTC expiry field used by the private host record.
+- The agent token is held in Fleet Secrets and is not stored in this receipt or
+  repository. The temporary bootstrap token was removed after agent
+  registration.
+- The worker is intentionally not registered in the project-specific Buildx
+  pool because its fail-closed selector requires physical Proxmox hypervisor
+  telemetry, which this provider-managed KVM guest cannot provide. Woodpecker
+  Docker builds are the supported trial path.
+- >-
+  Follow-up verification at 2026-11-18 07:29 UTC: live Woodpecker
+  `WOODPECKER_HOST` on CT108 is `https://ci.0exec.com`. Registration 140 is
+  online with `no_schedule=false`, Docker backend, capacity 2, and a fresh
+  heartbeat at 07:29:46 UTC. The worker container was healthy at the preceding
+  host check; Docker, Tailscale, and node exporter were active, and 134 GiB was
+  free on `/`.
+- >-
+  A read-only execution report over the latest 100 pipelines ending at
+  2026-11-18 07:29:27 UTC found registration 140 in 33 records: 17 succeeded,
+  12 were marked killed, and 4 were running. One successful pipeline ran
+  entirely on Kamatera: `baditaflorin/michael-riedler-pilot-1-pipeline#69`.
+  The other 32 matching pipeline records were mixed across physical hosts. All
+  12 killed records were `go-url-categorizer-api` push or pull-request events;
+  their cause was not investigated. This verifies general Woodpecker CI use,
+  but not standalone Buildx-pool selection or production image publication.
+- >-
+  The initial live execution-report configuration had two attribution drifts:
+  it classified registration 98 and its historical pve01-named agent as `pve01`,
+  while the current source runbook assigns that worker to CT108 (`0docker`).
+  Services Registry PR #1210 added the Kamatera agent-name mapping and corrected
+  those stale classifications. PR #1211 added registration ID 140 to preserve
+  historical attribution after retirement. The final merged configuration
+  (Services Registry commit `b506fac095918c38607545a79dbea5aaccfbc76a`) was
+  applied atomically to CT108. Backups of both prior configurations remain at
+  `/root/ci-execution-report-config.before-kamateratmp-20261118.json` and
+  `/root/ci-execution-report-config.before-kamateratmp-history-20261118.json`.
+- The provider billing cutoff is unconfirmed. The private host record has an
+  operator `expires_at` target; the field does not schedule a reminder or
+  automatic retirement. Confirm the provider date and begin the manual sunset
+  before the earlier deadline.
