@@ -153,6 +153,13 @@ echo "$node_pid" > /tmp/node-pid
 /usr/local/libexec/tailscale-endpoint-filter-health
 grep -q '^fleet_tailscale_endpoint_filter_healthy 1$' /var/lib/prometheus/node-exporter/textfile/tailscale-endpoint-filter.prom
 kill "$node_pid" 2>/dev/null || true
+mkdir -p /var/lib/prometheus-node-exporter/textfile
+python3 -c 'import time; time.sleep(300)' --collector.textfile.directory=/var/lib/prometheus-node-exporter/textfile </dev/null >/dev/null 2>&1 &
+node_pid=$!
+echo "$node_pid" > /tmp/node-pid
+/usr/local/libexec/tailscale-endpoint-filter-health
+grep -q '^fleet_tailscale_endpoint_filter_sender_guard_active 1$' /var/lib/prometheus-node-exporter/textfile/tailscale-endpoint-filter.prom
+kill "$node_pid" 2>/dev/null || true
 rm /tmp/node-pid
 sed -i 's/echo 1.104.7/echo 1.104.8/' /usr/sbin/tailscaled
 if /usr/local/libexec/tailscale-endpoint-filter-health; then

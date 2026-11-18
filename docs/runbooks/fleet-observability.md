@@ -94,9 +94,9 @@ line changes, which is not expected on any host today.
 |---|---|---|
 | node_exporter listen address(es), textfile directory and its owner/mode, extra flags | `fleet_node_exporter` | host variables `fleet_node_exporter_*` |
 | 0docker hypervisor socket proxy (tailnet `:9100` to the internal exporter), 0mcp runtime-general proxy (`:9101`) | `fleet_node_exporter` | `fleet_node_exporter_socket_proxies` |
-| 0mcp hypervisor build-metrics proxy `woodpecker-0exec-build-metrics-proxy.{socket,service}`: tailnet `100.64.0.6:9103` (`FreeBind=true`) to `10.10.10.30:9100` (docker-build VM exporter); consumer CT108 `100.114.37.21` | `fleet_node_exporter` | `fleet_node_exporter_socket_proxies` (`free_bind: true`, `consumer`, `consumer_grants`) |
+| 0mcp hypervisor build-metrics proxy `woodpecker-0exec-build-metrics-proxy.{socket,service}`: tailnet `100.64.0.6:9103` (`FreeBind=true`) to `10.10.10.30:9100` (docker-build VM exporter); consumer CT108 `100.64.0.28` | `fleet_node_exporter` | `fleet_node_exporter_socket_proxies` (`free_bind: true`, `consumer`, `consumer_grants`) |
 | 0docker hypervisor stale `woodpecker-exec-proxy@9100.socket`: kept stopped and disabled (`state: disabled`) | `fleet_node_exporter` | `fleet_node_exporter_socket_proxies` |
-| PVE host firewall line `100.114.37.21/32 -> 100.64.0.6 tcp 9103` on the 0mcp hypervisor | `proxmox_security` (`host.fw.j2`) | `proxmox_host_additional_tcp_rules` in `inventory/host_vars/proxmox-host.yml` |
+| PVE host firewall line `100.64.0.28/32 -> 100.64.0.6 tcp 9103` on the 0mcp hypervisor | `proxmox_security` (`host.fw.j2`) | `proxmox_host_additional_tcp_rules` in `inventory/host_vars/proxmox-host.yml` |
 | Tailnet grant `tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9103` and its policy test | `config/tailscale/policy.hujson` | applied with `scripts/tailscale_policy_sync.py` (see `docs/runbooks/tailscale-metrics-grants.md`) |
 | CT108 `tailscale serve --tcp=9100` to the internal exporter | `fleet_node_exporter` | `fleet_node_exporter_tailscale_serve_tcp` |
 | github-mirror nftables (tcp 9100 only from the monitoring VM on `tailscale0`) | `fleet_guest_firewall` | `fleet_guest_firewall_allowed_inbound` |
@@ -120,7 +120,7 @@ host and `/` stood at 83% with 91 images (two 2.4 GB Playwright images among the
 
 - The timer removes only unused images and old build cache; it does not touch containers, volumes or networks.
 - The alert rules apply to every host the 0mcp Prometheus scrapes with `mountpoint="/"`. That includes docker-build
-  (`10.10.10.30`), Builder CT108 (`100.114.37.21`) and the 0docker hypervisor (`100.64.0.5`), which it reaches over
+  (`10.10.10.30`), Builder CT108 (`100.64.0.28`) and the 0docker hypervisor (`100.64.0.5`), which it reaches over
   Tailscale. A fleet-wide `/` alert for hosts that only the 0docker Prometheus scrapes would live with that fleet's
   monitoring, not here.
 - Verified live on 2026-10-12: the rules load healthy, `node_filesystem_avail_bytes{mountpoint="/"}` returns docker-build,
@@ -175,7 +175,7 @@ The roles only reference these, by path, and only check existence, owner and mod
 1. **Resolved 2026-10-12 (user approved removal): the stale grant and cluster rule for the old build-metrics port `:9100`.**
    `woodpecker-0exec-build-metrics-proxy.socket` moved from tailnet `:9100` (now the hypervisor exporter) to `:9103`.
    The tailnet grant `tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9100` and the cluster firewall rule
-   `100.114.37.21/32` tcp 9100 were removed from the live tailnet policy, `config/tailscale/policy.hujson` and
+   `100.64.0.28/32` tcp 9100 were removed from the live tailnet policy, `config/tailscale/policy.hujson` and
    `proxmox_cluster_additional_tcp_rules`. Nothing used them. The monitoring VM keeps `tag:prometheus-monitoring ->
    100.64.0.6/32 tcp:9100`.
 2. **`woodpecker-exec-proxy@9100.socket` on the 0docker hypervisor** was enabled but inactive and is now **disabled**
@@ -193,9 +193,9 @@ The roles only reference these, by path, and only check existence, owner and mod
 ## Build-metrics proxy (0mcp hypervisor)
 
 ```
-CT108 (0docker-builder, tailnet 100.114.37.21, userspace tailscaled, socks5 127.0.0.1:1055)
+CT108 (0docker-builder, tailnet 100.64.0.28, userspace tailscaled, socks5 127.0.0.1:1055)
    -> tailnet grant  tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9103
-   -> PVE host.fw    IN ACCEPT -source 100.114.37.21/32 -dest 100.64.0.6 -p tcp -dport 9103
+   -> PVE host.fw    IN ACCEPT -source 100.64.0.28/32 -dest 100.64.0.6 -p tcp -dport 9103
    -> woodpecker-0exec-build-metrics-proxy.socket  ListenStream=100.64.0.6:9103  FreeBind=true
    -> systemd-socket-proxyd 10.10.10.30:9100  (docker-build VM130 node_exporter, nodename=docker-build)
 ```
@@ -409,7 +409,7 @@ What to do: on the host, `docker network ls --filter name=wp_` and `docker netwo
 
 ## CI cache prune alerts
 
-Added 2026-11-02. Rules: `config/prometheus/rules/fleet-ci-cache-prune.yml`; unit tests: `tests/promtool/fleet_ci_cache_prune_rules_test.yml`. The host-local Go/npm CI cache of the Woodpecker pilot agent `0own-build-worker` (VM 610; services-registry PR #806 and its runbook `docs/runbooks/woodpecker-ci-go-cache-pilot.md`) is trimmed by `woodpecker-ci-cache-prune.timer` at about 03:15 UTC. From 2026-10-21 to 11-01 `go-build` ended every run above its 8 GB cap (14 to 27 GB) and nothing alerted: `prune.sh` logged a line and exited 0. It now exits 3 in that case and, with `--prom /var/lib/prometheus/node-exporter/ci-cache-prune.prom`, writes the textfile these rules read: `ci_cache_prune_size_bytes`, `ci_cache_prune_cap_bytes` and `ci_cache_prune_over_cap` per `cache` (`go-build`, `go-mod`, `npm`) and `ci_cache_prune_last_run_timestamp_seconds`. That host's second node-exporter (`100.88.44.116:9101`, textfile directory `/var/lib/prometheus/node-exporter`) is already scraped through the Scanopy `file_sd` list with `host="0own-build-worker"` (read on the monitoring VM, 2026-11-02).
+Added 2026-11-02. Rules: `config/prometheus/rules/fleet-ci-cache-prune.yml`; unit tests: `tests/promtool/fleet_ci_cache_prune_rules_test.yml`. The host-local Go/npm CI cache of the Woodpecker pilot agent `0own-build-worker` (VM 610; services-registry PR #806 and its runbook `docs/runbooks/woodpecker-ci-go-cache-pilot.md`) is trimmed by `woodpecker-ci-cache-prune.timer` at about 03:15 UTC. From 2026-10-21 to 11-01 `go-build` ended every run above its 8 GB cap (14 to 27 GB) and nothing alerted: `prune.sh` logged a line and exited 0. It now exits 3 in that case and, with `--prom /var/lib/prometheus/node-exporter/ci-cache-prune.prom`, writes the textfile these rules read: `ci_cache_prune_size_bytes`, `ci_cache_prune_cap_bytes` and `ci_cache_prune_over_cap` per `cache` (`go-build`, `go-mod`, `npm`) and `ci_cache_prune_last_run_timestamp_seconds`. That host's second node-exporter (`100.64.0.29:9101`, textfile directory `/var/lib/prometheus/node-exporter`) is already scraped through the Scanopy `file_sd` list with `host="0own-build-worker"` (read on the monitoring VM, 2026-11-02).
 
 | Alert | Fires when |
 | --- | --- |
@@ -419,7 +419,7 @@ Added 2026-11-02. Rules: `config/prometheus/rules/fleet-ci-cache-prune.yml`; uni
 
 State when written: the new `prune.sh` is not on the pilot host yet and the pilot PR is not merged, so there are no series; the first two rules stay quiet and `CiCachePruneMissing` would speak after 3 days. The file is in `monitoring_prometheus_adopted_rule_files`, so a converge of the `monitoring_vm` role copies it (mode 0640 root:prometheus) and reloads Prometheus; a copy by hand works too (`promtool check rules`, copy to `/etc/prometheus/rules/`, reload).
 
-What to do: `CiCacheOverCap`: on the host read `journalctl -u woodpecker-ci-cache-prune.service --since -2d`; its `ALERT` line names the cache. Either one working day needs more than the cap (`go-build` measured 14 to 27 GB per working day in 11-2026): raise the flag in the unit's drop-in `/etc/systemd/system/woodpecker-ci-cache-prune.service.d/caps.conf` (an empty `ExecStart=` line, then the full command), `systemctl daemon-reload`; or something other than the pipelines writes into `/var/cache/woodpecker-ci` (`du -sh` of the three directories, newest files first). `CiCachePruneStale` and `CiCachePruneMissing`: `systemctl status woodpecker-ci-cache-prune.timer woodpecker-ci-cache-prune.service`, then `ls -l /var/lib/prometheus/node-exporter/ci-cache-prune.prom` and `curl -s http://100.88.44.116:9101/metrics | grep ci_cache_prune`. A second agent host that gets the host-local cache needs no change here: its series carry its own `host` label.
+What to do: `CiCacheOverCap`: on the host read `journalctl -u woodpecker-ci-cache-prune.service --since -2d`; its `ALERT` line names the cache. Either one working day needs more than the cap (`go-build` measured 14 to 27 GB per working day in 11-2026): raise the flag in the unit's drop-in `/etc/systemd/system/woodpecker-ci-cache-prune.service.d/caps.conf` (an empty `ExecStart=` line, then the full command), `systemctl daemon-reload`; or something other than the pipelines writes into `/var/cache/woodpecker-ci` (`du -sh` of the three directories, newest files first). `CiCachePruneStale` and `CiCachePruneMissing`: `systemctl status woodpecker-ci-cache-prune.timer woodpecker-ci-cache-prune.service`, then `ls -l /var/lib/prometheus/node-exporter/ci-cache-prune.prom` and `curl -s http://100.64.0.29:9101/metrics | grep ci_cache_prune`. A second agent host that gets the host-local cache needs no change here: its series carry its own `host` label.
 
 ## Woodpecker agent record alerts
 

@@ -78,10 +78,10 @@ all:
               socket_description: Tailscale-only node-exporter proxy for 0mcp docker-build-lv3
               service_description: Forward the 0mcp builder node-exporter over Tailscale only
               # Documentation only (not rendered): who reads this proxy, and the rules that let them.
-              consumer: CT108 0docker-builder (tailnet 100.114.37.21, tag:builder-metrics-controller) reads docker-build metrics
+              consumer: CT108 0docker-builder (tailnet 100.64.0.28, tag:builder-metrics-controller) reads docker-build metrics
               consumer_grants:
                 - tailnet policy grant tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9103 (config/tailscale/policy.hujson)
-                - PVE host.fw line IN ACCEPT -source 100.114.37.21/32 -dest 100.64.0.6 -p tcp -dport 9103 (proxmox_host_additional_tcp_rules)
+                - PVE host.fw line IN ACCEPT -source 100.64.0.28/32 -dest 100.64.0.6 -p tcp -dport 9103 (proxmox_host_additional_tcp_rules)
 
     # ----------------------------------------------------------------- 0docker
     fleet_0docker:
@@ -278,7 +278,7 @@ all:
           fleet_node_exporter_listen_addresses:
             - 10.10.60.60:9100
           fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
-        # VM670 (pdm, 100.65.106.57) also runs prometheus-node-exporter on its tailnet address and its nftables file opens
+        # VM670 (pdm, 100.64.0.30) also runs prometheus-node-exporter on its tailnet address and its nftables file opens
         # tcp 9100 on tailscale0 to 100.64.0.4 only, but our SSH key is not accepted there (it was set up through the
         # QEMU guest agent: `qm guest exec 670`), so it is not an Ansible host yet.
 

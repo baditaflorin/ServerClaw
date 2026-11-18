@@ -211,7 +211,7 @@ def test_hypervisor_port_plan_has_no_collision_and_models_the_build_metrics_prox
     assert proxy["state"] == "present"
     assert (proxy["listen_address"], proxy["listen_port"], proxy["upstream"]) == ("100.64.0.6", 9103, "10.10.10.30:9100")
     assert proxy["free_bind"] is True
-    assert "100.114.37.21" in proxy["consumer"]
+    assert "100.64.0.28" in proxy["consumer"]
     # The tailnet port the exporter owns (:9100) is no longer claimed by the proxy.
     assert "100.64.0.6:9100" in host["fleet_node_exporter_listen_addresses"]
 
@@ -294,7 +294,7 @@ def test_stale_woodpecker_exec_proxy_on_the_0docker_hypervisor_is_modelled_as_di
 def test_build_metrics_proxy_firewall_rule_and_tailnet_grant_match_the_proxy() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text(encoding="utf-8"))
     rule = next(r for r in host_vars["proxmox_host_additional_tcp_rules"] if r["port"] == 9103)
-    assert (rule["source"], rule["destination"]) == ("100.114.37.21/32", "100.64.0.6")
+    assert (rule["source"], rule["destination"]) == ("100.64.0.28/32", "100.64.0.6")
 
     policy = (REPO_ROOT / "config" / "tailscale" / "policy.hujson").read_text(encoding="utf-8")
     grant = re.search(r'"src": \["tag:builder-metrics-controller"\],\s*"dst": \["100\.120\.234\.7/32"\],\s*"ip":\s*\["tcp:9103"\]', policy)
@@ -309,7 +309,7 @@ def test_retired_build_metrics_port_9100_grant_and_cluster_rule_stay_removed() -
 
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text(encoding="utf-8"))
     cluster_rules = {(r["source"], r["port"]) for r in host_vars["proxmox_cluster_additional_tcp_rules"]}
-    assert ("100.114.37.21/32", 9100) not in cluster_rules, "the retired CT108 -> :9100 cluster firewall rule is back"
+    assert ("100.64.0.28/32", 9100) not in cluster_rules, "the retired CT108 -> :9100 cluster firewall rule is back"
     assert ("100.64.0.7/32", 9102) in cluster_rules
 
 

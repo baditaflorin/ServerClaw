@@ -36,7 +36,7 @@ print(result)
 PY
 )
 dir=$(realpath -e "$dir" 2>/dev/null) || { logger -p daemon.err -t tailscale-endpoint-filter 'Node-exporter textfile directory is missing'; exit 1; }
-case "$dir" in /var/lib/prometheus/node-exporter|/var/lib/prometheus/node-exporter/*) ;; *)
+case "$dir" in /var/lib/prometheus/node-exporter|/var/lib/prometheus/node-exporter/*|/var/lib/prometheus-node-exporter/textfile|/var/lib/prometheus-node-exporter/textfile/*) ;; *)
   logger -p daemon.err -t tailscale-endpoint-filter 'Unsupported node-exporter textfile directory'
   exit 1 ;;
 esac

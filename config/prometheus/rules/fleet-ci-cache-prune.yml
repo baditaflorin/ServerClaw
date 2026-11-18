@@ -3,7 +3,7 @@
 # to 11-01 and nothing alerted, because the script exited 0.
 # The numbers come from `prune.sh --prom /var/lib/prometheus/node-exporter/ci-cache-prune.prom`: a node-exporter textfile written when a real (not
 # dry) run ends, with the size and cap of go-build, go-mod and npm, an over-cap flag per cache and the time of the run. Prometheus scrapes that
-# exporter (100.88.44.116:9101) through the Scanopy file_sd list with host="0own-build-worker". The same run exits 3 when a cache is still over its cap.
+# exporter (100.64.0.29:9101) through the Scanopy file_sd list with host="0own-build-worker". The same run exits 3 when a cache is still over its cap.
 # Until the new prune.sh runs on that host there are no ci_cache_prune_* series: the first two rules stay quiet and CiCachePruneMissing speaks after
 # 3 days. A second agent host that gets the host-local cache needs no change here: its series carry its own `host` label. `max by (...)` merges the
 # duplicate series an exporter restart leaves.
@@ -42,5 +42,5 @@ groups:
           service: fleet_ci_cache_prune
         annotations:
           summary: "No host reports the CI cache prune metrics"
-          description: "No series ci_cache_prune_last_run_timestamp_seconds at all for 3 days (the stale rule cannot fire on a series that does not exist). Either `--prom` is not set in the prune unit on the pilot host, the textfile is not written, or its exporter is not scraped. Check `ls -l /var/lib/prometheus/node-exporter/ci-cache-prune.prom` on 0own-build-worker and `curl -s http://100.88.44.116:9101/metrics | grep ci_cache_prune`."
+          description: "No series ci_cache_prune_last_run_timestamp_seconds at all for 3 days (the stale rule cannot fire on a series that does not exist). Either `--prom` is not set in the prune unit on the pilot host, the textfile is not written, or its exporter is not scraped. Check `ls -l /var/lib/prometheus/node-exporter/ci-cache-prune.prom` on 0own-build-worker and `curl -s http://100.64.0.29:9101/metrics | grep ci_cache_prune`."
           runbook_url: docs/runbooks/fleet-observability.md#ci-cache-prune-alerts

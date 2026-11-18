@@ -1,0 +1,61 @@
+workstream: ws-20261118-tailscale-restart-proof
+applied_at_utc: '2026-11-17T22:47:00Z'
+source_commit: 98ead578ce5590e75d2b0587d3d4f69f71d934d9
+status: partial
+scope: One real runtime reboot, two guard-service restarts, two additional sender-filter runtime deployments, and one monitoring inventory addition.
+verification:
+  runtime_reboot: The runtime boot ID changed. The daemon and health timer were enabled and active, and an independent peer reached Tailscale and read healthy advertisement and sender-filter metrics.
+  firewall_services: Restarted the owned nftables and physical-egress services sequentially. Both layers and the reconciliation timer were active and enabled; a controlled private-address UDP send was denied and public HTTPS succeeded.
+  sender_rollout: The delayed runtime and a separate OpenObserve runtime passed endpoint, service, exporter, and host-guard checks with rollback timers armed; the commits were confirmed only after those checks. The monitoring job scraped eight registered sender guards as healthy.
+  verifier_correction: The first reboot verifier used the wrong exporter textfile directory and reported failure; the correct path and independent exporter were checked directly and both sender metrics were healthy.
+limitations: No hypervisor reboot or whole-host firewall reload was performed. Other unregistered peers remain to be upgraded. The vendor-version fallback may run the stock daemon, so the WAN guards remain required. The host carrying the two newly upgraded VMs has sustained I/O pressure of unknown cause.
+subnet_router_canary:
+  applied_at_utc: '2026-11-17T22:52:00Z'
+  change: Installed the committed sender filter with a five-minute rollback timer via independent host management.
+  verification: A peer saw the LAN endpoint retained and Docker bridge endpoint removed. Tailscale connectivity, sender health metric, a private VM path, the advertised subnet route, and both WAN guards passed before confirmation.
+builder_canary:
+  applied_at_utc: '2026-11-17T23:03:00Z'
+  change: Installed the reviewed sender filter for the existing vendor release with a timed rollback and independently accessed management.
+  verification: A peer observed the LAN endpoint retained and Docker bridge endpoints removed. Tailscale, sender metric, Docker, exporter, and both host WAN guards passed before confirmation.
+older_builder_canary:
+  applied_at_utc: '2026-11-17T23:12:00Z'
+  source_commit: a464bc6b0
+  change: Installed the independently reproduced older-release sender filter under a rollback timer.
+  verification: An independent peer confirmed LAN endpoint retained, Docker bridge endpoints absent, Tailscale connectivity and sender metric. Docker, exporter, and both host WAN guards passed. An initial canary rolled back because of an unsupported exporter textfile directory; the committed correction passed isolated tests before the successful retry.
+additional_builder_canary:
+  applied_at_utc: '2026-11-17T23:17:00Z'
+  source_commit: a464bc6b0
+  change: Installed the release-matched sender filter with a rollback timer on a further builder.
+  verification: LAN endpoint retained, bridge endpoints removed, independent peer connectivity and sender metric, Docker and both host guards passed. The existing restricted exporter was used without changing its listener.
+monitoring_lan_builder_canary:
+  applied_at_utc: '2026-11-17T23:19:00Z'
+  source_commit: a464bc6b0
+  verification: A peer observed bridge endpoints removed and LAN retained. Tailscale, sender metric, two running CI agents and both host WAN guards passed before confirmation.
+inference_builder_canary:
+  applied_at_utc: '2026-11-17T23:21:00Z'
+  source_commit: a464bc6b0
+  verification: Peer saw bridge endpoints removed and LAN retained; Tailscale, sender metrics, Docker, exporter and both host WAN guards passed before confirmation.
+inference_hypervisor_canary:
+  applied_at_utc: '2026-11-17T23:24:00Z'
+  source_commit: a464bc6b0
+  verification: An independent peer confirmed the LAN endpoint, Tailscale connectivity and sender metric. The subnet route, private VM access and both host WAN guards passed before confirmation.
+additional_hypervisor_canary:
+  applied_at_utc: '2026-11-17T23:28:00Z'
+  source_commit: a464bc6b0
+  verification: Peer confirmed LAN endpoint, Tailscale connectivity and sender metric; both private routes, local VM access, and both WAN guards passed before confirmation.
+final_public_hypervisor_canary:
+  applied_at_utc: '2026-11-17T23:36:00Z'
+  source_commit: a464bc6b0
+  verification: Peer confirmed LAN endpoint, Tailscale connectivity and sender metric; both private routes, local VM access and both WAN guards passed. An initial attempt rolled back after a case-sensitive peer-name mismatch.
+infrastructure_guest_canaries:
+  applied_at_utc: '2026-11-17T23:40:00Z'
+  source_commit: a464bc6b0
+  scope: Proxy, backup, Git mirror and management service guests.
+  verification: Independent peer verified LAN endpoints, Tailscale connectivity and sender metrics; the relevant service units, exporters and host WAN guards passed before confirmation.
+agent_gateway_canary:
+  applied_at_utc: '2026-11-17T23:45:00Z'
+  source_commit: a464bc6b0
+  verification: Gateway, dashboard, web service, private exporter, peer connectivity and both host guards passed. An initial attempt rolled back after using a monitoring peer denied by existing policy; a second authorized peer verified the successful retry.
+remaining_scope:
+  state: partial
+  details: One database primary has established live Tailscale client connections and was not restarted. Two peers were offline in the observed network maps. These nodes remain behind the monitored public-uplink guard where applicable and require later rollout or verification.

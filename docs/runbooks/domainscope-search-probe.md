@@ -12,7 +12,7 @@ search answered 0 rows, while every route-level check (health, version, edge pro
 | `domainscope-search-probe.timer` | CT108 (`config/systemd/`) | every 15 minutes at :04/:19/:34/:49 (+ up to 60 s), no catch-up run after a boot |
 | `domainscope-search-probe.service` | CT108 | `flock -n` + the wrapper; exit 2 (a search check failed) is a success of the unit, exit 3 is a failed unit |
 | `/usr/local/bin/domainscope-search-probe-run` | CT108 (`scripts/domainscope-search-probe-run`) | fetches the probe from origin/main (blobless depth-1 clone in `/var/lib/domainscope-search-probe/repo`, only the four files the probe reads are extracted), runs `search-probe.sh --all --markets 20 --metrics-file ... https://domainscope.scrapetheworld.org` **as `nobody` with an empty environment**, then installs the metrics file |
-| `domainscope_search_probe.prom` | CT108 `/var/lib/prometheus-node-exporter/textfile/` | read by the builder's node exporter, scraped by the 0mcp Prometheus (`instance="100.114.37.21:9100"`, `host="0docker-builder"`) |
+| `domainscope_search_probe.prom` | CT108 `/var/lib/prometheus-node-exporter/textfile/` | read by the builder's node exporter, scraped by the 0mcp Prometheus (`instance="100.64.0.28:9100"`, `host="0docker-builder"`) |
 | `config/prometheus/rules/domainscope-search.yml` | monitoring VM `/etc/prometheus/rules/` | `DomainScopeSearchBroken`, `DomainScopeSearchProbeStale` (severity warning: Alertmanager sends them to the ntfy warning topic and to fleet triage) |
 
 The probe only reads: about 46 anonymous GET requests to `/api/v1/search/smart` and `/api/v1/search/semantic` per run (the uncached semantic

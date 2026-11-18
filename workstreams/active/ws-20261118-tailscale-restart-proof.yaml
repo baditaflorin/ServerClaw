@@ -1,0 +1,67 @@
+id: ws-20261118-tailscale-restart-proof
+adr: '0014'
+title: Verify Tailscale and private WAN guards survive restarts
+status: ready_for_merge
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/tailscale-restart-proof
+worktree_path: .codex/worktrees/tailscale-restart-proof
+doc: docs/workstreams/ws-20261118-tailscale-restart-proof.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- docs/workstreams/ws-20261118-tailscale-restart-proof.md
+- workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: restart_proof
+    mode: exclusive
+    paths:
+    - docs/workstreams/ws-20261118-tailscale-restart-proof.md
+    - workstreams/active/ws-20261118-tailscale-restart-proof.yaml
+    - receipts/live-applies/ws-20261118-tailscale-restart-proof-apply-receipt.yaml
+  - id: monitoring_targets
+    mode: shared_contract
+    contract: monitoring-vm-targets-v1
+    paths:
+    - inventory/host_vars/monitoring.yml
+  - id: publication_sanitization
+    mode: shared_contract
+    contract: tier-c-sanitization-replacements-v1
+    paths:
+    - config/publication-sanitization.yaml
+  - id: endpoint_filter_version_extension
+    mode: shared_contract
+    contract: tailscale-endpoint-filter-version-v1
+    paths:
+    - config/tailscale-endpoint-filter/**
+  - id: ci_workflow
+    mode: shared_contract
+    contract: woodpecker-ci-v1
+    paths:
+    - .woodpecker.yml
+  - id: agent_coordination_diagram
+    mode: shared_contract
+    contract: generated-artifacts-v1
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+  - id: release_integration
+    mode: shared_contract
+    contract: mainline-release-integration-v1
+    paths:
+    - VERSION
+    - changelog.md
+    - versions/stack.yaml
+    - README.md
+    - build/platform-manifest.json
+  - id: registry
+    mode: shared_contract
+    contract: workstream-registry-v1
+    paths:
+    - workstreams.yaml
+canonical_truth:
+  changelog_entry: Extend private discovery sender guards across fleet nodes and verify controlled restart persistence.
+  release_bump: patch
+  included_in_repo_version: null
+plane_issue_id: e19923fb-cabf-4390-936e-4200d04b606f

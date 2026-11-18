@@ -285,14 +285,14 @@ comparison and rollback).
 |---|---|---|
 | 0mcp hypervisor | `prometheus-node-exporter` listens on the tailnet address at `:9100` and `:9102`. | `fleet_node_exporter` |
 | 0docker hypervisor | systemd socket proxy `zdocker-hypervisor-metrics-proxy.{socket,service}` forwards its tailnet `:9100` to `10.10.10.1:9100` (the exporter cannot bind two addresses). | `fleet_node_exporter` |
-| 0mcp hypervisor (build-metrics proxy) | systemd socket proxy `woodpecker-0exec-build-metrics-proxy.{socket,service}` (`FreeBind=true`) forwards its tailnet `:9103` to `10.10.10.30:9100` (docker-build VM exporter). Consumer: CT108 `100.114.37.21`, via the grant `tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9103`. | `fleet_node_exporter` |
+| 0mcp hypervisor (build-metrics proxy) | systemd socket proxy `woodpecker-0exec-build-metrics-proxy.{socket,service}` (`FreeBind=true`) forwards its tailnet `:9103` to `10.10.10.30:9100` (docker-build VM exporter). Consumer: CT108 `100.64.0.28`, via the grant `tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9103`. | `fleet_node_exporter` |
 | 0docker hypervisor (stale `woodpecker-exec-proxy@9100.socket`) | kept stopped and disabled. | `fleet_node_exporter` (`state: disabled`) |
 | 0docker VM100 | node_exporter on its tailnet address `:9100`. | `fleet_node_exporter` |
 | 0docker CT108 | `tailscale serve --tcp=9100` to `10.10.10.108:9100` (userspace tailscaled). | `fleet_node_exporter` |
 | 0own github-mirror (VM640) | `nftables`: only the monitoring VM's tailnet address may reach tcp 9100, on `tailscale0`. | `fleet_guest_firewall` |
 | 0own VMs 620/630/640/650, 0docker VM104, CT107, CT109 | New `prometheus-node-exporter` installs with the textfile directory, bound to the tailnet or internal address. | `fleet_node_exporter` |
 | 0docker and 0own hypervisors | Advertised `/32` routes `10.10.10.109/32` and `10.60.10.50/32`. | `fleet_tailscale_node` |
-| 0mcp monitoring-lv3 (VM140) | CT108 `100.114.37.21` may read Prometheus `:9090` and Alertmanager `:9093` (GET only, consumers go-fleet-triage and the `fleet` MCP server, via tailscaled's userspace SOCKS5 on CT108). Three coupled pieces: the grant `100.114.37.21/32 -> 100.64.0.4/32 tcp:9090,9093`, an nftables allow rule for exactly that source (`network_policy.guests.monitoring`), and Alertmanager listening on `0.0.0.0:9093` (`alertmanager_runtime_listen_address`; Prometheus already listens on `0.0.0.0:9090`). Rollback: remove the nft rule, set the listen address back to `127.0.0.1:9093` and restart Alertmanager, drop `tcp:9093` from the grant. | `linux_guest_firewall`, `alertmanager_runtime`, policy sync |
+| 0mcp monitoring-lv3 (VM140) | CT108 `100.64.0.28` may read Prometheus `:9090` and Alertmanager `:9093` (GET only, consumers go-fleet-triage and the `fleet` MCP server, via tailscaled's userspace SOCKS5 on CT108). Three coupled pieces: the grant `100.64.0.28/32 -> 100.64.0.4/32 tcp:9090,9093`, an nftables allow rule for exactly that source (`network_policy.guests.monitoring`), and Alertmanager listening on `0.0.0.0:9093` (`alertmanager_runtime_listen_address`; Prometheus already listens on `0.0.0.0:9090`). Rollback: remove the nft rule, set the listen address back to `127.0.0.1:9093` and restart Alertmanager, drop `tcp:9093` from the grant. | `linux_guest_firewall`, `alertmanager_runtime`, policy sync |
 | 0database hypervisor (pve01), pg-primary, own-pbs | **RETIRED: pve01 was cancelled (its VMs stopped 2026-10-21), so what ran on its hypervisor and on pg-primary VM100 is gone.** Historical record of the 2026-10-12 setup: PBS storage `own-pbs-0database`, job `pg-primary-daily-pbs` (02:30) with `/usr/local/sbin/vzdump-pg-metrics-hook`, pgBackRest prepared on pg-primary, PBS user/ACL/prune job. | `fleet_pg_backup` |
 
 The `nginx` guest on the 0mcp fleet keeps its monitoring-only tcp 9100 firewall rule in
@@ -308,7 +308,7 @@ The `nginx` guest on the 0mcp fleet keeps its monitoring-only tcp 9100 firewall 
   `100.64.0.6/32` `tcp:9103`, its policy test and the PVE `host.fw` line are in
   git and live. **Removed 2026-10-12 (user approved):** the older grant
   `tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9100` and the cluster
-  firewall rule for `100.114.37.21/32` tcp 9100. They reached the hypervisor
+  firewall rule for `100.64.0.28/32` tcp 9100. They reached the hypervisor
   exporter, not the builder VM; no consumer used them (CT108 reads via SSH
   tunnels and the `:9103` proxy; its only flow to `:9100` was an idle, zero-payload
   TCP connection).

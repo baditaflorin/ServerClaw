@@ -14,6 +14,12 @@
       "source_commit": "73a48057aaf5f60e4f770b398e9b7af576b01dbe",
       "static_binary_sha256": "50e734d44627c49e7dd957f1cadf74e211f69db69abe2ba0b0dfdab87fd0e43d",
       "previous_static_binary_sha256": "7197c7b609b5c9813c43e9cf727c01b07c5fafca13ca5e62aaec20366c07f196"
+    },
+    "1.102.4": {
+      "source_commit": "bbcd7d1fc2054b9189ebc1531acf74bd880ca0c8",
+      "static_binary_sha256": "980a84f7570c2a8000c46bf14f191d3845c05d538246bf3166c091d59ef9e750",
+      "sender_hook": "sender-hook-1.102.patch",
+      "sender_hook_sha256": "dcde29fdab048dca690b5164098e76262c437c7347747c5d1d7225eb861abab1"
     }
   },
   "sender_hook_sha256": "30b0c9e09135f56eb6b42cb9e68814ce9c901945257d22d8e8807322db9eda0d",

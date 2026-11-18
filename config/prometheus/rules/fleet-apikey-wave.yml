@@ -1,7 +1,7 @@
 # Added 2026-10-22. Alerts for apikey-wave, the unattended tool on the builder CT108 that moves pool replicas from the edge keystore URL to
 # their local keystore node (fleet-state scripts/ct108/apikey-wave.py, systemd apikey-wave.timer; claude_team KEYSTORE-MESH-PLAN section 33,
 # docs/runbooks/apikey-wave.md). Metrics come from its textfile /var/lib/prometheus-node-exporter/textfile/apikey-wave.prom, scraped from the
-# builder's node exporter (instance 100.114.37.21:9100).
+# builder's node exporter (instance 100.64.0.28:9100).
 #
 # Three shapes: the tool stopped itself because something failed after a replica was rolled or a container check failed (`ApikeyWaveHalted`),
 # the tool stopped running while work remains (`ApikeyWaveSilent`), and the tool runs but nothing moves (`ApikeyWaveStalled`, for instance
