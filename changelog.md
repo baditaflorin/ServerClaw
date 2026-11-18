@@ -15,6 +15,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - Add guarded, no-restart Prometheus scraping for the 0own Proxmox host.
 - Guard public uplinks against private IPv4 leakage with independent nftables and physical-egress filters, reconciliation and monitoring; restore the monitoring probe to Gitea and fix partial-layer network-policy verification.
 - Prepare monitored Tailscale endpoint-advertisement and off-link private discovery filters, and repair private Plane automation access.
+- Extend private discovery sender guards across fleet nodes and verify controlled restart persistence.
 - Restore the remote validation gateway route to the declared build VM and cap pre-push validation concurrency.
 - Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
 - Fix the Fleet build broker PKI renewal, which has failed every hour since 2026-10-05: verify the step-ca server leaf with its intermediate (the root alone cannot build the chain) and issue client leaves from a clientAuth-only template instead of the `--key-usage` flags that step 0.30 removed. Add regression tests that use a root, intermediate and leaf like step-ca does.

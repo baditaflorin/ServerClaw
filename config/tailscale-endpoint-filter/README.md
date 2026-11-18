@@ -13,7 +13,7 @@ static Linux/amd64 daemon on an approved builder using a pinned Go image. It
 runs the upstream network-monitor tests plus `endpoint_filter_test.go`.
 
 The canary installer is intentionally limited to the explicitly tested stock
-releases 1.104.7 and 1.104.5. It refuses conflicting files, verifies the artifact hash, and arms a
+releases 1.104.7, 1.104.5, and 1.102.4. It refuses conflicting files, verifies the artifact hash, and arms a
 five-minute local rollback before adding a systemd drop-in. An operator confirms
 the canary only after independently checking peer endpoint advertisements,
 Tailscale connectivity, the node's service paths, and the guard counters. A lost

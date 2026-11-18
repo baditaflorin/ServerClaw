@@ -111,7 +111,7 @@ monitoring_prometheus_extra_scrape_jobs:
     params:
       "collect[]": [textfile]
     static_configs:
-      - targets: ["100.64.0.7:9100", "100.64.0.25:9100", "100.64.0.24:9100", "10.10.60.60:9100", "10.10.10.20:9100", "10.10.10.40:9100", "100.64.0.5:9100"]
+      - targets: ["100.64.0.7:9100", "100.64.0.25:9100", "100.64.0.24:9100", "10.10.60.60:9100", "10.10.10.20:9100", "10.10.10.40:9100", "100.64.0.5:9100", "100.64.0.12:9100", "100.64.0.26:9100", "100.64.0.27:9100", "100.64.0.28:9100", "100.64.0.29:9101", "10.10.10.30:9100", "100.64.0.23:9100", "100.64.0.21:9100", "100.64.0.3:9100", "100.64.0.6:9100", "100.64.0.30:9100", "100.64.0.8:9100", "100.64.0.11:9100", "100.64.0.13:9100", "10.10.10.100:9100"]
     metric_relabel_configs:
       - source_labels: [__name__]
         regex: "fleet_tailscale_endpoint_filter_.*"
@@ -156,9 +156,9 @@ monitoring_prometheus_extra_scrape_jobs:
   # node-placement rule regex.
   - job_name: pipe_node_exporter_via_tailscale
     static_configs:
-      - targets: ["100.115.117.66:9100"]
+      - targets: ["100.64.0.26:9100"]
         labels: {host: pipe-hypervisor, role: hypervisor, fleet: 0pipe}
-      - targets: ["100.125.199.15:9100"]
+      - targets: ["100.64.0.27:9100"]
         labels: {host: 0pipe-build, role: ci, fleet: 0pipe}
       # 0pipe-runtime (VM 101, restricted canary pool member, tag:pool-runtime; node_exporter bound to its tailnet address, seen 2026-11-04). The path is
       # already granted (tag:prometheus-monitoring -> tag:pool-runtime tcp 9100, config/tailscale/policy.hujson). Whether Prometheus already scrapes it was not checked.
@@ -199,9 +199,9 @@ monitoring_prometheus_remote_write_targets: []
 alertmanager_runtime_ntfy_username: alertmanager-notify
 # fleet-triage runs on the 0docker Builder (CT108); reached over the tailnet via `tailscale serve --tcp 18322` there
 # (grants: monitoring-lv3 -> CT108 tcp:18322, config/tailscale/policy.hujson). The token file is controller-local.
-alertmanager_runtime_triage_webhook_url: "http://100.114.37.21:18322/webhook/alertmanager?source=0mcp"
+alertmanager_runtime_triage_webhook_url: "http://100.64.0.28:18322/webhook/alertmanager?source=0mcp"
 # Read-only access for the Builder (CT108): Alertmanager listens on all addresses (Prometheus already does, see
-# monitoring_prometheus_listen_address); guest nftables accepts 9090/9093 only from 100.114.37.21/32
+# monitoring_prometheus_listen_address); guest nftables accepts 9090/9093 only from 100.64.0.28/32
 # (inventory/host_vars/proxmox-host.yml network_policy.guests.monitoring) and the Tailscale grant is single-pair.
 alertmanager_runtime_listen_address: "0.0.0.0:9093"
 # Tier-0 alert replica on VM704 (0infer), reached through the 0infer host's tailnet address (nft forwards; see docs/runbooks/tier0-infer-site.md).

@@ -108,6 +108,14 @@ steps:
       - cp config/tailscale-endpoint-filter/endpoint_filter_test.go /tmp/tailscale-source-1045/net/netmon/endpoint_filter_local_test.go
       - (cd /tmp/tailscale-source-1045 && go test ./net/netmon)
       - (cd /tmp/tailscale-source-1045 && go test ./wgengine/magicsock -run 'Test(SuppressOffLinkPrivateDisco|OffLinkDiscoveryStopsBeforeSocketWrite)$' -count=1)
+      - git clone --depth 1 --branch v1.102.4 https://github.com/tailscale/tailscale.git /tmp/tailscale-source-1024
+      - test "$(git -C /tmp/tailscale-source-1024 rev-parse HEAD)" = bbcd7d1fc2054b9189ebc1531acf74bd880ca0c8
+      - git -C /tmp/tailscale-source-1024 apply --unidiff-zero "$PWD/config/tailscale-endpoint-filter/upstream-17762.patch"
+      - git -C /tmp/tailscale-source-1024 apply "$PWD/config/tailscale-endpoint-filter/sender-hook-1.102.patch"
+      - cp config/tailscale-endpoint-filter/private_discovery_filter.go config/tailscale-endpoint-filter/private_discovery_filter_test.go /tmp/tailscale-source-1024/wgengine/magicsock/
+      - cp config/tailscale-endpoint-filter/endpoint_filter_test.go /tmp/tailscale-source-1024/net/netmon/endpoint_filter_local_test.go
+      - (cd /tmp/tailscale-source-1024 && go test ./net/netmon)
+      - (cd /tmp/tailscale-source-1024 && go test ./wgengine/magicsock -run 'Test(SuppressOffLinkPrivateDisco|OffLinkDiscoveryStopsBeforeSocketWrite)$' -count=1)
     when:
       - event: manual
       - event: [push, pull_request]

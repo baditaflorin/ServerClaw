@@ -10,9 +10,9 @@ tests:
 - name: a probe that passes every 15 minutes raises nothing
   interval: 1m
   input_series:
-  - series: domainscope_search_probe_success{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_success{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 1x480
-  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 0x14 900x14 1800x14 2700x14 3600x14 4500x14 5400x14 6300x14 7200x14 8100x14 9000x14 9900x14 10800x14 11700x14 12600x14 13500x14 14400x14 15300x14 16200x14 17100x14 18000x14 18900x14 19800x14
       20700x14 21600x14 22500x14 23400x14 24300x14 25200x14 26100x14 27000x14 27900x14 28800x14
   alert_rule_test:
@@ -31,9 +31,9 @@ tests:
 - name: two failed runs in a row alert about 25 minutes after the first one and resolve with the next good run
   interval: 1m
   input_series:
-  - series: domainscope_search_probe_success{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_success{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 1x14 0x29 1x60
-  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 0x14 900x14 1800x14 2700x60
   alert_rule_test:
   - eval_time: 16m
@@ -48,7 +48,7 @@ tests:
     - exp_labels:
         severity: warning
         service: domainscope
-        instance: 100.114.37.21:9100
+        instance: 100.64.0.28:9100
         job: node_exporter
         target: https://domainscope.scrapetheworld.org
       exp_annotations:
@@ -66,9 +66,9 @@ tests:
 - name: one failed run between good ones does not alert
   interval: 1m
   input_series:
-  - series: domainscope_search_probe_success{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_success{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 1x14 0x14 1x60
-  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 0x14 900x14 1800x60
   alert_rule_test:
   - eval_time: 25m
@@ -83,9 +83,9 @@ tests:
 - name: failures that alternate with good runs do not alert
   interval: 1m
   input_series:
-  - series: domainscope_search_probe_success{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_success{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 1x14 0x14 1x14 0x14 1x30
-  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 0x14 900x14 1800x14 2700x14 3600x30
   alert_rule_test:
   - eval_time: 35m
@@ -100,9 +100,9 @@ tests:
 - name: one failed run and then the builder stops (nightly backup) is not two failed runs
   interval: 1m
   input_series:
-  - series: domainscope_search_probe_success{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_success{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 1x14 0x14 _x60
-  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 0x14 900x14 _x60
   alert_rule_test:
   - eval_time: 30m
@@ -117,9 +117,9 @@ tests:
 - name: the nightly backup stop of the builder (70 minutes without the series) raises nothing
   interval: 1m
   input_series:
-  - series: domainscope_search_probe_success{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_success{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 1x89 _x69 1x60
-  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 0x14 900x14 1800x14 2700x14 3600x14 4500x14 _x69 9600x14 10500x45
   alert_rule_test:
   - eval_time: 100m
@@ -137,9 +137,9 @@ tests:
 - name: a probe whose runs stop (the exporter still serves the old file) is stale after 3 hours
   interval: 1m
   input_series:
-  - series: domainscope_search_probe_success{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_success{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 1x530
-  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 0x14 900x14 1800x500
   alert_rule_test:
   - eval_time: 200m
@@ -166,9 +166,9 @@ tests:
 - name: a builder that stays down is stale after 3 hours and stays stale once the series is gone for 6 hours
   interval: 1m
   input_series:
-  - series: domainscope_search_probe_success{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_success{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 1x29 _x500
-  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
+  - series: domainscope_search_probe_last_run_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter",target="https://domainscope.scrapetheworld.org"}
     values: 0x14 900x14 _x500
   alert_rule_test:
   - eval_time: 190m

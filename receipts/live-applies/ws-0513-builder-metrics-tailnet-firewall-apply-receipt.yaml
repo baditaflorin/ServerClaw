@@ -19,7 +19,7 @@ targets:
     protocol: tcp
     port: 9100
 - resource: host:proxmox-host
-  builder_peer: 100.114.37.21
+  builder_peer: 100.64.0.28
   metrics_target: 100.64.0.6:9100
 errors: []
 notes:
@@ -28,9 +28,9 @@ notes:
   08:19 UTC; Ansible recap ok=37 changed=2 unreachable=0 failed=0 skipped=8 rescued=0.
 - The docker-build inet filter input chain now allows only host source 10.10.10.1
   TCP/9100 for the node-exporter proxy backend. PVE cluster firewall exception for
-  100.114.37.21/32 TCP/9100 is compiled and active; the host proxy listens at 100.64.0.6:9100
+  100.64.0.28/32 TCP/9100 is compiled and active; the host proxy listens at 100.64.0.6:9100
   and forwards to 10.10.10.30:9100.
-- 'End-to-end from 0docker-builder PCT108, Tailscale IP 100.114.37.21: using tailscaled
+- 'End-to-end from 0docker-builder PCT108, Tailscale IP 100.64.0.28: using tailscaled
   userspace SOCKS5 proxy 127.0.0.1:1055, GET http://100.64.0.6:9100/metrics returned
   HTTP 200 and node_uname_info nodename=docker-build. Raw curl without the proxy does
   not traverse Tailscale because this guest has no tailscale0 interface and routes

@@ -9,9 +9,9 @@ tests:
 - name: a refresh that is good every day raises nothing
   interval: 1m
   input_series:
-  - series: domainscope_drive_refresh_ok{instance="100.114.37.21:9100",job="node_exporter"}
+  - series: domainscope_drive_refresh_ok{instance="100.64.0.28:9100",job="node_exporter"}
     values: 1x7200
-  - series: domainscope_drive_refresh_last_success_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter"}
+  - series: domainscope_drive_refresh_last_success_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter"}
     values: 0x1439 86400x1439 172800x1439 259200x1439 345600x1439
   alert_rule_test:
   - eval_time: 50h
@@ -26,9 +26,9 @@ tests:
 - name: one failed run alerts about half an hour after it and resolves with the next good run
   interval: 1m
   input_series:
-  - series: domainscope_drive_refresh_ok{instance="100.114.37.21:9100",job="node_exporter"}
+  - series: domainscope_drive_refresh_ok{instance="100.64.0.28:9100",job="node_exporter"}
     values: 1x1440 0x1440 1x1440
-  - series: domainscope_drive_refresh_last_success_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter"}
+  - series: domainscope_drive_refresh_last_success_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter"}
     values: 0x1440 86400x2880
   alert_rule_test:
   - eval_time: 24h10m
@@ -40,7 +40,7 @@ tests:
     - exp_labels:
         severity: warning
         service: domainscope
-        instance: 100.114.37.21:9100
+        instance: 100.64.0.28:9100
         job: node_exporter
       exp_annotations:
         summary: The DomainScope Drive data room refresh failed its last run
@@ -54,7 +54,7 @@ tests:
 - name: no good run for two days alerts, and a series that never appeared alerts too
   interval: 1m
   input_series:
-  - series: domainscope_drive_refresh_last_success_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter"}
+  - series: domainscope_drive_refresh_last_success_timestamp_seconds{instance="100.64.0.28:9100",job="node_exporter"}
     values: 0x4320
   alert_rule_test:
   - eval_time: 40h
