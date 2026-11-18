@@ -27,6 +27,192 @@ archive_summary:
   by_year:
     '2026': 349
 workstreams:
+- id: ws-20261118-kamateratmp-build-pool-expansion
+  adr: 0497
+  title: Add the temporary Kamatera worker to shared Buildx lanes with enforced sunset
+  status: in_progress
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/kamateratmp-postmerge-record
+  worktree_path: .worktrees/kamateratmp-build-pool-expansion/.worktrees/kamateratmp-postmerge-record
+  doc: docs/workstreams/ws-20261118-kamateratmp-build-pool-expansion.md
+  depends_on:
+  - ws-20261118-kamatera-trial-build-worker
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0497-expiring-external-build-worker-pool-admission.md - docs/adr/0496-temporary-external-build-worker-lifecycle.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/**
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/temporary-build-worker.md
+  - docs/workstreams/ws-20261118-kamateratmp-build-pool-expansion.md
+  - receipts/live-applies/ws-20261118-kamateratmp-build-pool-expansion-apply-receipt.yaml
+  - README.md
+  - VERSION
+  - changelog.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - workstreams/active/ws-20261118-kamateratmp-build-pool-expansion.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: expiring_build_worker_decision
+      mode: exclusive
+      paths:
+      - docs/adr/0497-expiring-external-build-worker-pool-admission.md
+      - docs/adr/0496-temporary-external-build-worker-lifecycle.md
+      - docs/runbooks/temporary-build-worker.md
+      - docs/workstreams/ws-20261118-kamateratmp-build-pool-expansion.md
+    - id: build_worker_live_apply_receipt
+      mode: exclusive
+      paths:
+      - receipts/live-applies/ws-20261118-kamateratmp-build-pool-expansion-apply-receipt.yaml
+    - id: generated_adr_index
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+    - id: generated_coordination_diagram
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+    - id: mainline_release_integration
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+      paths:
+      - README.md
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+    - id: workstream_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - workstreams/active/ws-20261118-kamateratmp-build-pool-expansion.yaml
+      - workstreams.yaml
+  canonical_truth:
+    changelog_entry: Integrate the expiring temporary builder with shared Fleet Runner
+      and GoURL Buildx admission, and stop assigning work after its lease target.
+    release_bump: patch
+    included_in_repo_version: null
+  context: 'The temporary Debian 13 KVM worker already runs a general ci.0exec.com
+    Woodpecker agent with two bounded workflows. Fleet Runner''s broad image-build
+    pool and GoURL''s project-specific Buildx selector are separate consumers. Fleet
+    Runner centralizes live capacity probes and build leases. GoURL merged guest-scoped
+    admission in PR #4339 (`91eeb2fae9e6ff8d83ffbd47b6b7509c97c1bf38`), while retaining
+    physical-host checks for hypervisor rows. The SSH key matched Tailscale''s signed
+    fingerprint and is pinned on the Mac; CT108''s existing pin was verified. Fleet
+    Runner and GoURL both admit the worker, and a cache-only GoURL Buildx canary passed.
+    Fleet Runner''s effective thresholds are 1.0 load/CPU and 20,000 MiB disk; the
+    0mcp worker is currently below the disk floor. PFS PR #705 merged at b1d5571dca1b26c1980f03f589444229f93be8c0.
+    The patch release is still pending because the release manager reports 105 repository
+    blockers, including expired pre-existing waiver failures. The owner-directed sunset
+    target is 2026-12-17T14:59:50Z; provider billing cutoff remains unconfirmed. Build
+    selection and Woodpecker scheduling must fail closed at the target.'
+  plane_issue_id: 9084a511-32b5-45da-97a0-21ba11bb7656
+- id: ws-20261118-kamatera-trial-build-worker
+  adr: 0496
+  title: Onboard a 30-day external Debian build worker and record its sunset path
+  status: merged
+  ready_to_merge: false
+  live_applied: true
+  owner: codex
+  branch: codex/kamateratmp-ci-use-proof
+  worktree_path: .codex/worktrees/kamateratmp-ci-use-proof
+  doc: docs/workstreams/ws-20261118-kamatera-trial-build-worker.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0496-temporary-external-build-worker-lifecycle.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/**
+  - docs/status/history/live-apply-evidence.md
+  - docs/status/history/merged-workstreams.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/temporary-build-worker.md
+  - docs/workstreams/ws-20261118-kamatera-trial-build-worker.md
+  - receipts/live-applies/ws-20261118-kamatera-trial-build-worker-apply-receipt.yaml
+  - README.md
+  - VERSION
+  - changelog.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - workstreams/active/ws-20261118-kamatera-trial-build-worker.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: temporary_build_worker_lifecycle_docs
+      mode: exclusive
+      paths:
+      - docs/adr/0496-temporary-external-build-worker-lifecycle.md
+      - docs/runbooks/temporary-build-worker.md
+      - docs/workstreams/ws-20261118-kamatera-trial-build-worker.md
+    - id: temporary_build_worker_apply_receipt
+      mode: exclusive
+      paths:
+      - receipts/live-applies/ws-20261118-kamatera-trial-build-worker-apply-receipt.yaml
+    - id: generated_adr_index
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+    - id: agent_coordination_map
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+    - id: generated_status_history
+      mode: shared_contract
+      contract: generated-status-docs-v1
+      paths:
+      - docs/status/history/live-apply-evidence.md
+      - docs/status/history/merged-workstreams.md
+    - id: temporary_build_worker_tracking
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - workstreams/active/ws-20261118-kamatera-trial-build-worker.yaml
+      - workstreams.yaml
+    - id: repository_release_artifacts
+      mode: shared_contract
+      contract: release-bump-v1
+      paths:
+      - VERSION
+      - changelog.md
+      - README.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+  canonical_truth:
+    changelog_entry: Document the active temporary external build worker's monitoring
+      and Woodpecker integration, its fail-closed Buildx exclusion, and manual sunset
+      process.
+    release_bump: patch
+    included_in_repo_version: null
+  context: The provider supplied a short-lived Debian 13 KVM guest for build and CI
+    execution. Tailscale is installed; the user completed interactive authentication
+    and confirmed Tailnet Lock signing, and the tagged node is online and reachable.
+    Docker CE, Buildx, Compose, the named ops account, bounded logs, and a daily cache-prune
+    timer are installed. SSH is key-only on the tailnet address with root/password
+    login disabled. A tailnet-only node-exporter target is monitored, and a Woodpecker
+    Docker agent is active on the general CI plane with a fresh heartbeat and bounded
+    two-workflow/5-GiB-per-step limits. The general controller mirror was reconciled
+    before registration. Follow-up verification on 2026-11-18 confirmed registration
+    140 is online, schedulable, and has capacity for two workflows; the latest 100-pipeline
+    report included it in 33 pipelines, 17 of which succeeded. One successful pipeline
+    ran entirely on Kamatera. The other matching records used multiple agents. Twelve
+    matching pipelines were marked killed; their cause is not established by the report.
+    The project-specific Buildx pool is intentionally not used because its fail-closed
+    selector requires physical Proxmox hypervisor telemetry that this provider-managed
+    KVM guest cannot supply. The provider cutoff is unconfirmed; the private host
+    record's expiry is an operator target only and triggers no automatic alert or
+    retirement. The full-repository YAML validator still reports pre-existing findings
+    outside this workstream; the changed-scope remote pre-push gate passed.
+  plane_issue_id: 09755b3d-c661-47ef-a0df-4bda5a4e7968
 - id: ws-20261031-pg-primary-memory
   adr: 0495
   title: Put the VM701 memory guardrails after the 2026-10-31 global OOM in git (parallel-query

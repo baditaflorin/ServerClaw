@@ -1,0 +1,63 @@
+workstream_id: ws-20261118-kamateratmp-build-pool-expansion
+state: completed
+schema_version: 1.1.0
+started_at: '2026-11-18T12:36:57Z'
+completed_at: '2026-11-18T13:20:41Z'
+applied_by: codex
+repo_version: ''
+adr: 0497
+summary: Enable the temporary Kamateratmp host for general Woodpecker CI, Fleet Runner
+  image builds, and the GoURL Buildx pool with verified SSH identity, bounded capacity,
+  and the 2026-12-17 sunset target.
+targets:
+- host: Kamateratmp
+  path: Tailscale SSH identity and Docker runtime
+  change: Verified SSH ED25519 fingerprint against the signed Tailscale device fingerprint;
+    ops SSH and Docker responded.
+- host: Builder LXC 108
+  path: SSH known_hosts and Docker/Buildx contexts
+  change: Verified the existing HostKeyAlias pin; configured kamateratmp-amd64-ctx
+    and Buildx builder kamateratmp-amd64 from fresh GoURL origin/main.
+- host: Builder LXC 108
+  path: /root/fleet-state/builder-pool.json
+  change: Applied canonical Kamateratmp worker policy with one build slot and expiry
+    2026-12-17T14:59:50Z; preserved the prior config at /root/fleet-state/builder-pool.json.bak-pre-kamateratmp-20261118T.
+- host: Builder LXC 108
+  path: /root/.fleet-runner.env
+  change: Aligned non-secret BUILDER_MAX_LOAD_PER_CPU and BUILDER_MIN_DISK_MIB overrides
+    to 1 and 20000.
+- host: Builder LXC 108
+  path: GoURL remote Buildx selector
+  change: Selector reported Kamateratmp eligible; a FROM scratch cache-only Buildx
+    canary passed without publishing an image.
+- host: Builder LXC 108
+  path: /etc/woodpecker-load-controller/ci.0exec.json
+  change: Set node agent 140 expiry to 2026-12-17T14:59:50Z and restarted the expiry-aware
+    controller; registration remains available for general CI.
+- host: ci.0exec.com
+  path: Woodpecker execution history
+  change: 'Historical report included 33 records mentioning the Kamateratmp agent:
+    17 succeeded, 12 killed, and 4 running at sample; one successful pipeline ran
+    entirely on Kamateratmp.'
+errors: []
+notes:
+- SSH fingerprint matched SHA256:N/Sbii1MvUIpSuAFLysG/c2AC8Fjr2PWSPxt4rhcCt8 from
+  the Tailscale-signed device details; CT108 had the matching HostKeyAlias pin already,
+  while the Mac pin was added.
+- Fleet Runner v0.7.776 self-update check matched source SHA 4da231cc4dc96cf523beee45441a3fd2ae0c68ee.
+  Live status confirms thresholds of 1.0 load/CPU and 20000 MiB disk.
+- At the latest sample, the 0mcp Buildx worker had 19036 MiB free and is excluded
+  by the corrected central disk threshold. Other GoURL workers were not verified as
+  available fallback capacity on CT108.
+- GoURL selector defaults to 10240 MiB free disk, but mandatory central Fleet Runner
+  admission enforces 20000 MiB on CT108. GoURL selector observes reservations but
+  does not create a shared lease; keep builds serialized with Fleet Runner and Woodpecker
+  on this worker.
+- The Woodpecker historical report does not explain the 12 killed pipeline records.
+  Agent 140 remains general ci.0exec.com capacity and has no lv3 label.
+- 2026-12-17T14:59:50Z is the owner-directed sunset target. Provider billing/termination
+  cutoff is unconfirmed; no automatic deletion or reminder was configured.
+- 'PFS PR #705 merged to main at b1d5571dca1b26c1980f03f589444229f93be8c0 after all
+  three Woodpecker checks passed. The repo remains at 0.179.65 because release_manager
+  status reports 105 repository blockers, including expired pre-existing waiver failures;
+  the patch release remains pending.'

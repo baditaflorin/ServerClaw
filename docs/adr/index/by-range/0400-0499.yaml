@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-17'
+generated: '2026-11-18'
 facet: range
 label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 87
+total_adrs: 89
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -1622,3 +1622,48 @@ adrs:
     path: docs/adr/0496-tailscale-endpoint-advertisement-filter.md
     implemented_in_repo_version: 0.179.63
     implemented_on: '2026-11-17'
+  - adr: 0496
+    title: Use a direct Debian worker for short-lived external build capacity
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-11-18'
+    concern: host-os
+    keywords:
+      - build-worker
+      - temporary-host
+      - lifecycle
+      - ci
+      - use
+      - direct
+      - debian
+      - worker
+      - short-lived
+      - external
+    summary: 1. Keep the provider's Debian installation and configure Docker, Buildx or
+    filename: 0496-temporary-external-build-worker-lifecycle.md
+    path: docs/adr/0496-temporary-external-build-worker-lifecycle.md
+    implemented_in_repo_version: 0.179.65
+    implemented_on: '2026-11-18'
+  - adr: 0497
+    title: Admit expiring external guests to shared build pools
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-11-18'
+    concern: vm-topology
+    keywords:
+      - build-worker
+      - ci
+      - lifecycle
+      - capacity
+      - admit
+      - expiring
+      - external
+      - guests
+      - shared
+      - build
+    summary: 1. Keep a provider-managed guest as a directly managed Debian worker. Do not
+    filename: 0497-expiring-external-build-worker-pool-admission.md
+    path: docs/adr/0497-expiring-external-build-worker-pool-admission.md
+    implemented_on: '2026-11-18'

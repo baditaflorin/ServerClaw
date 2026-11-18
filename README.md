@@ -31,7 +31,7 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.64` |
+| Repository version | `0.179.65` |
 | Platform version | `0.179.63` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -89,7 +89,7 @@ Showing 20 of 200 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.64` |
+| Repository version | `0.179.65` |
 | Platform version | `0.179.63` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -133,8 +133,8 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 
 - **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
 - **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
-- **518+ ADRs** — Every architectural decision documented and indexed
-- **298+ runbooks** — Step-by-step procedures an AI agent can follow
+- **520+ ADRs** — Every architectural decision documented and indexed
+- **299+ runbooks** — Step-by-step procedures an AI agent can follow
 - **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
 
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
@@ -168,11 +168,11 @@ self-hosted platform:
 
 | Layer | What | Count |
 |-------|------|-------|
-| Architecture decisions | `docs/adr/` | 518+ ADRs |
+| Architecture decisions | `docs/adr/` | 520+ ADRs |
 | Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 176 roles |
 | Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 66 playbooks |
-| Operational runbooks | `docs/runbooks/` | 298+ runbooks |
-| Automation scripts | `scripts/` | 387+ scripts |
+| Operational runbooks | `docs/runbooks/` | 299+ runbooks |
+| Automation scripts | `scripts/` | 390+ scripts |
 | Validation tests | `tests/` | Automated regression suite |
 
 ### Services included
@@ -286,10 +286,10 @@ variables from it — no manual IP editing.
 │   ├── minimal/         # Tier 1 compose (4 containers)
 │   └── full/            # Tier 2 compose (7 containers)
 ├── docs/
-│   ├── adr/             # 518+ architecture decision records
-│   ├── runbooks/        # 298+ operational runbooks
+│   ├── adr/             # 520+ architecture decision records
+│   ├── runbooks/        # 299+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
-├── scripts/             # 387+ automation scripts
+├── scripts/             # 390+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
 └── Makefile             # 35+ automation targets
 ```
@@ -357,10 +357,11 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 360 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 361 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0496` | Onboard a 30-day external Debian build worker and record its sunset path | `merged` | [ws-20261118-kamatera-trial-build-worker.md](docs/workstreams/ws-20261118-kamatera-trial-build-worker.md) |
 | `0493` | Bound Plausible ClickHouse diagnostic log storage | `live_applied` | [ws-0520-plausible-clickhouse-log-retention.md](docs/workstreams/ws-0520-plausible-clickhouse-log-retention.md) |
 | `0492` | Scope Plausible analytics SSO to the operator email identity | `live_applied` | [ws-0519-plausible-email-sso.md](docs/workstreams/ws-0519-plausible-email-sso.md) |
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](docs/adr/0470-deployment-fixture-matrix.md) |
@@ -385,7 +386,6 @@ Showing 25 of 360 merged or live-applied workstreams. Full history: [merged work
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
 | `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](docs/workstreams/ws-0293-main-integration.md) |
 | `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](docs/workstreams/ws-0259-main-merge.md) |
-| `0252` | Integrate ADR 0252 exact-main replay onto current origin/main | `merged` | [ws-0252-main-merge.md](docs/workstreams/ws-0252-main-merge.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements
@@ -411,6 +411,6 @@ and merge procedures.
 
 ---
 
-*Generated 2026-11-07 by [scripts/generate_readme.py](scripts/generate_readme.py)
+*Generated 2026-11-18 by [scripts/generate_readme.py](scripts/generate_readme.py)
 from [docs/templates/README.md.j2](docs/templates/README.md.j2).
 Run `make generate-readme` to refresh.*

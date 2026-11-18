@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-17'
+generated: '2026-11-18'
 facet: concern
 concern: vm-topology
-total_adrs: 50
+total_adrs: 51
 adrs:
   - adr: '0005'
     title: Single-Node First Topology
@@ -968,3 +968,25 @@ adrs:
       (README with the measured n
     filename: 0495-pg-primary-memory-guardrails.md
     path: docs/adr/0495-pg-primary-memory-guardrails.md
+  - adr: 0497
+    title: Admit expiring external guests to shared build pools
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-11-18'
+    concern: vm-topology
+    keywords:
+      - build-worker
+      - ci
+      - lifecycle
+      - capacity
+      - admit
+      - expiring
+      - external
+      - guests
+      - shared
+      - build
+    summary: 1. Keep a provider-managed guest as a directly managed Debian worker. Do not
+    filename: 0497-expiring-external-build-worker-pool-admission.md
+    path: docs/adr/0497-expiring-external-build-worker-pool-admission.md
+    implemented_on: '2026-11-18'
