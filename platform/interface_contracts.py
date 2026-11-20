@@ -11,6 +11,7 @@ from platform.repo import load_yaml, parse_make_targets, repo_path
 CONTRACTS_DIR = repo_path("config", "contracts")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
+GITHUB_REPOSITORY_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 ALLOWED_COMPATIBILITY_POLICIES = {
     "backward_compatible_minor",
     "backward_compatible_patch",
@@ -235,6 +236,44 @@ def validate_workstream_registry_contract(contract: dict[str, Any]) -> None:
         _require_string_list(workstream.get("shared_surfaces"), f"workstreams.yaml.workstreams[{index}].shared_surfaces")
         _require_bool(workstream.get("ready_to_merge"), f"workstreams.yaml.workstreams[{index}].ready_to_merge")
         _require_bool(workstream.get("live_applied"), f"workstreams.yaml.workstreams[{index}].live_applied")
+        validate_workstream_repository_references(workstream, f"workstreams.yaml.workstreams[{index}]")
+
+
+def validate_workstream_repository_references(workstream: dict[str, Any], path: str) -> None:
+    repositories: list[str] | None = None
+    if "repositories" in workstream:
+        repositories = _require_string_list(workstream["repositories"], f"{path}.repositories")
+        invalid_repositories = [repo for repo in repositories if not GITHUB_REPOSITORY_PATTERN.fullmatch(repo)]
+        if invalid_repositories:
+            raise ValueError(
+                f"{path}.repositories entries must use owner/repository format: {invalid_repositories}"
+            )
+        if len(repositories) != len(set(repositories)):
+            raise ValueError(f"{path}.repositories must not contain duplicates")
+
+    if "pull_requests" not in workstream:
+        return
+    if repositories is None:
+        raise ValueError(f"{path}.pull_requests requires an explicit repositories list")
+    pull_requests = _require_list(workstream["pull_requests"], f"{path}.pull_requests")
+    seen: set[tuple[str, int]] = set()
+    for pr_index, raw_pr in enumerate(pull_requests):
+        pr_path = f"{path}.pull_requests[{pr_index}]"
+        pull_request = _require_mapping(raw_pr, pr_path)
+        if set(pull_request) != {"repository", "number"}:
+            raise ValueError(f"{pr_path} must contain only repository and number")
+        repository = _require_non_empty_string(pull_request.get("repository"), f"{pr_path}.repository")
+        if not GITHUB_REPOSITORY_PATTERN.fullmatch(repository):
+            raise ValueError(f"{pr_path}.repository must use owner/repository format")
+        if repository not in repositories:
+            raise ValueError(f"{pr_path}.repository must also appear in {path}.repositories")
+        number = pull_request.get("number")
+        if isinstance(number, bool) or not isinstance(number, int) or number <= 0:
+            raise ValueError(f"{pr_path}.number must be a positive integer")
+        key = (repository, number)
+        if key in seen:
+            raise ValueError(f"{path}.pull_requests must not contain duplicate repository/number pairs")
+        seen.add(key)
 
 
 def validate_converge_workflow_contract(contract: dict[str, Any]) -> None:

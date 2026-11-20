@@ -1,0 +1,90 @@
+workstream_id: ws-20261119-nginx2root-remediation
+state: completed
+schema_version: 1.1.0
+started_at: '2026-11-19'
+completed_at: '2026-11-19T12:10:02Z'
+applied_by: codex
+repo_version: 0.179.65
+adr: 0498
+source_commit: 3cf82653d
+summary: >-
+  Patched all 15 NGINX runtimes in the active inventory across eight
+  NGINX-bearing hosts to official fixed releases and contained the separate
+  SCTP kernel path on hosts where SCTP was unused.
+targets:
+  - type: managed-edge
+    count: 1
+    result: NGINX 1.30.7; nginx -t passed; service active.
+    rollback: Existing NGINX configuration backup retained on host.
+  - type: public-edge
+    count: 1
+    result: NGINX 1.30.7; nginx -t passed; service active.
+    rollback: Existing NGINX configuration backup retained on host.
+  - type: private-gateway
+    count: 1
+    result: NGINX 1.30.7; nginx -t passed; service active.
+    rollback: Existing NGINX configuration backup retained on host.
+  - type: application-docker-runtime
+    services:
+      - Dify: NGINX 1.30.7; config valid; container healthy.
+      - Excalidraw: NGINX 1.30.7; config valid; container healthy.
+      - Huly: NGINX 1.31.9; config valid; container running.
+      - Plane admin: NGINX 1.30.7; config valid; container healthy.
+      - Plane web: NGINX 1.30.7; config valid; container healthy.
+    rollback: Dated Compose backups retained on host.
+  - type: harbor
+    services:
+      - proxy: NGINX 1.30.7; config valid; container healthy.
+      - portal: NGINX 1.30.7; config valid; container healthy.
+    package: nginx_1.30.7-1~bookworm_amd64.deb
+    package_sha256: 0e5325ab48a0995d09650132073920993b0b8949b7af51194240e33105755857
+    executable_sha256: 4a56e4d221295038a568e7dac10a70fd664844be0e9f004cdb69f72cd03a7fb8
+    rollback: Installer Compose backup retained at the Harbor project path with the nginx2root date suffix.
+  - type: coolify
+    count: 1
+    result: NGINX 1.30.7; config valid; container healthy.
+    rollback: Dated Compose backup retained on host.
+  - type: domainscope-frontends
+    count: 2
+    result: Both NGINX 1.30.7; config valid; containers running; staging has no healthcheck.
+    rollback: Dated Compose backups retained on host.
+  - type: static-sites
+    count: 2
+    result: Both NGINX 1.30.7; config valid; containers running without healthchecks.
+    rollback: Dated Compose backups retained on host.
+  - type: sctp-containment
+    count: 8
+    result: Installed /etc/modprobe.d/zz-nginx2root-disable-sctp.conf on each NGINX-bearing host after confirming modular SCTP support and no SCTP sockets or listeners; module unloaded.
+  - type: builder-inventory-reconciliation
+    result: A stale NGINX service record was last seen on 2026-11-07; the current Docker inventory contained no NGINX containers.
+errors:
+  - >-
+    The controller-side Dify post-deploy probe could not resolve its inventory
+    hostname. A direct host health request returned HTTP 200 and the container
+    was healthy; runtime verification succeeded.
+notes:
+  - >-
+    All 15 runtimes passed nginx -t. The three system services were active;
+    configured container healthchecks passed. Containers without healthchecks
+    were confirmed running with valid NGINX configuration.
+  - >-
+    Fixed container digest for nginx:1.30.7-alpine:
+    sha256:4d1d4ce08432dc7dfe4af762cb224ce6b5273ae878f41e020ea2425d02ea91a4.
+  - >-
+    Huly was recreated from the corrected official nginx:1.31.9 image digest:
+    sha256:5b9ebb95001cc4f5242fbc3e1a9ac76d313c8ba197c7e5803a77d3f7879f0cda.
+  - >-
+    Container runtime changes retain dated Compose backups on the owning hosts;
+    system package changes retain NGINX configuration backups. The Harbor
+    installer Compose backup is at /opt/harbor/installer/harbor/docker-compose.yml.nginx2root-20261119.bak.
+  - >-
+    The Dify image scan has a separate critical zlib finding with no vendor
+    fix, plus eight high and five medium findings. Its tracked exception
+    expires 2026-11-26; the NGINX remediation does not resolve that finding.
+  - >-
+    Plane workstream synchronization was unavailable because the configured
+    authentication token was invalid or expired; Git remains authoritative.
+  - >-
+    Live platform version was 0.179.63 and repository base was 0.179.65.
+    Release and platform version updates remain governed by the PR/merge and
+    verified live-state workflow.

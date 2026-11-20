@@ -8,6 +8,11 @@ owner: platform-infrastructure
 branch: claude/loving-agnesi-b8dab1
 worktree_path: .claude/worktrees/loving-agnesi-b8dab1
 doc: docs/adr/0443-continuous-topology-reconciler.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 61
 depends_on:
   - adr-0373-service-registry-derived-defaults
   - adr-0416-pg-hba-from-service-registry

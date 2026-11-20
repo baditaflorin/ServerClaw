@@ -25,13 +25,21 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - Allow the Builder metrics peer to scrape docker-build node-exporter over the private tailnet without disrupting Docker-managed firewall rules.
 - Allow the pve01, 0infer and 0mcp CI agents to reach only the shared Go build cache port on the 0own build worker.
 - Remove the tailnet grant that let the pve01, 0infer and 0mcp CI agents reach the retired Go build cache port on the 0own build worker.
+- Ensure managed NGINX edge sites load and Woodpecker apply receipts retain their state across JSON fallback.
 - Restore governed Plane API access through a loopback-only SSH forward and document the procedure.
 - Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
 - Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
 - Keep sanitized ServerClaw snapshots compatible with validation without publishing deployment-specific firewall exceptions.
+- Reconcile the ws-0448 handoff workstream with merged PR #76 and its documented 0.179.11 implementation release.
+- Backfill repository and pull-request references for legacy workstreams verified from merged PR evidence.
+- Add an evidence-based workstream reconciliation report and explicit repository and pull-request references.
+- Reconcile the ws-0463 receipt-freshness workstream with merged release PR #93 (0.179.26).
 - Allow an explicitly configured operator email to access Plausible through a dedicated Authentik OAuth client and proxy.
 - Cap Plausible ClickHouse diagnostic system logs at one day without changing analytics event retention.
 - Document the active temporary external build worker's monitoring and Woodpecker integration, its fail-closed Buildx exclusion, and manual sunset process.
+- Integrate the expiring temporary builder with shared Fleet Runner and GoURL Buildx admission, and stop assigning work after its lease target.
+- Patch every identified NGINX runtime to an official fixed release and block the unused SCTP kernel module on affected hosts until the kernel fix is available.
+- Add durable Woodpecker trial accounting and a Grafana cost-per-pipeline dashboard for short-lived build workers.
 
 ## Latest Release
 

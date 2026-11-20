@@ -54,6 +54,9 @@
       - monitoring_blackbox_exporter_env_file | length > 0
       - monitoring_grafana_slo_dashboard_file | length > 0
       - monitoring_grafana_log_canary_dashboard_file | length > 0
+      - monitoring_grafana_build_trial_dashboard_file | length > 0
+      - monitoring_grafana_build_trial_dashboard_uid | length > 0
+      - monitoring_grafana_build_trial_dashboard_source_file | length > 0
       - monitoring_tempo_deb_url | length > 0
       - monitoring_tempo_deb_checksum | length > 0
       - monitoring_tempo_config_file | length > 0
@@ -392,6 +395,7 @@
     src: "{{ monitoring_grafana_admin_password_file }}"
   register: monitoring_grafana_admin_password_raw
   no_log: true
+  tags: [build_trial_dashboard]
 
 - name: Read InfluxDB admin password
   ansible.builtin.slurp:
@@ -399,9 +403,14 @@
   register: monitoring_influxdb_admin_password_raw
   no_log: true
 
-- name: Set monitoring secret facts
+- name: Set Grafana admin password fact
   ansible.builtin.set_fact:
     monitoring_grafana_admin_password: "{{ monitoring_grafana_admin_password_raw.content | b64decode | trim }}"
+  no_log: true
+  tags: [build_trial_dashboard]
+
+- name: Set InfluxDB admin password fact
+  ansible.builtin.set_fact:
     monitoring_influxdb_admin_password: "{{ monitoring_influxdb_admin_password_raw.content | b64decode | trim }}"
   no_log: true
 
@@ -1146,6 +1155,30 @@
     regexp: '"uid": "lv3-prometheus"'
     replace: '"uid": "{{ platform_identity.config_prefix }}-prometheus"'
 
+- name: Copy build trial cost dashboard
+  ansible.builtin.copy:
+    src: "{{ monitoring_grafana_build_trial_dashboard_source_file }}"
+    dest: "{{ monitoring_grafana_build_trial_dashboard_file }}"
+    owner: root
+    group: grafana
+    mode: "0644"
+  register: monitoring_grafana_build_trial_dashboard_file_rendered
+  tags: [build_trial_dashboard]
+
+- name: Patch build trial dashboard UID for deployment prefix
+  ansible.builtin.replace:
+    path: "{{ monitoring_grafana_build_trial_dashboard_file }}"
+    regexp: '"uid": "lv3-build-trial-cost"'
+    replace: '"uid": "{{ monitoring_grafana_build_trial_dashboard_uid }}"'
+  tags: [build_trial_dashboard]
+
+- name: Patch build trial dashboard datasource UIDs for deployment prefix
+  ansible.builtin.replace:
+    path: "{{ monitoring_grafana_build_trial_dashboard_file }}"
+    regexp: '"uid": "lv3-prometheus"'
+    replace: '"uid": "{{ monitoring_grafana_prometheus_datasource_uid }}"'
+  tags: [build_trial_dashboard]
+
 - name: Render Loki Canary systemd unit
   ansible.builtin.template:
     src: loki-canary.service.j2
@@ -1433,6 +1466,22 @@
   failed_when: monitoring_grafana_log_canary_dashboard_existing.status not in [200, 404]
   no_log: true
 
+- name: Check whether build trial cost dashboard already exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_build_trial_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_build_trial_dashboard_existing
+  changed_when: false
+  failed_when: monitoring_grafana_build_trial_dashboard_existing.status not in [200, 404]
+  no_log: true
+  tags: [build_trial_dashboard]
+
 - name: Check whether VM detail dashboards already exist
   ansible.builtin.uri:
     url: "http://127.0.0.1:3000/api/dashboards/uid/lv3-vm-{{ item.name }}"
@@ -1479,6 +1528,13 @@
     src: "{{ monitoring_grafana_log_canary_dashboard_file }}"
   register: monitoring_grafana_log_canary_dashboard_payload_raw
   no_log: true
+
+- name: Read rendered build trial cost dashboard
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_build_trial_dashboard_file }}"
+  register: monitoring_grafana_build_trial_dashboard_payload_raw
+  no_log: true
+  tags: [build_trial_dashboard]
 
 - name: Render VM detail dashboards
   ansible.builtin.template:
@@ -1594,6 +1650,25 @@
   when: monitoring_grafana_log_canary_dashboard_file_rendered is changed or monitoring_grafana_log_canary_dashboard_existing.status == 404
   no_log: true
 
+- name: Import build trial cost dashboard into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ monitoring_grafana_build_trial_dashboard_payload_raw.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
+      overwrite: true
+    status_code: 200
+  register: monitoring_grafana_build_trial_dashboard_import
+  changed_when: monitoring_grafana_build_trial_dashboard_file_rendered is changed or monitoring_grafana_build_trial_dashboard_existing.status == 404
+  when: monitoring_grafana_build_trial_dashboard_file_rendered is changed or monitoring_grafana_build_trial_dashboard_existing.status == 404
+  no_log: true
+  tags: [build_trial_dashboard]
+
 - name: Import VM detail dashboards into Grafana
   ansible.builtin.uri:
     url: http://127.0.0.1:3000/api/dashboards/db
@@ -1675,6 +1750,19 @@
   register: monitoring_grafana_log_canary_dashboard_check
   changed_when: false
   no_log: true
+
+- name: Verify build trial cost dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_build_trial_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_build_trial_dashboard_check
+  changed_when: false
+  no_log: true
+  tags: [build_trial_dashboard]
 
 - name: Verify VM detail dashboards are provisioned
   ansible.builtin.uri:

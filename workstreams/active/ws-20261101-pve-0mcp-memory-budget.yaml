@@ -8,6 +8,11 @@ owner: claude
 branch: claude/live-apply-budget-alert
 worktree_path: .claude/worktrees/live-apply-budget-alert
 doc: docs/workstreams/ws-20261101-pve-0mcp-memory-budget.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 653
 depends_on: []
 conflicts_with: []
 shared_surfaces:

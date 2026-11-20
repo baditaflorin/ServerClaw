@@ -1,0 +1,301 @@
+# Purpose: Install and validate the signed fixed NGINX package on Debian-family edge hosts.
+# Use case: Replace distribution packages that do not yet contain these CVE fixes.
+# Inputs: Debian release facts and the current NGINX configuration.
+# Outputs: NGINX 1.30.7, matching Perl module when required, and a running validated service.
+# Idempotency: Yes; package and configuration state are converged before the restart handler.
+# Dependencies: gpg, ca-certificates, Debian/Ubuntu apt, and a systemd-managed nginx service.
+---
+- name: Require a supported Debian-family NGINX host
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == 'Debian'
+      - ansible_distribution_release in ['bookworm', 'trixie', 'noble']
+      - ansible_service_mgr == 'systemd'
+    fail_msg: "nginx_org_security_package supports Debian 12/13 and Ubuntu 24.04 systemd hosts."
+
+- name: Validate the current NGINX configuration before package migration
+  ansible.builtin.command:
+    argv:
+      - nginx
+      - -t
+  changed_when: false
+
+- name: Read the installed NGINX version before migration
+  ansible.builtin.command:
+    argv:
+      - nginx
+      - -v
+  register: nginx_org_security_package_version_before
+  changed_when: false
+  failed_when: false
+
+- name: Parse the installed NGINX version before migration
+  ansible.builtin.set_fact:
+    nginx_org_security_package_version_before_parsed: >-
+      {{ (nginx_org_security_package_version_before.stderr | regex_findall('nginx/([0-9.]+)') | first) | default('0.0.0') }}
+
+- name: Select the least disruptive fixed NGINX package branch
+  ansible.builtin.set_fact:
+    nginx_org_security_package_target_branch: >-
+      {{ 'mainline' if nginx_org_security_package_version_before_parsed is version('1.31.0', '>=') else 'stable' }}
+    nginx_org_security_package_target_version: >-
+      {{ nginx_org_security_package_mainline_version if nginx_org_security_package_version_before_parsed is version('1.31.0', '>=') else nginx_org_security_package_stable_version }}
+
+- name: Select the official NGINX repository URL
+  ansible.builtin.set_fact:
+    nginx_org_security_package_repository_url: >-
+      {{
+        nginx_org_security_package_repository_root
+        ~ ('/mainline' if nginx_org_security_package_target_branch == 'mainline' else '')
+        ~ ('/ubuntu' if ansible_distribution == 'Ubuntu' else '/debian')
+      }}
+
+- name: Determine whether the current NGINX release is already fixed
+  ansible.builtin.set_fact:
+    nginx_org_security_package_already_fixed: >-
+      {{
+        (
+          nginx_org_security_package_version_before_parsed is version('1.30.7', '>=')
+          and nginx_org_security_package_version_before_parsed is version('1.31.0', '<')
+        )
+        or nginx_org_security_package_version_before_parsed is version('1.31.9', '>=')
+      }}
+
+- name: Detect whether the current NGINX config loads the Perl module
+  ansible.builtin.shell: >-
+    nginx -T 2>&1 | grep -Fq 'load_module modules/ngx_http_perl_module.so'
+  args:
+    executable: /bin/sh
+  register: nginx_org_security_package_perl_module_check
+  changed_when: false
+  failed_when: nginx_org_security_package_perl_module_check.rc not in [0, 1]
+
+- name: Install NGINX repository verification prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - gnupg
+    state: present
+    update_cache: false
+
+- name: Download the official NGINX signing key
+  ansible.builtin.get_url:
+    url: "{{ nginx_org_security_package_key_url }}"
+    dest: "{{ nginx_org_security_package_key_ascii }}"
+    mode: "0644"
+  register: nginx_org_security_package_key_download
+
+- name: Inspect the official NGINX signing key fingerprints
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --with-colons
+      - --show-keys
+      - "{{ nginx_org_security_package_key_ascii }}"
+  register: nginx_org_security_package_key_inspection
+  changed_when: false
+
+- name: Require a recognized NGINX signing key fingerprint
+  ansible.builtin.assert:
+    that:
+      - >-
+        nginx_org_security_package_key_fingerprints
+        | select('in', nginx_org_security_package_key_inspection.stdout)
+        | list | length > 0
+    fail_msg: "The downloaded NGINX package signing key did not match a pinned official fingerprint."
+
+- name: Dearmor the official NGINX signing key when it changes
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --yes
+      - --output
+      - "{{ nginx_org_security_package_keyring }}"
+      - "{{ nginx_org_security_package_key_ascii }}"
+  when: nginx_org_security_package_key_download.changed
+
+- name: Check whether the dearmored NGINX signing key exists
+  ansible.builtin.stat:
+    path: "{{ nginx_org_security_package_keyring }}"
+  register: nginx_org_security_package_keyring_stat
+
+- name: Dearmor the official NGINX signing key when absent
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --yes
+      - --output
+      - "{{ nginx_org_security_package_keyring }}"
+      - "{{ nginx_org_security_package_key_ascii }}"
+  when: not nginx_org_security_package_keyring_stat.stat.exists
+
+- name: Set permissions on the NGINX signing keyring
+  ansible.builtin.file:
+    path: "{{ nginx_org_security_package_keyring }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure the official NGINX apt repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/nginx-org.list
+    owner: root
+    group: root
+    mode: "0644"
+    content: >-
+      deb [signed-by={{ nginx_org_security_package_keyring }}]
+      {{ nginx_org_security_package_repository_url }}
+      {{ ansible_distribution_release }} nginx
+
+- name: Prefer packages from the official NGINX repository
+  ansible.builtin.copy:
+    dest: /etc/apt/preferences.d/99nginx-org
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Package: *
+      Pin: origin nginx.org
+      Pin-Priority: 900
+
+- name: Back up the current NGINX configuration before package migration
+  ansible.builtin.file:
+    path: /var/backups
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Check whether today's NGINX configuration backup already exists
+  ansible.builtin.stat:
+    path: "/var/backups/nginx2root-pre-update-{{ ansible_date_time.date }}.tar.gz"
+  register: nginx_org_security_package_backup_stat
+
+- name: Back up the current NGINX configuration before package migration
+  community.general.archive:
+    path: /etc/nginx
+    dest: "/var/backups/nginx2root-pre-update-{{ ansible_date_time.date }}.tar.gz"
+    format: gz
+  when:
+    - not nginx_org_security_package_already_fixed
+    - not nginx_org_security_package_backup_stat.stat.exists
+
+- name: Restrict the NGINX configuration backup to root
+  ansible.builtin.file:
+    path: "/var/backups/nginx2root-pre-update-{{ ansible_date_time.date }}.tar.gz"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Install fixed NGINX and the matching Perl module when required
+  ansible.builtin.apt:
+    name: >-
+      {{
+        ['nginx=' ~ nginx_org_security_package_target_version ~ '-1~' ~ ansible_distribution_release]
+        + (
+          ['nginx-module-perl=' ~ nginx_org_security_package_target_version ~ '-1~' ~ ansible_distribution_release]
+          if nginx_org_security_package_perl_module_check.rc == 0
+          else []
+        )
+      }}
+    state: present
+    update_cache: true
+    force_apt_get: true
+    dpkg_options: force-confold,force-confdef
+    policy_rc_d: 101
+  notify: Restart NGINX after the security package update
+  when: not nginx_org_security_package_already_fixed
+
+- name: Restore the pre-migration NGINX configuration tree
+  ansible.builtin.unarchive:
+    src: "/var/backups/nginx2root-pre-update-{{ ansible_date_time.date }}.tar.gz"
+    dest: /
+    remote_src: true
+  when: not nginx_org_security_package_already_fixed
+  notify: Restart NGINX after the security package update
+
+- name: Remove the obsolete Debian dynamic stream module loader
+  ansible.builtin.file:
+    path: "{{ nginx_org_security_package_stream_module_config }}"
+    state: absent
+  notify: Restart NGINX after the security package update
+
+- name: Ensure the optional module configuration directory exists
+  ansible.builtin.file:
+    path: /etc/nginx/modules-enabled
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: nginx_org_security_package_perl_module_check.rc == 0
+
+- name: Inspect the restored Perl module loader
+  ansible.builtin.stat:
+    path: "{{ nginx_org_security_package_perl_module_config }}"
+    follow: false
+  register: nginx_org_security_package_perl_loader_stat
+  when: nginx_org_security_package_perl_module_check.rc == 0
+
+- name: Replace a stale Debian Perl module loader symlink
+  ansible.builtin.file:
+    path: "{{ nginx_org_security_package_perl_module_config }}"
+    state: absent
+  when:
+    - nginx_org_security_package_perl_module_check.rc == 0
+    - nginx_org_security_package_perl_loader_stat.stat.islnk | default(false)
+
+- name: Load the matching NGINX Perl module when the active configuration requires it
+  ansible.builtin.copy:
+    dest: "{{ nginx_org_security_package_perl_module_config }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: "load_module modules/ngx_http_perl_module.so;\n"
+  when: nginx_org_security_package_perl_module_check.rc == 0
+
+- name: Validate the final NGINX configuration before restarting the service
+  ansible.builtin.command:
+    argv:
+      - nginx
+      - -t
+  changed_when: false
+
+- name: Flush NGINX restart handlers before live verification
+  ansible.builtin.meta: flush_handlers
+
+- name: Read the installed NGINX version
+  ansible.builtin.command:
+    argv:
+      - nginx
+      - -v
+  register: nginx_org_security_package_version_check
+  changed_when: false
+  failed_when: false
+
+- name: Parse the installed NGINX version
+  ansible.builtin.set_fact:
+    nginx_org_security_package_version_after_parsed: >-
+      {{ (nginx_org_security_package_version_check.stderr | regex_findall('nginx/([0-9.]+)') | first) | default('0.0.0') }}
+
+- name: Require an NGINX release that includes the disclosed fixes
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          nginx_org_security_package_version_after_parsed is version('1.30.7', '>=')
+          and nginx_org_security_package_version_after_parsed is version('1.31.0', '<')
+        )
+        or nginx_org_security_package_version_after_parsed is version('1.31.9', '>=')
+    fail_msg: >-
+      Installed NGINX version {{ nginx_org_security_package_version_after_parsed | default('unknown') }}
+      is older than the fixed stable 1.30.7 or mainline 1.31.9 release.
+
+- name: Check NGINX service state after upgrade
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - nginx
+  changed_when: false

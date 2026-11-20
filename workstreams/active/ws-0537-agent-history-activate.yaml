@@ -8,6 +8,11 @@ owner: claude
 branch: claude/agent-history-activate
 worktree_path: .claude/worktrees/agent-history-activate
 doc: docs/workstreams/ws-0537-agent-history-activate.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 615
 depends_on:
   - ws-0534-agent-history-vm
 conflicts_with: []

@@ -17,8 +17,9 @@ Commands:
   conflicts <arg> Workstreams sharing files with a given file path or branch
   next            Suggest the next workstream to pick up
   summary         Aggregate stats
+  reconcile       Read-only closeout evidence report
 
-Output: JSON to stdout.  Errors to stderr.  Exit 0=ok, 1=error.
+Output: JSON to stdout except the Markdown-capable reconcile command. Errors to stderr. Exit 0=ok, 1=error.
 """
 
 from __future__ import annotations
@@ -31,6 +32,7 @@ from typing import Any
 
 from controller_automation_toolkit import emit_cli_error
 from platform.workstream_registry import load_workstreams
+from workstream_reconciliation import create_report, render_markdown
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -306,6 +308,12 @@ def cmd_summary(args: argparse.Namespace) -> None:
     print(json.dumps(result, indent=2))
 
 
+def cmd_reconcile(args: argparse.Namespace) -> None:
+    report = create_report(REPO_ROOT, include_archive=args.include_archive)
+    rendered = render_markdown(report) if args.format == "markdown" else json.dumps(report, indent=2)
+    print(rendered)
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -343,6 +351,11 @@ def main(argv: list[str] | None = None) -> int:
     # summary
     sub.add_parser("summary", help="Aggregate stats across all workstreams")
 
+    # reconcile
+    p_reconcile = sub.add_parser("reconcile", help="Read-only evidence report for workstream closeout review")
+    p_reconcile.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    p_reconcile.add_argument("--include-archive", action="store_true", help="Include archived workstreams")
+
     args = parser.parse_args(argv)
     dispatch = {
         "list": cmd_list,
@@ -351,6 +364,7 @@ def main(argv: list[str] | None = None) -> int:
         "conflicts": cmd_conflicts,
         "next": cmd_next,
         "summary": cmd_summary,
+        "reconcile": cmd_reconcile,
     }
     try:
         dispatch[args.command](args)

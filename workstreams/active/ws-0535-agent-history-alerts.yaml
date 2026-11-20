@@ -8,6 +8,11 @@ owner: claude
 branch: claude/agent-history-alerts
 worktree_path: .claude/worktrees/agent-history-alerts
 doc: docs/workstreams/ws-0535-agent-history-alerts.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 599
 depends_on: []
 conflicts_with: []
 shared_surfaces:

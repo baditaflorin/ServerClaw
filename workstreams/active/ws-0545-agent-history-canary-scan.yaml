@@ -8,6 +8,11 @@ owner: claude
 branch: claude/agent-history-canary-scan
 worktree_path: .claude/worktrees/ah-canary
 doc: docs/workstreams/ws-0545-agent-history-canary-scan.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 625
 depends_on:
   - ws-0534-agent-history-vm
   - ws-0535-agent-history-alerts

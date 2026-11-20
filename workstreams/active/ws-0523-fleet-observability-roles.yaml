@@ -8,6 +8,11 @@ owner: claude
 branch: fleet-observability-roles
 worktree_path: .worktrees/fleet-observability-roles
 doc: docs/workstreams/ws-0523-fleet-observability-roles.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 302
 depends_on:
   - ws-0522-monitoring-live-changes-codify
 conflicts_with: []

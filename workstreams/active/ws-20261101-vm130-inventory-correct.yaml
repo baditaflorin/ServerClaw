@@ -8,6 +8,11 @@ owner: claude
 branch: claude/vm130-inventory-correct
 worktree_path: .claude/worktrees/vm130-inventory-correct
 doc: docs/workstreams/ws-20261101-vm130-inventory-correct.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 651
 depends_on: []
 conflicts_with: []
 shared_surfaces:

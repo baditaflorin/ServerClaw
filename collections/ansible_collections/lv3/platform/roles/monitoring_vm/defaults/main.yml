@@ -80,6 +80,9 @@ monitoring_grafana_log_canary_dashboard_file: /var/lib/grafana/dashboards/lv3/{{
 monitoring_grafana_log_canary_dashboard_uid: "{{ platform_identity.config_prefix }}-log-canary-overview"
 monitoring_grafana_log_canary_dashboard_title: LV3 Log Canary
 monitoring_grafana_log_canary_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/log-canary-overview.json"
+monitoring_grafana_build_trial_dashboard_file: /var/lib/grafana/dashboards/lv3/{{ platform_identity.config_prefix }}-build-trial-cost.json
+monitoring_grafana_build_trial_dashboard_uid: "{{ platform_identity.config_prefix }}-build-trial-cost"
+monitoring_grafana_build_trial_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/build-trial-cost.json"
 monitoring_influxdb_admin_user: "{{ platform_identity.config_prefix }}-monitoring-admin"
 monitoring_influxdb_admin_password_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-admin-password"
 monitoring_influxdb_operator_token_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-operator.token"

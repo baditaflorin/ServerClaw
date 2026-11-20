@@ -8,6 +8,11 @@ owner: claude
 branch: claude/ws-0488-wave-3
 worktree_path: .claude/worktrees/agitated-saha-a10fa8
 doc: docs/adr/0488-single-deployment-per-repo-checkout.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 122
 depends_on:
   - adr-0385-one-identity-file
   - adr-0407-generic-by-default

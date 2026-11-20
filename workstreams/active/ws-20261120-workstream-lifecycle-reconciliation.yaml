@@ -1,0 +1,125 @@
+id: ws-20261120-workstream-lifecycle-reconciliation
+adr: '0452'
+title: Make workstream reconciliation evidence-based and repeatable
+status: merged
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/ws-20261120-reconciliation-closeout
+worktree_path: .worktrees/ws-20261120-reconciliation-closeout
+doc: docs/workstreams/ws-20261120-workstream-lifecycle-reconciliation.md
+repositories:
+- baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 715
+  - repository: baditaflorin/platform_server
+    number: 716
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- .config-locations.yaml
+- .repo-structure.yaml
+- build/onboarding/*.yaml
+- docs/adr/.index.yaml
+- docs/adr/index/*.yaml
+- docs/adr/0452-workstream-lifecycle-auto-close.md
+- docs/diagrams/agent-coordination-map.excalidraw
+- docs/runbooks/workstream-registry-shards.md
+- docs/discovery/config-locations/project-tracking.yaml
+- docs/discovery/config-locations/validation-and-ci.yaml
+- docs/discovery/repo-structure/automation-and-infrastructure.yaml
+- docs/workstreams/ws-20261120-workstream-lifecycle-reconciliation.md
+- README.md
+- changelog.md
+- docs/status/history/merged-workstreams.md
+- scripts/validate_repo.sh
+- scripts/workstream_tool.py
+- tests/test_interface_contracts.py
+- workstreams/active/ws-20261120-workstream-lifecycle-reconciliation.yaml
+- workstreams.yaml
+- config/contracts/workstream-registry-v1.yaml
+- platform/interface_contracts.py
+- scripts/workstream_reconciliation.py
+- tests/test_workstream_reconciliation.py
+- docs/diagrams/agent-coordination-map.excalidraw
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_reconciliation_tool
+    mode: exclusive
+    paths:
+    - scripts/workstream_reconciliation.py
+    - scripts/workstream_tool.py
+    - tests/test_workstream_reconciliation.py
+    - tests/test_interface_contracts.py
+    - docs/runbooks/workstream-registry-shards.md
+    - docs/workstreams/ws-20261120-workstream-lifecycle-reconciliation.md
+  - id: workstream_metadata_contract
+    mode: shared_contract
+    contract: workstream-registry-v1
+    paths:
+    - config/contracts/workstream-registry-v1.yaml
+    - platform/interface_contracts.py
+    - workstreams/active/*.yaml
+  - id: workstream_and_adr_registry
+    mode: shared_contract
+    contract: workstream-registry-v1
+    paths:
+    - docs/adr/0452-workstream-lifecycle-auto-close.md
+    - workstreams/active/ws-20261120-workstream-lifecycle-reconciliation.yaml
+    - workstreams.yaml
+  - id: generated_coordination_diagram
+    mode: shared_contract
+    contract: generated-artifacts-v1
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+  - id: generated_release_summaries
+    mode: shared_contract
+    contract: generated-artifacts-v1
+    paths:
+    - README.md
+    - changelog.md
+    - docs/status/history/merged-workstreams.md
+  - id: changed_shard_validation_gate
+    mode: shared_contract
+    contract: pre-push-gate-v1
+    paths:
+    - scripts/validate_repo.sh
+  - id: generated_discovery_and_adr_indexes
+    mode: shared_contract
+    contract: generated-artifacts-v1
+    paths:
+    - .repo-structure.yaml
+    - .config-locations.yaml
+    - build/onboarding/*.yaml
+    - docs/adr/.index.yaml
+    - docs/adr/index/*.yaml
+    - docs/discovery/config-locations/project-tracking.yaml
+    - docs/discovery/config-locations/validation-and-ci.yaml
+    - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+canonical_truth:
+  changelog_entry: Add an evidence-based workstream reconciliation report and explicit
+    repository and pull-request references.
+  release_bump: minor
+  included_in_repo_version: null
+  latest_receipts: {}
+context: The release gate currently counts every status=in_progress record. A first
+  pass found stale-looking flags, missing worktree paths, and reused branch names,
+  so closure must be evidence-based and must not infer completion from flags or branch
+  names alone. Preserve legacy records while making future records easier to reconcile.
+schema_version: 1.0.0
+tasks:
+- id: t1
+  title: Define the backward-compatible workstream repository and PR reference fields
+  status: completed
+- id: t2
+  title: Implement a read-only reconciliation report with explicit evidence and safe
+    recommendations
+  status: completed
+- id: t3
+  title: Document the closeout flow and connect the audit to validation
+  status: completed
+- id: t4
+  title: Verify current backlog classification and publish through a PR
+  status: completed
+plane_issue_id: c1211ba6-83e3-4614-b649-eb805bedf53f

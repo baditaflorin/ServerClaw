@@ -8,6 +8,11 @@ owner: codex
 branch: codex/release-0.179.47-20260928
 worktree_path: .worktrees/serverclaw-publish-main-20260928
 doc: docs/workstreams/ws-0514-repository-release-0-179-47.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 254
 canonical_truth:
   changelog_entry: Release Woodpecker-only public CI and scoped service-completeness validation in 0.179.47.
   release_bump: patch

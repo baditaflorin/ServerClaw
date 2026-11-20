@@ -9,6 +9,11 @@ deployment: 0fork
 branch: unassigned/ws-0484-self-verification-contracts
 worktree_path: unassigned/ws-0484-self-verification-contracts
 doc: docs/adr/0484-self-verification-contracts.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 119
 depends_on:
   - adr-0420-receipt-schema
   - adr-0481-explicit-deployment-context

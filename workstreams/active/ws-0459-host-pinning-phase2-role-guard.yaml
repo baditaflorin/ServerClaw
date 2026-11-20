@@ -8,6 +8,11 @@ owner: platform-infrastructure
 branch: claude/crazy-chaplygin-c7c256
 worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
 doc: docs/adr/0457-host-pinning-deployment-owner.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 87
 depends_on:
   - adr-0457-host-pinning-deployment-owner
 conflicts_with: []

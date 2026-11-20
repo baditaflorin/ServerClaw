@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "dify_nginx_runtime",
+  "image_ref": "docker.io/library/nginx:1.30.7-alpine@sha256:4d1d4ce08432dc7dfe4af762cb224ce6b5273ae878f41e020ea2425d02ea91a4",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.111.0@sha256:af9f30d1de4ecfbbcd2b674371e8df787879e16832af8ab81551b0bf1ec0ad5b",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.42.4@sha256:e9f29bec38cc856bfd3a7966d2f99711b5b244a531bf121da9de3b47789eecfa",
+  "scanned_on": "2026-11-19",
+  "sbom_receipt": "receipts/sbom/4d1d4ce08432.cdx.json",
+  "cve_receipt": "receipts/cve/4d1d4ce08432-20261119T110658Z.grype.json",
+  "summary": {
+    "critical": 1,
+    "high": 8,
+    "medium": 5,
+    "low": 0,
+    "unknown": 0,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 14
+  }
+}

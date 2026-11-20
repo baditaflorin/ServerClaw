@@ -8,6 +8,11 @@ branch: claude/adr-0422-lsp-ai-decision
 owner: claude
 worktree_path: .claude/worktrees/serene-euclid
 doc: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 14
 depends_on: []
 conflicts_with: []
 shared_surfaces:

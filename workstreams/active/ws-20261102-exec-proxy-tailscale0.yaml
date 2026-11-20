@@ -8,6 +8,11 @@ owner: claude
 branch: claude/hostconf-exec-proxy-tailscale0
 worktree_path: .claude/worktrees/hostconf-exec-proxy-tailscale0
 doc: docs/workstreams/ws-20261102-exec-proxy-tailscale0.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 659
 depends_on: []
 conflicts_with: []
 shared_surfaces:

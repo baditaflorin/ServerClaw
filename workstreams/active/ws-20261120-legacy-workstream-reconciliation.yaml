@@ -1,0 +1,273 @@
+id: ws-20261120-legacy-workstream-reconciliation
+adr: '0452'
+title: Reconcile legacy workstreams from direct PR and release evidence
+status: merged
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/ws-20261120-legacy-workstream-reconciliation-closeout
+worktree_path: .worktrees/ws-20261120-legacy-workstream-reconciliation-closeout
+doc: docs/workstreams/ws-20261120-legacy-workstream-reconciliation.md
+repositories:
+- baditaflorin/platform_server
+pull_requests:
+- repository: baditaflorin/platform_server
+  number: 717
+- repository: baditaflorin/platform_server
+  number: 718
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- workstreams/active/adr-0481-multi-deployment-service-registry.yaml
+- workstreams/active/ws-0421-platform-service-watchdog.yaml
+- workstreams/active/ws-0422-lsp-ai-decision.yaml
+- workstreams/active/ws-0424-fork-clone-0fork.yaml
+- workstreams/active/ws-0438-generic-by-construction.yaml
+- workstreams/active/ws-0443-topology-drift-detection.yaml
+- workstreams/active/ws-0444-nginx-oauth2-proxy-buffer-sizing.yaml
+- workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+- workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+- workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+- workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+- workstreams/active/ws-0448-postmortem-and-handoff.yaml
+- workstreams/active/ws-0449-phase4-self-healing-primitives.yaml
+- workstreams/active/ws-0450-phase5-doctor-aggregator-and-rename-hook.yaml
+- workstreams/active/ws-0451-phase6-self-healing-actions.yaml
+- workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
+- workstreams/active/ws-0455-phase7-drive-doctor-to-zero.yaml
+- workstreams/active/ws-0456-deployment-aware-cert-validation.yaml
+- workstreams/active/ws-0457-host-pinning-deployment-owner.yaml
+- workstreams/active/ws-0458-host-pinning-gate-wiring.yaml
+- workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
+- workstreams/active/ws-0460-host-pinning-sweep.yaml
+- workstreams/active/ws-0460-phase8-cross-deploy-and-auto-promote.yaml
+- workstreams/active/ws-0461-cert-validator-multi-deployment.yaml
+- workstreams/active/ws-0462-deployment-lifecycle-cli-parity.yaml
+- workstreams/active/ws-0463-atomic-receipt-write.yaml
+- workstreams/active/ws-0464-topology-precommit-schema-hook.yaml
+- workstreams/active/ws-0465-host-pinning-sweep-regression-test.yaml
+- workstreams/active/ws-0465-phase9-self-running-automation.yaml
+- workstreams/active/ws-0466-post-converge-health-probe.yaml
+- workstreams/active/ws-0467-ssh-retry-classifier.yaml
+- workstreams/active/ws-0468-converge-state-diff.yaml
+- workstreams/active/ws-0469-preconverge-live-state-check.yaml
+- workstreams/active/ws-0470-preconverge-snapshot.yaml
+- workstreams/active/ws-0471-connection-yml-vault-pull.yaml
+- workstreams/active/ws-0473-phase10-reservation-hardening.yaml
+- workstreams/active/ws-0474-phase11-cpu-only-automation.yaml
+- workstreams/active/ws-0475-phase12-receipt-mass-refresh.yaml
+- workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml
+- workstreams/active/ws-0477-cert-lifecycle-make-target-fix.yaml
+- workstreams/active/ws-0481-explicit-deployment-context.yaml
+- workstreams/active/ws-0481-pentest-fleet-migration.yaml
+- workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
+- workstreams/active/ws-0484-self-verification-contracts.yaml
+- workstreams/active/ws-0485-convergence-idempotency-tests.yaml
+- workstreams/active/ws-0486-hands-off-bootstrap.yaml
+- workstreams/active/ws-0488-collapse-to-single-deployment.yaml
+- workstreams/active/ws-0489-neko-vhost-edge-cert-drift.yaml
+- workstreams/active/ws-0497-fleet-build-broker-pki-handoff.yaml
+- workstreams/active/ws-0498-https-tls-test-baseline.yaml
+- workstreams/active/ws-0499-fleet-build-broker-pki-vault-writer.yaml
+- workstreams/active/ws-0500-builder-private-0mcp-transport.yaml
+- workstreams/active/ws-0501-https-alert-presence-contract.yaml
+- workstreams/active/ws-0502-cache-ghcr-private-auth.yaml
+- workstreams/active/ws-0503-builder-publisher-identity.yaml
+- workstreams/active/ws-0512-authentik-consumer-e2e.yaml
+- workstreams/active/ws-0514-repository-release-0-179-47.yaml
+- workstreams/active/ws-0515-dify-runtime-recovery.yaml
+- workstreams/active/ws-0516-openbao-completeness.yaml
+- workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
+- workstreams/active/ws-0523-fleet-observability-roles.yaml
+- workstreams/active/ws-0529-0infer-observability.yaml
+- workstreams/active/ws-0532-dbeaver-postgres-direct-access.yaml
+- workstreams/active/ws-0533-pve-host-daily-low-alert.yaml
+- workstreams/active/ws-0534-agent-history-vm.yaml
+- workstreams/active/ws-0535-agent-history-alerts.yaml
+- workstreams/active/ws-0537-agent-history-activate.yaml
+- workstreams/active/ws-0538-agent-history-policy-owner.yaml
+- workstreams/active/ws-0539-agent-history-provision-fix.yaml
+- workstreams/active/ws-0540-agent-history-runbook-records.yaml
+- workstreams/active/ws-0541-gate-stacked-base-ref.yaml
+- workstreams/active/ws-0541-proxmox-vm-firewall-tag.yaml
+- workstreams/active/ws-0545-agent-history-canary-scan.yaml
+- workstreams/active/ws-20261020-enrichment-pool-ports.yaml
+- workstreams/active/ws-20261029-0pipe-gate-builder-runbook.yaml
+- workstreams/active/ws-20261029-agent-history-embed-query.yaml
+- workstreams/active/ws-20261029-agent-history-netpolicy-drift.yaml
+- workstreams/active/ws-20261029-agent-history-vip-collision.yaml
+- workstreams/active/ws-20261029-dockerhost-state-staging-peak.yaml
+- workstreams/active/ws-20261029-pve-backup-weekly-freshness.yaml
+- workstreams/active/ws-20261030-dockerhost-state-live-drift.yaml
+- workstreams/active/ws-20261030-pve-firewall-install-guard.yaml
+- workstreams/active/ws-20261030-woodpecker-activate-repo.yaml
+- workstreams/active/ws-20261031-pg-primary-hugepages.yaml
+- workstreams/active/ws-20261031-pg-primary-memory.yaml
+- workstreams/active/ws-20261101-hypervisor-swap-stopgap.yaml
+- workstreams/active/ws-20261101-pg-swap-hostconf.yaml
+- workstreams/active/ws-20261101-pve-0mcp-memory-budget.yaml
+- workstreams/active/ws-20261101-standby-guest-diag.yaml
+- workstreams/active/ws-20261101-vm130-inventory-correct.yaml
+- workstreams/active/ws-20261102-build-gc-cache-trim.yaml
+- workstreams/active/ws-20261102-exec-proxy-tailscale0.yaml
+- workstreams/active/ws-20261102-tailscaled-restart-proxies.yaml
+- workstreams/active/ws-20261103-build-gc-helper-image.yaml
+- workstreams/active/ws-20261103-pve-0mcp-budget-status.yaml
+- workstreams/active/ws-20261103-tailscaled-restart-0docker.yaml
+- workstreams/active/ws-20261104-fleet-job-caches-trim-alerts.yaml
+- workstreams/active/ws-20261109-ct-names-weekly-trim.yaml
+- workstreams/active/ws-20261109-fix-1107-receipt-validation.yaml
+- workstreams/active/ws-20261112-agent-history-autounlock.yaml
+- workstreams/active/ws-20261118-kamateratmp-build-pool-expansion.yaml
+- workstreams/active/ws-20261120-legacy-workstream-reconciliation.yaml
+- workstreams.yaml
+- docs/workstreams/ws-20261120-legacy-workstream-reconciliation.md
+- docs/workstreams/ws-20261120-legacy-workstream-reconciliation-evidence.csv
+- README.md
+- changelog.md
+- docs/status/history/merged-workstreams.md
+- docs/diagrams/agent-coordination-map.excalidraw
+ownership_manifest:
+  owned_surfaces:
+  - id: verified_legacy_workstream_reconciliation
+    mode: shared_contract
+    contract: workstream-registry-v1
+    paths:
+    - workstreams/active/adr-0481-multi-deployment-service-registry.yaml
+    - workstreams/active/ws-0421-platform-service-watchdog.yaml
+    - workstreams/active/ws-0422-lsp-ai-decision.yaml
+    - workstreams/active/ws-0424-fork-clone-0fork.yaml
+    - workstreams/active/ws-0438-generic-by-construction.yaml
+    - workstreams/active/ws-0443-topology-drift-detection.yaml
+    - workstreams/active/ws-0444-nginx-oauth2-proxy-buffer-sizing.yaml
+    - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+    - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+    - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+    - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+    - workstreams/active/ws-0448-postmortem-and-handoff.yaml
+    - workstreams/active/ws-0449-phase4-self-healing-primitives.yaml
+    - workstreams/active/ws-0450-phase5-doctor-aggregator-and-rename-hook.yaml
+    - workstreams/active/ws-0451-phase6-self-healing-actions.yaml
+    - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
+    - workstreams/active/ws-0455-phase7-drive-doctor-to-zero.yaml
+    - workstreams/active/ws-0456-deployment-aware-cert-validation.yaml
+    - workstreams/active/ws-0457-host-pinning-deployment-owner.yaml
+    - workstreams/active/ws-0458-host-pinning-gate-wiring.yaml
+    - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
+    - workstreams/active/ws-0460-host-pinning-sweep.yaml
+    - workstreams/active/ws-0460-phase8-cross-deploy-and-auto-promote.yaml
+    - workstreams/active/ws-0461-cert-validator-multi-deployment.yaml
+    - workstreams/active/ws-0462-deployment-lifecycle-cli-parity.yaml
+    - workstreams/active/ws-0463-atomic-receipt-write.yaml
+    - workstreams/active/ws-0464-topology-precommit-schema-hook.yaml
+    - workstreams/active/ws-0465-host-pinning-sweep-regression-test.yaml
+    - workstreams/active/ws-0465-phase9-self-running-automation.yaml
+    - workstreams/active/ws-0466-post-converge-health-probe.yaml
+    - workstreams/active/ws-0467-ssh-retry-classifier.yaml
+    - workstreams/active/ws-0468-converge-state-diff.yaml
+    - workstreams/active/ws-0469-preconverge-live-state-check.yaml
+    - workstreams/active/ws-0470-preconverge-snapshot.yaml
+    - workstreams/active/ws-0471-connection-yml-vault-pull.yaml
+    - workstreams/active/ws-0473-phase10-reservation-hardening.yaml
+    - workstreams/active/ws-0474-phase11-cpu-only-automation.yaml
+    - workstreams/active/ws-0475-phase12-receipt-mass-refresh.yaml
+    - workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml
+    - workstreams/active/ws-0477-cert-lifecycle-make-target-fix.yaml
+    - workstreams/active/ws-0481-explicit-deployment-context.yaml
+    - workstreams/active/ws-0481-pentest-fleet-migration.yaml
+    - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
+    - workstreams/active/ws-0484-self-verification-contracts.yaml
+    - workstreams/active/ws-0485-convergence-idempotency-tests.yaml
+    - workstreams/active/ws-0486-hands-off-bootstrap.yaml
+    - workstreams/active/ws-0488-collapse-to-single-deployment.yaml
+    - workstreams/active/ws-0489-neko-vhost-edge-cert-drift.yaml
+    - workstreams/active/ws-0497-fleet-build-broker-pki-handoff.yaml
+    - workstreams/active/ws-0498-https-tls-test-baseline.yaml
+    - workstreams/active/ws-0499-fleet-build-broker-pki-vault-writer.yaml
+    - workstreams/active/ws-0500-builder-private-0mcp-transport.yaml
+    - workstreams/active/ws-0501-https-alert-presence-contract.yaml
+    - workstreams/active/ws-0502-cache-ghcr-private-auth.yaml
+    - workstreams/active/ws-0503-builder-publisher-identity.yaml
+    - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
+    - workstreams/active/ws-0514-repository-release-0-179-47.yaml
+    - workstreams/active/ws-0515-dify-runtime-recovery.yaml
+    - workstreams/active/ws-0516-openbao-completeness.yaml
+    - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
+    - workstreams/active/ws-0523-fleet-observability-roles.yaml
+    - workstreams/active/ws-0529-0infer-observability.yaml
+    - workstreams/active/ws-0532-dbeaver-postgres-direct-access.yaml
+    - workstreams/active/ws-0533-pve-host-daily-low-alert.yaml
+    - workstreams/active/ws-0534-agent-history-vm.yaml
+    - workstreams/active/ws-0535-agent-history-alerts.yaml
+    - workstreams/active/ws-0537-agent-history-activate.yaml
+    - workstreams/active/ws-0538-agent-history-policy-owner.yaml
+    - workstreams/active/ws-0539-agent-history-provision-fix.yaml
+    - workstreams/active/ws-0540-agent-history-runbook-records.yaml
+    - workstreams/active/ws-0541-gate-stacked-base-ref.yaml
+    - workstreams/active/ws-0541-proxmox-vm-firewall-tag.yaml
+    - workstreams/active/ws-0545-agent-history-canary-scan.yaml
+    - workstreams/active/ws-20261020-enrichment-pool-ports.yaml
+    - workstreams/active/ws-20261029-0pipe-gate-builder-runbook.yaml
+    - workstreams/active/ws-20261029-agent-history-embed-query.yaml
+    - workstreams/active/ws-20261029-agent-history-netpolicy-drift.yaml
+    - workstreams/active/ws-20261029-agent-history-vip-collision.yaml
+    - workstreams/active/ws-20261029-dockerhost-state-staging-peak.yaml
+    - workstreams/active/ws-20261029-pve-backup-weekly-freshness.yaml
+    - workstreams/active/ws-20261030-dockerhost-state-live-drift.yaml
+    - workstreams/active/ws-20261030-pve-firewall-install-guard.yaml
+    - workstreams/active/ws-20261030-woodpecker-activate-repo.yaml
+    - workstreams/active/ws-20261031-pg-primary-hugepages.yaml
+    - workstreams/active/ws-20261031-pg-primary-memory.yaml
+    - workstreams/active/ws-20261101-hypervisor-swap-stopgap.yaml
+    - workstreams/active/ws-20261101-pg-swap-hostconf.yaml
+    - workstreams/active/ws-20261101-pve-0mcp-memory-budget.yaml
+    - workstreams/active/ws-20261101-standby-guest-diag.yaml
+    - workstreams/active/ws-20261101-vm130-inventory-correct.yaml
+    - workstreams/active/ws-20261102-build-gc-cache-trim.yaml
+    - workstreams/active/ws-20261102-exec-proxy-tailscale0.yaml
+    - workstreams/active/ws-20261102-tailscaled-restart-proxies.yaml
+    - workstreams/active/ws-20261103-build-gc-helper-image.yaml
+    - workstreams/active/ws-20261103-pve-0mcp-budget-status.yaml
+    - workstreams/active/ws-20261103-tailscaled-restart-0docker.yaml
+    - workstreams/active/ws-20261104-fleet-job-caches-trim-alerts.yaml
+    - workstreams/active/ws-20261109-ct-names-weekly-trim.yaml
+    - workstreams/active/ws-20261109-fix-1107-receipt-validation.yaml
+    - workstreams/active/ws-20261112-agent-history-autounlock.yaml
+    - workstreams/active/ws-20261118-kamateratmp-build-pool-expansion.yaml
+    - workstreams/active/ws-20261120-legacy-workstream-reconciliation.yaml
+    - workstreams.yaml
+  - id: reconciliation_evidence_doc
+    mode: exclusive
+    paths:
+    - docs/workstreams/ws-20261120-legacy-workstream-reconciliation.md
+    - docs/workstreams/ws-20261120-legacy-workstream-reconciliation-evidence.csv
+  - id: generated_reconciliation_summaries
+    mode: shared_contract
+    contract: generated-artifacts-v1
+    paths:
+    - README.md
+    - changelog.md
+    - docs/status/history/merged-workstreams.md
+    - docs/diagrams/agent-coordination-map.excalidraw
+canonical_truth:
+  changelog_entry: Backfill repository and pull-request references for legacy workstreams
+    verified from merged PR evidence.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+schema_version: 1.0.0
+tasks:
+- id: t1
+  title: Verify historical PR and release evidence for legacy in-progress records
+  status: completed
+- id: t2
+  title: Reconcile only records whose exact repository, PR, and lifecycle state are
+    proven
+  status: completed
+- id: t3
+  title: Document evidence, remaining backlog, and safe follow-up automation
+  status: completed
+- id: t4
+  title: Validate and publish the reconciliation through a pull request
+  status: completed
+plane_issue_id: fc5cbc6b-b6cd-4027-a2b5-c061e9c74440

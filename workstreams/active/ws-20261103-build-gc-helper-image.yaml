@@ -8,6 +8,11 @@ owner: claude
 branch: claude/build-gc-helper-image
 worktree_path: .claude/worktrees/build-gc-helper-image
 doc: docs/workstreams/ws-20261103-build-gc-helper-image.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 664
 depends_on: []
 conflicts_with: []
 shared_surfaces:

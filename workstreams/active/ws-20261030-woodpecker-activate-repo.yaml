@@ -8,6 +8,11 @@ owner: claude
 branch: claude/woodpecker-activate
 worktree_path: .claude/worktrees/woodpecker-activate
 doc: docs/workstreams/ws-20261030-woodpecker-activate-repo.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 641
 depends_on: []
 conflicts_with: []
 shared_surfaces:

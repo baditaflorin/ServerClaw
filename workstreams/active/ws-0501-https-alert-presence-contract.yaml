@@ -8,6 +8,11 @@ owner: codex
 branch: codex/fix-https-alert-presence-gate
 worktree_path: .worktrees/fix-https-alert-presence-gate
 doc: docs/workstreams/ws-0501-https-alert-presence-contract.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 225
 depends_on: []
 conflicts_with: []
 shared_surfaces:

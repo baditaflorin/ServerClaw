@@ -1,0 +1,27 @@
+workstream_id: ws-20261119-kamateratmp-trial-cost-accounting
+state: completed
+schema_version: 1.1.0
+started_at: '2026-11-19T21:45:46Z'
+completed_at: '2026-11-19T21:46:01Z'
+applied_by: codex
+repo_version: 0.179.66
+adr: 0499
+summary: Provision the Kamateratmp Woodpecker trial cost dashboard on the 0mcp monitoring
+  VM from merged main.
+targets:
+- host: monitoring
+  ssh_alias: 0mcp_monitoring
+  vmid: 140
+  address: 10.10.10.40
+  dashboard_uid: 0mcp-build-trial-cost
+errors: []
+notes:
+- Scoped Ansible apply completed for monitoring VM 140 (10.10.10.40).
+- Earlier attempts identified and documented a direct-IP route failure and a missing
+  tag dependency; both were corrected before this successful run.
+- The private 0mcp inventory maps monitoring to the verified SSH alias; Ansible ping
+  succeeded before apply.
+- 'Dashboard UID: 0mcp-build-trial-cost.'
+- 'Identity overlay: .local/deployments/0mcp/identity.yml; inventory overlay: .local/deployments/0mcp/ansible-connection.yml.'
+- 'Playbook: playbooks/services/grafana.yml; tag: build_trial_dashboard; source commit:
+  2cff3b89b6f1b8b2c89279104159e64ed5cbee08.'

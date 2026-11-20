@@ -8,6 +8,11 @@ owner: claude
 branch: claude/gate-stacked-base-ref
 worktree_path: .claude/worktrees/gate-stacked-base
 doc: docs/workstreams/ws-0541-gate-stacked-base-ref.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 621
 depends_on: []
 conflicts_with: []
 shared_surfaces:

@@ -8,6 +8,11 @@ owner: claude
 branch: claude/pve-0mcp-budget-status
 worktree_path: .claude/worktrees/pve-0mcp-budget-status
 doc: docs/workstreams/ws-20261103-pve-0mcp-budget-status.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 669
 depends_on: []
 conflicts_with: []
 shared_surfaces:

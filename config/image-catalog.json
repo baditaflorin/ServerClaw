@@ -119,24 +119,24 @@
       "runtime_host": "docker-runtime",
       "container_name": "dify-nginx",
       "registry_ref": "docker.io/library/nginx",
-      "tag": "1.29.1-alpine",
-      "digest": "sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8",
-      "ref": "docker.io/library/nginx:1.29.1-alpine@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8",
+      "tag": "1.30.7-alpine",
+      "digest": "sha256:4d1d4ce08432dc7dfe4af762cb224ce6b5273ae878f41e020ea2425d02ea91a4",
+      "ref": "docker.io/library/nginx:1.30.7-alpine@sha256:4d1d4ce08432dc7dfe4af762cb224ce6b5273ae878f41e020ea2425d02ea91a4",
       "platform": "linux/amd64",
-      "pinned_on": "2026-03-28",
+      "pinned_on": "2026-11-19",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-09-28-dify-nginx-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-11-19-dify-nginx-runtime.json",
       "exception": {
-        "justification": "Fresh Grype evidence on the pinned Dify NGINX digest reports critical and high findings with no fixes available for this digest. Keep the existing fixed digest during the urgent availability repair while completing the Dify image refresh.",
+        "justification": "Roll forward immediately to the vendor-fixed NGINX 1.30.7 Alpine image; the exact digest scan retains one unrelated critical zlib finding with no fix available.",
         "owner": "Platform operations",
         "compensating_controls": [
-          "The NGINX container is only published on the private Docker-runtime host port 8094 and is reached through the shared SSO-protected public edge.",
-          "The current image digest remains pinned; no image version or digest is changing during this emergency repair.",
-          "This exception expires in seven days and requires a patched, freshly scanned Dify release before renewal."
+          "The fixed NGINX image is pinned by immutable digest.",
+          "The separate zlib finding has no vendor fix in the scanned image; re-scan and replace the base as soon as Alpine publishes one.",
+          "SCTP is blocked on the Docker runtime host as a separate kernel escalation mitigation."
         ],
-        "approved_on": "2026-09-28",
-        "expires_on": "2026-10-05",
-        "remediation_plan": "Upgrade Dify and its NGINX image to a supported release by 2026-10-05 after reviewing official compose changes, backing up PostgreSQL, Qdrant, and file storage, and validating the database migration path."
+        "approved_on": "2026-11-19",
+        "expires_on": "2026-11-26",
+        "remediation_plan": "Re-scan the pinned image by 2026-11-26 and update to an Alpine base with the zlib fix as soon as available; keep the NGINX 1.30.7 security fix in place."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",

@@ -156,6 +156,19 @@
   changed_when: false
   no_log: true
 
+- name: Verify build trial cost dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_build_trial_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_build_trial_dashboard
+  changed_when: false
+  no_log: true
+  tags: [build_trial_dashboard]
+
 - name: Verify public Grafana dashboard URLs redirect unauthenticated viewers to login
   ansible.builtin.uri:
     url: "{{ monitoring_grafana_public_url }}/d/{{ monitoring_grafana_dashboard_uid }}/{{ monitoring_grafana_dashboard_uid }}"
@@ -166,6 +179,25 @@
   become: false
   register: monitoring_verify_public_dashboard_redirect
   changed_when: false
+  when: monitoring_verify_public_edge | default(true)
+
+- name: Verify public build trial dashboard URL redirects unauthenticated viewers to login
+  ansible.builtin.uri:
+    url: "{{ monitoring_grafana_public_url }}/d/{{ monitoring_grafana_build_trial_dashboard_uid }}/build-trial-cost-and-ci-usage"
+    method: GET
+    follow_redirects: none
+    status_code: 302
+  delegate_to: localhost
+  become: false
+  register: monitoring_verify_public_build_trial_dashboard_redirect
+  changed_when: false
+  when: monitoring_verify_public_edge | default(true)
+
+- name: Assert public build trial dashboard URL points at login
+  ansible.builtin.assert:
+    that:
+      - "'/login' in (monitoring_verify_public_build_trial_dashboard_redirect.location | default(''))"
+    fail_msg: "Unauthenticated requests to the public build trial dashboard URL are not being redirected to login."
   when: monitoring_verify_public_edge | default(true)
 
 - name: Assert the public Grafana dashboard redirect points at login

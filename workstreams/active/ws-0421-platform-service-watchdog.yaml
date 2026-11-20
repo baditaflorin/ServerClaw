@@ -8,6 +8,11 @@ owner: claude
 branch: claude/sharp-jemison
 worktree_path: .claude/worktrees/sharp-jemison
 doc: docs/adr/0421-platform-wide-service-watchdog.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 12
 depends_on:
   - adr-0376-identity-core-watchdog
   - adr-0226-systemd-timers

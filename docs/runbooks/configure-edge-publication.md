@@ -25,6 +25,12 @@ touching `nginx-edge`. It fails fast when the subdomain catalog, generated
 publication registry, shared-edge certificate domain set, and
 `config/certificate-catalog.json` disagree.
 
+If the Proxmox public address does not accept the automation SSH route on port
+22, set `BOOTSTRAP_OVERLAY_HOST_ADDR` to the deployment's approved management
+or Tailscale address when invoking the target. This keeps the jump host inside
+the overlay-aware path without overriding protected Ansible connection
+variables.
+
 ## Verification
 
 ```bash

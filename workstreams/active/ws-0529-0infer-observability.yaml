@@ -8,6 +8,11 @@ owner: codex
 branch: codex/ws-0529-monitoring-ssh-scope
 worktree_path: .worktrees/ws-0529-monitoring-ssh-scope
 doc: docs/workstreams/ws-0529-0infer-observability.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 411
 depends_on:
   - ws-0528-0infer-ci-worker
 conflicts_with: []

@@ -8,6 +8,11 @@ owner: claude
 branch: claude/pg-primary-pgss-max
 worktree_path: .claude/worktrees/pg-primary-pgss-max
 doc: docs/workstreams/ws-20261031-pg-primary-hugepages.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 648
 depends_on: []
 conflicts_with: []
 shared_surfaces:

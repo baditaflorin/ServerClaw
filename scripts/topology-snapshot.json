@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-13T23:41:25Z",
+  "generated_at": "2026-11-19T16:55:12Z",
   "generated_from": [
     "inventory/hosts.yml",
     "inventory/host_vars/proxmox-host.yml",
@@ -78,6 +78,10 @@
         "postgres-data": {
           "vmid": 154,
           "ip": "10.10.10.54"
+        },
+        "agent-history": {
+          "vmid": 155,
+          "ip": "10.10.10.55"
         }
       },
       "services": {

@@ -8,6 +8,11 @@ owner: claude
 branch: claude/friendly-pike-233883
 worktree_path: .claude/worktrees/friendly-pike-233883
 doc: docs/postmortems/2026-05-11-service-inventory-gap-multi-deployment.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 118
 related_adrs:
   - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - docs/adr/0437-fork-bootstrap-gaps.md

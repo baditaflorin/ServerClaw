@@ -8,6 +8,11 @@ owner: claude
 branch: claude/pve-fw-guard
 worktree_path: .claude/worktrees/pve-fw-guard
 doc: docs/workstreams/ws-20261030-pve-firewall-install-guard.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 638
 depends_on: []
 conflicts_with: []
 shared_surfaces:

@@ -8,6 +8,11 @@ owner: codex
 branch: codex/fix-broker-pki-handoff-template
 worktree_path: .worktrees/fix-broker-pki-handoff-template
 doc: docs/workstreams/ws-0497-fleet-build-broker-pki-handoff.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 228
 depends_on:
   - adr-0042-step-ca-for-ssh-and-internal-tls
   - adr-0047-short-lived-credentials-and-internal-mtls

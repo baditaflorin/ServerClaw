@@ -8,6 +8,11 @@ owner: claude
 branch: claude/live-apply-pve-daily-low
 worktree_path: .claude/worktrees/live-apply-pve-daily-low
 doc: docs/workstreams/ws-0533-pve-host-daily-low-alert.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 584
 depends_on: []
 conflicts_with: []
 shared_surfaces:

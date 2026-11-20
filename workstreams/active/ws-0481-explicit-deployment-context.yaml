@@ -8,6 +8,11 @@ owner: claude
 branch: claude/condescending-pascal-021248
 worktree_path: .claude/worktrees/condescending-pascal-021248
 doc: docs/adr/0481-explicit-deployment-context.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 119
 depends_on:
   - adr-0407-generic-by-default
   - adr-0437-overlay-aware-bootstrap

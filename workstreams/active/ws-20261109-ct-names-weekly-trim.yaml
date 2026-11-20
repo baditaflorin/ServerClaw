@@ -8,6 +8,11 @@ owner: codex
 branch: codex/ct-reclaim-live-evidence
 worktree_path: .worktrees/ct-reclaim-live-evidence
 doc: docs/workstreams/ws-20261109-ct-names-weekly-trim.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 692
 depends_on: []
 conflicts_with: []
 shared_surfaces:

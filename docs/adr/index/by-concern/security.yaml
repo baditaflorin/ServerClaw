@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-18'
+generated: '2026-11-20'
 facet: concern
 concern: security
-total_adrs: 49
+total_adrs: 50
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -951,3 +951,24 @@ adrs:
     summary: yaml
     filename: 0489-firewall-rule-provenance-and-drift-detection.md
     path: docs/adr/0489-firewall-rule-provenance-and-drift-detection.md
+  - adr: 0498
+    title: Patch NGINX RCEs and contain the SCTP escalation path
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-11-19'
+    concern: security
+    keywords:
+      - nginx
+      - security
+      - containers
+      - sctp
+      - patch
+      - rces
+      - contain
+      - escalation
+      - path
+    summary: 1. Replace system NGINX with the signed NGINX.org stable package 1.30.7, or
+    filename: 0498-nginx2root-remediation.md
+    path: docs/adr/0498-nginx2root-remediation.md
+    implemented_on: '2026-11-19'

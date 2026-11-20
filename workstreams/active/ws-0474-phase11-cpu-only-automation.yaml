@@ -8,6 +8,11 @@ owner: claude
 branch: claude/objective-carson-cbe0c3
 worktree_path: .claude/worktrees/objective-carson-cbe0c3
 doc: docs/adr/0473-phase11-cpu-only-automation-primitives.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 106
 depends_on:
   - adr-0449-phase4-self-healing-primitives
   - adr-0465-phase9-self-running-automation

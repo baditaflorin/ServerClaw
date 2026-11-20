@@ -29,6 +29,12 @@ entries:
       alert-rules, tofu, agent-standards
 
       '
+  scripts/workstream_reconciliation.py:
+    purpose: Read-only workstream closeout audit and changed-active-shard metadata validator
+    owner: human and automation
+    format: Python
+    use_for: Finding missing exact repository/PR references and inconsistent closeout signals
+    validation: agent-standards requires repositories and pull_requests on changed active shards
   .gitea/workflows/:
     purpose: Gitea Actions CI workflows (PRIMARY CI)
     owner: human

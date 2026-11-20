@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.65` |
-| Platform version | `0.179.63` |
+| Repository version | `0.179.66` |
+| Platform version | `0.179.66` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -89,8 +89,8 @@ Showing 20 of 200 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.65` |
-| Platform version | `0.179.63` |
+| Repository version | `0.179.66` |
+| Platform version | `0.179.66` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -357,14 +357,21 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 361 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 369 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0499` | Measure Kamateratmp trial CI usage and cost in Grafana | `live_applied` | [ws-20261119-kamateratmp-trial-cost-accounting.md](docs/workstreams/ws-20261119-kamateratmp-trial-cost-accounting.md) |
+| `0498` | Patch NGINX pre-auth RCEs and contain the SCTP privilege-escalation chain | `merged` | [ws-20261119-nginx2root-remediation.md](docs/workstreams/ws-20261119-nginx2root-remediation.md) |
+| `0497` | Add the temporary Kamatera worker to shared Buildx lanes with enforced sunset | `live_applied` | [ws-20261118-kamateratmp-build-pool-expansion.md](docs/workstreams/ws-20261118-kamateratmp-build-pool-expansion.md) |
 | `0496` | Onboard a 30-day external Debian build worker and record its sunset path | `merged` | [ws-20261118-kamatera-trial-build-worker.md](docs/workstreams/ws-20261118-kamatera-trial-build-worker.md) |
 | `0493` | Bound Plausible ClickHouse diagnostic log storage | `live_applied` | [ws-0520-plausible-clickhouse-log-retention.md](docs/workstreams/ws-0520-plausible-clickhouse-log-retention.md) |
 | `0492` | Scope Plausible analytics SSO to the operator email identity | `live_applied` | [ws-0519-plausible-email-sso.md](docs/workstreams/ws-0519-plausible-email-sso.md) |
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](docs/adr/0470-deployment-fixture-matrix.md) |
+| `0461` | Atomic receipt write + dangling-receipt gate flag | `merged` | [0461-atomic-receipt-write-and-dangling-check.md](docs/adr/0461-atomic-receipt-write-and-dangling-check.md) |
+| `0452` | Make workstream reconciliation evidence-based and repeatable | `merged` | [ws-20261120-workstream-lifecycle-reconciliation.md](docs/workstreams/ws-20261120-workstream-lifecycle-reconciliation.md) |
+| `0452` | Reconcile legacy workstreams from direct PR and release evidence | `merged` | [ws-20261120-legacy-workstream-reconciliation.md](docs/workstreams/ws-20261120-legacy-workstream-reconciliation.md) |
+| `0448` | Cross-agent handoff postmortem for ws-0448 deployment connection registry | `merged` | [2026-04-28-ws-0448-deployment-connection-registry.md](docs/postmortems/2026-04-28-ws-0448-deployment-connection-registry.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](docs/adr/0448-deployment-connection-registry-and-wrapper.md) |
 | `0409` | Keep sanitized ServerClaw snapshots compatible with source validation | `merged` | [ws-0524-serverclaw-snapshot-ci-compat.md](docs/workstreams/ws-0524-serverclaw-snapshot-ci-compat.md) |
 | `0409` | Accept clean ignored HTTPS alert outputs while rejecting present drift | `merged` | [ws-0500-https-alert-runtime-output-gate.md](docs/workstreams/ws-0500-https-alert-runtime-output-gate.md) |
@@ -376,16 +383,9 @@ Showing 25 of 361 merged or live-applied workstreams. Full history: [merged work
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](docs/adr/0362-agent-service-api-gateway-pattern.md) |
 | `0360` | Restore the governed Plane API access path for workstream sync | `merged` | [ws-0518-plane-api-access.md](docs/workstreams/ws-0518-plane-api-access.md) |
+| `0350` | Restore public NGINX edge and Woodpecker reachability | `merged` | [ws-20261119-ci-edge-reachability.md](docs/workstreams/ws-20261119-ci-edge-reachability.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
-| `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
-| `0296` | Remove the CI Go build cache grant to the 0own build worker | `live_applied` | [ws-0531-retire-ci-go-build-cache-grant.md](docs/workstreams/ws-0531-retire-ci-go-build-cache-grant.md) |
-| `0296` | Let CI agents reach the shared Go build cache on the 0own build worker | `live_applied` | [ws-0530-ci-go-build-cache-grant.md](docs/workstreams/ws-0530-ci-go-build-cache-grant.md) |
-| `0296` | Allow Builder metrics scraping over the private tailnet | `live_applied` | [ws-0513-builder-metrics-tailnet-firewall.md](docs/workstreams/ws-0513-builder-metrics-tailnet-firewall.md) |
-| `0296` | Deliver the cache-only GHCR proxy configuration through a one-shot reader bridge | `merged` | [ws-0504-cache-ghcr-secret-renderer.md](docs/workstreams/ws-0504-cache-ghcr-secret-renderer.md) |
-| `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
-| `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](docs/workstreams/ws-0293-main-integration.md) |
-| `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](docs/workstreams/ws-0259-main-merge.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements

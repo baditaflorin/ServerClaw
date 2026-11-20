@@ -8,6 +8,11 @@ owner: codex
 branch: codex/fix-broker-pki-writer-config-validation
 worktree_path: .worktrees/fix-broker-pki-writer-config-validation
 doc: docs/workstreams/ws-0499-fleet-build-broker-pki-vault-writer.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 226
 depends_on:
   - ws-0497-fleet-build-broker-vm180
 conflicts_with: []

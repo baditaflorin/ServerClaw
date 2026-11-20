@@ -8,6 +8,11 @@ owner: claude
 branch: claude/dockerhost-state-staging-peak
 worktree_path: .claude/worktrees/dockerhost-state-staging-peak
 doc: docs/workstreams/ws-20261029-dockerhost-state-staging-peak.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 617
 depends_on: []
 conflicts_with: []
 shared_surfaces:

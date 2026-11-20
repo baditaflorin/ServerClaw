@@ -14,6 +14,11 @@ created: 2026-04-28
 branch: claude/ws-0447-coolify-apps-self-healing
 worktree_path: .claude/worktrees/ws-0447-coolify-apps-self-healing
 doc: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 80
 ownership_manifest:
   owned_surfaces:
     - id: ws_0447_coolify_runtime_role

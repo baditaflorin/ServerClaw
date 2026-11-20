@@ -8,6 +8,11 @@ owner: claude
 branch: claude/reverent-cray-37f3c3
 worktree_path: .claude/worktrees/reverent-cray-37f3c3
 doc: docs/adr/0438-generic-by-construction.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 53
 depends_on:
   - adr-0407-generic-by-default
   - adr-0409-zero-sanitization-publication

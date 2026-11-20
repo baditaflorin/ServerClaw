@@ -1,13 +1,18 @@
 id: ws-0463-atomic-receipt-write
 adr: "0461"
 title: "Atomic receipt write + dangling-receipt gate flag"
-status: in_progress
+status: merged
 ready_to_merge: true
 live_applied: false
 owner: platform-infrastructure
 branch: claude/crazy-chaplygin-c7c256
 worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
 doc: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 93
 depends_on:
   - adr-0446-phase2-multi-deployment-hardening
 conflicts_with: []
@@ -54,3 +59,8 @@ notes: |
   10 new tests cover atomic write, idempotent rewrite, no-temp-leftover
   on success and on exception, parent-dir creation, dangling-check
   empty/dirty/empty-slug paths, and CLI exit codes.
+canonical_truth:
+  changelog_entry: 'Reconcile the ws-0463 receipt-freshness workstream with merged release PR #93 (0.179.26).'
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}

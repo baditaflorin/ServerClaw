@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-18'
+generated: '2026-11-20'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 55
+total_adrs: 54
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -582,24 +582,6 @@ adrs:
     summary: Extend scripts/refreshsafereceipts.py::candidaterolepaths to
     filename: 0451-phase6-self-healing-actions.md
     path: docs/adr/0451-phase6-self-healing-actions.md
-  - adr: '0452'
-    title: Workstream Lifecycle Auto-Close
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
-    date: '2026-04-28'
-    concern: automation
-    keywords:
-      - workstreams
-      - registry
-      - archive
-      - lifecycle
-      - automation
-      - workstream
-      - auto-close
-    summary: 'Add three mechanical closures around ADR 0326''s existing data layout:'
-    filename: 0452-workstream-lifecycle-auto-close.md
-    path: docs/adr/0452-workstream-lifecycle-auto-close.md
   - adr: '0453'
     title: Integration-Health Telemetry
     status: Proposed

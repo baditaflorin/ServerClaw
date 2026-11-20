@@ -8,6 +8,11 @@ owner: platform-infrastructure
 branch: claude/crazy-chaplygin-c7c256
 worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
 doc: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 67
 depends_on: []
 conflicts_with: []
 shared_surfaces:

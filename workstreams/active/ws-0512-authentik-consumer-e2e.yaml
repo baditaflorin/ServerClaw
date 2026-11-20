@@ -9,6 +9,11 @@ owner: codex
 branch: codex/ws-0512-glitchtip-scan-evidence-20261014
 worktree_path: .worktrees/ws-0512-glitchtip-scan-evidence-20261014
 doc: docs/workstreams/ws-0512-authentik-consumer-e2e.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 243
 canonical_truth:
   changelog_entry: Verify Authentik consumer sign-in and preserve source-faithful, secret-audited ServerClaw publication.
   release_bump: patch

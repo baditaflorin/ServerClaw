@@ -8,6 +8,11 @@ owner: claude
 branch: claude/gallant-chebyshev-b0def1
 worktree_path: .claude/worktrees/gallant-chebyshev-b0def1
 doc: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 15
 related_adrs:
   - docs/adr/0425-retrospective-420-adr-platform-build.md
 depends_on:
@@ -22,6 +27,9 @@ shared_surfaces:
   - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - docs/adr/0425-retrospective-420-adr-platform-build.md
   - docs/runbooks/hetzner-bare-metal-bootstrap.md
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
 started: '2026-04-21'
 priority: p1
 surfaces:
@@ -156,12 +164,16 @@ ownership_manifest:
         - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml
         - collections/ansible_collections/lv3/platform/roles/step_ca_ssh_trust/tasks/main.yml
         - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml
-        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
-        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml
         - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/loki-config.yml.j2
-        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
         - playbooks/step-ca.yml
       mode: exclusive
+    - id: monitoring_vm_role_shared_edits
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
     - id: ws_0424_schema_catalog_fixes
       paths:
         - config/command-catalog.json
@@ -282,3 +294,9 @@ notes: >
   clean. The DNS token shared in chat should be rotated regardless of clone
   outcome. See ADR 0424 open questions for the full list of decisions awaiting
   operator confirmation on return.
+  Ownership correction (2026-11-19): the monitoring VM defaults, task, and
+  verification files are now maintained under the existing
+  monitoring-vm-role-edits-v1 shared contract used by ws-0522. The recorded
+  WS-0424 branch/worktree is absent, and the monitoring baseline is already on
+  main. Only these three stale exclusive claims were transferred; other claims
+  remain unchanged.

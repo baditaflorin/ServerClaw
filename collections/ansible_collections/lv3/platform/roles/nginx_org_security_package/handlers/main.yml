@@ -1,0 +1,12 @@
+# Purpose: Restart NGINX only after the replacement package and module config validate.
+# Use case: Triggered when the package or module loader changes.
+# Inputs: A validated local NGINX configuration.
+# Outputs: Running NGINX with the fixed executable.
+# Idempotency: Runs only when notified by a changed remediation task.
+# Dependencies: systemd-managed NGINX service.
+---
+- name: Restart NGINX after the security package update
+  ansible.builtin.systemd:
+    name: nginx
+    state: restarted
+    daemon_reload: true

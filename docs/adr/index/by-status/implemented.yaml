@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-18'
+generated: '2026-11-20'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 381
+total_adrs: 384
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -7144,6 +7144,27 @@ adrs:
     summary: A new per-deployment file (gitignored under .local/) describing how
     filename: 0448-deployment-connection-registry-and-wrapper.md
     path: docs/adr/0448-deployment-connection-registry-and-wrapper.md
+  - adr: '0452'
+    title: Workstream Lifecycle Reconciliation and Safe Closeout
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-28'
+    concern: ci-cd
+    keywords:
+      - workstreams
+      - registry
+      - archive
+      - lifecycle
+      - automation
+      - reconciliation
+      - closeout
+      - repository-references
+      - workstream
+      - safe
+    summary: 'Keep one lifecycle authority: the existing canonical-truth release flow owns'
+    filename: 0452-workstream-lifecycle-auto-close.md
+    path: docs/adr/0452-workstream-lifecycle-auto-close.md
   - adr: '0456'
     title: Deployment-Aware Certificate Validation
     status: Deprecated
@@ -7497,3 +7518,48 @@ adrs:
     filename: 0497-expiring-external-build-worker-pool-admission.md
     path: docs/adr/0497-expiring-external-build-worker-pool-admission.md
     implemented_on: '2026-11-18'
+  - adr: 0498
+    title: Patch NGINX RCEs and contain the SCTP escalation path
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-11-19'
+    concern: security
+    keywords:
+      - nginx
+      - security
+      - containers
+      - sctp
+      - patch
+      - rces
+      - contain
+      - escalation
+      - path
+    summary: 1. Replace system NGINX with the signed NGINX.org stable package 1.30.7, or
+    filename: 0498-nginx2root-remediation.md
+    path: docs/adr/0498-nginx2root-remediation.md
+    implemented_on: '2026-11-19'
+  - adr: 0499
+    title: Durable Cost Accounting for Temporary Build Workers
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-11-19'
+    concern: monitoring
+    keywords:
+      - build-worker
+      - woodpecker
+      - grafana
+      - cost
+      - trial
+      - lifecycle
+      - durable
+      - accounting
+      - temporary
+      - build
+    summary: 1. Store each trial's control plane, execution host, historical and current
+    filename: 0499-temporary-build-trial-cost-accounting.md
+    path: docs/adr/0499-temporary-build-trial-cost-accounting.md
+    implemented_in_repo_version: 0.179.66
+    implemented_in_platform_version: 0.179.66
+    implemented_on: '2026-11-19'

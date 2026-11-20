@@ -8,6 +8,11 @@ owner: claude
 branch: claude/dockerhost-state-live-drift
 worktree_path: .claude/worktrees/dockerhost-state-live-drift
 doc: docs/workstreams/ws-20261030-dockerhost-state-live-drift.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 642
 depends_on: []
 conflicts_with: []
 shared_surfaces:

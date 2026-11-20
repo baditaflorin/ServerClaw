@@ -8,6 +8,11 @@ owner: claude
 branch: claude/fix-neko-vhost-cert-drift-2026-08-29
 worktree_path: .worktrees/fix-neko-vhost-cert-drift
 doc: docs/adr/0380-neko-for-operator-remote-browser-access.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 161
 depends_on:
   - adr-0380-neko-remote-desktop
 conflicts_with: []

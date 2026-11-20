@@ -8,6 +8,11 @@ owner: codex
 branch: codex/ws-0515-dify-secret-source-guard-20260928
 worktree_path: .worktrees/ws-0515-dify-live-apply-20260928
 doc: docs/workstreams/ws-0515-dify-runtime-recovery.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 256
 depends_on: []
 conflicts_with: []
 shared_surfaces:

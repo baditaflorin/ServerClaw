@@ -643,6 +643,7 @@ validate_workstream_surfaces() {
   # A branch stacked on an unmerged parent sets LV3_VALIDATION_BASE_REF to the
   # parent's ref so only its own commits are checked against its own surfaces.
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-branch --base-ref "${LV3_VALIDATION_BASE_REF:-origin/main}" >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_reconciliation.py" --check-new-metadata --base-ref "${LV3_VALIDATION_BASE_REF:-origin/main}" >/dev/null
 }
 
 validate_generated_docs() {

@@ -6,6 +6,11 @@ owner: claude
 branch: claude/sleepy-proskuriakova-a0a263
 worktree_path: .claude/worktrees/sleepy-proskuriakova-a0a263
 doc: docs/adr/0452-workstream-lifecycle-auto-close.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 82
 depends_on:
   - adr-0326-workstream-registry-shards
   - adr-0420-ci-release-readiness-checks
