@@ -111,7 +111,13 @@ class WorkstreamApplyReceipts:
         self._receipts_dir = Path(repo_root) / RECEIPTS_SUBDIR
 
     def _receipt_path(self, workstream_id: str) -> Path:
-        return self._receipts_dir / f"{workstream_id}-apply-receipt.yaml"
+        yaml_path = self._receipts_dir / f"{workstream_id}-apply-receipt.yaml"
+        json_path = yaml_path.with_suffix(".json")
+        if yaml_path.exists():
+            return yaml_path
+        if json_path.exists():
+            return json_path
+        return yaml_path if _YAML_AVAILABLE else json_path
 
     def current_state(self, workstream_id: str) -> ApplyState | None:
         """Return current apply state or None if no receipt exists."""
@@ -133,14 +139,17 @@ class WorkstreamApplyReceipts:
         self._receipts_dir.mkdir(parents=True, exist_ok=True)
         path = self._receipt_path(receipt.workstream_id)
         data = receipt.as_dict()
-        if _YAML_AVAILABLE:
+        if path.suffix == ".json":
+            import json
+            with path.open("w") as f:
+                json.dump(data, f, indent=2)
+        elif _YAML_AVAILABLE:
             with path.open("w") as f:
                 yaml.dump(data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
         else:
-            import json
-            path = path.with_suffix(".json")
-            with path.open("w") as f:
-                json.dump(data, f, indent=2)
+            raise RuntimeError(
+                "PyYAML is required to update an existing YAML apply receipt"
+            )
         return path
 
     def start(
@@ -233,11 +242,13 @@ class WorkstreamApplyReceipts:
     def _read(self, path: Path) -> WorkstreamApplyReceipt | None:
         try:
             with path.open() as f:
-                if _YAML_AVAILABLE:
-                    data = yaml.safe_load(f)
-                else:
+                if path.suffix == ".json":
                     import json
                     data = json.load(f)
+                elif _YAML_AVAILABLE:
+                    data = yaml.safe_load(f)
+                else:
+                    return None
             if not isinstance(data, dict):
                 return None
             return WorkstreamApplyReceipt.from_dict(data)

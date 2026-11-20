@@ -8,6 +8,11 @@ owner: claude
 branch: claude/proxmox-vm-firewall-scope
 worktree_path: .claude/worktrees/vm-firewall-scope
 doc: docs/workstreams/ws-0541-proxmox-vm-firewall-tag.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 622
 depends_on: []
 conflicts_with: []
 shared_surfaces:

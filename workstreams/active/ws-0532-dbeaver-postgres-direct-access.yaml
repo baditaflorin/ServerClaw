@@ -8,6 +8,11 @@ owner: codex
 branch: codex/dbeaver-direct-5432
 worktree_path: .worktrees/dbeaver-postgres-direct-access
 doc: docs/workstreams/ws-0532-dbeaver-postgres-direct-access.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 579
 depends_on: []
 conflicts_with: []
 shared_surfaces:

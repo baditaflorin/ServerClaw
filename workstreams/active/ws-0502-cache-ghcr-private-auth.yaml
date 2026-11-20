@@ -8,6 +8,11 @@ owner: codex
 branch: codex/cache-ghcr-private-auth
 worktree_path: .worktrees/ws-0502-cache-ghcr-private-auth
 doc: docs/workstreams/ws-0502-cache-ghcr-private-auth.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 230
 depends_on:
   - ws-0274-artifact-cache-plane
 conflicts_with: []

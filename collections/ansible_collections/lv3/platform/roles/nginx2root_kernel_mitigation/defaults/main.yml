@@ -1,0 +1,11 @@
+# Purpose: Declare the temporary SCTP module-block path and policy.
+# Use case: Consumed by nginx2root_kernel_mitigation.
+# Inputs: None.
+# Outputs: Stable modprobe policy values.
+# Idempotency: Fully idempotent; defaults only.
+# Dependencies: modprobe and Linux kernel module support.
+---
+nginx2root_kernel_mitigation_file: /etc/modprobe.d/zz-nginx2root-disable-sctp.conf
+nginx2root_kernel_mitigation_content: |
+  install sctp /bin/false
+  blacklist sctp

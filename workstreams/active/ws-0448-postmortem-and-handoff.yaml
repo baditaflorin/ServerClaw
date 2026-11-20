@@ -1,13 +1,18 @@
 id: ws-0448-postmortem-and-handoff
 adr: "0448"
 title: "Cross-agent handoff postmortem for ws-0448 deployment connection registry"
-status: in_progress
+status: merged
 ready_to_merge: true
 live_applied: false
 owner: platform-infrastructure
 branch: claude/crazy-chaplygin-c7c256
 worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
 doc: docs/postmortems/2026-04-28-ws-0448-deployment-connection-registry.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 76
 depends_on:
   - adr-0448-deployment-connection-registry-and-wrapper
 conflicts_with: []
@@ -66,3 +71,8 @@ notes: |
    - Deployment-aware cert validation.
    - `make new-deployment` / `make use-deployment` (ADR 0442) — the
      `run_with_deployment.sh` wrapper is the leaf they would invoke.
+canonical_truth:
+  changelog_entry: 'Reconcile the ws-0448 handoff workstream with merged PR #76 and its documented 0.179.11 implementation release.'
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}

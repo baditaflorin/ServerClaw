@@ -8,6 +8,11 @@ owner: claude
 branch: claude/0pipe-gate-builder-runbook
 worktree_path: .claude/worktrees/0pipe-gate-builder
 doc: docs/workstreams/ws-20261029-0pipe-gate-builder-runbook.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 623
 depends_on: []
 conflicts_with: []
 shared_surfaces:

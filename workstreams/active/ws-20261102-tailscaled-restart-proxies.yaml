@@ -8,6 +8,11 @@ owner: claude
 branch: claude/tailscaled-restart-proxies
 worktree_path: .claude/worktrees/tailscaled-restart-proxies
 doc: docs/workstreams/ws-20261102-tailscaled-restart-proxies.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 661
 depends_on: []
 conflicts_with: []
 shared_surfaces:

@@ -8,6 +8,11 @@ owner: claude
 branch: claude/live-apply-pve-weekly-freshness
 worktree_path: .claude/worktrees/live-apply-pve-weekly-freshness
 doc: docs/workstreams/ws-20261029-pve-backup-weekly-freshness.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 624
 depends_on: []
 conflicts_with: []
 shared_surfaces:

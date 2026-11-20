@@ -8,6 +8,11 @@ owner: claude
 branch: claude/tailscaled-restart-0docker
 worktree_path: .claude/worktrees/tailscaled-0docker
 doc: docs/workstreams/ws-20261103-tailscaled-restart-0docker.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 667
 depends_on: []
 conflicts_with: []
 shared_surfaces:

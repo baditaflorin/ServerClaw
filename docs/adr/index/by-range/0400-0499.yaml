@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-18'
+generated: '2026-11-20'
 facet: range
 label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 89
+total_adrs: 91
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -881,21 +881,24 @@ adrs:
     filename: 0451-phase6-self-healing-actions.md
     path: docs/adr/0451-phase6-self-healing-actions.md
   - adr: '0452'
-    title: Workstream Lifecycle Auto-Close
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    title: Workstream Lifecycle Reconciliation and Safe Closeout
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-28'
-    concern: automation
+    concern: ci-cd
     keywords:
       - workstreams
       - registry
       - archive
       - lifecycle
       - automation
+      - reconciliation
+      - closeout
+      - repository-references
       - workstream
-      - auto-close
-    summary: 'Add three mechanical closures around ADR 0326''s existing data layout:'
+      - safe
+    summary: 'Keep one lifecycle authority: the existing canonical-truth release flow owns'
     filename: 0452-workstream-lifecycle-auto-close.md
     path: docs/adr/0452-workstream-lifecycle-auto-close.md
   - adr: '0453'
@@ -1667,3 +1670,48 @@ adrs:
     filename: 0497-expiring-external-build-worker-pool-admission.md
     path: docs/adr/0497-expiring-external-build-worker-pool-admission.md
     implemented_on: '2026-11-18'
+  - adr: 0498
+    title: Patch NGINX RCEs and contain the SCTP escalation path
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-11-19'
+    concern: security
+    keywords:
+      - nginx
+      - security
+      - containers
+      - sctp
+      - patch
+      - rces
+      - contain
+      - escalation
+      - path
+    summary: 1. Replace system NGINX with the signed NGINX.org stable package 1.30.7, or
+    filename: 0498-nginx2root-remediation.md
+    path: docs/adr/0498-nginx2root-remediation.md
+    implemented_on: '2026-11-19'
+  - adr: 0499
+    title: Durable Cost Accounting for Temporary Build Workers
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-11-19'
+    concern: monitoring
+    keywords:
+      - build-worker
+      - woodpecker
+      - grafana
+      - cost
+      - trial
+      - lifecycle
+      - durable
+      - accounting
+      - temporary
+      - build
+    summary: 1. Store each trial's control plane, execution host, historical and current
+    filename: 0499-temporary-build-trial-cost-accounting.md
+    path: docs/adr/0499-temporary-build-trial-cost-accounting.md
+    implemented_in_repo_version: 0.179.66
+    implemented_in_platform_version: 0.179.66
+    implemented_on: '2026-11-19'

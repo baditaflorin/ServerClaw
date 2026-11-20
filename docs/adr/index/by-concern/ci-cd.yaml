@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-18'
+generated: '2026-11-20'
 facet: concern
 concern: ci-cd
-total_adrs: 52
+total_adrs: 53
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -908,6 +908,27 @@ adrs:
     summary: Extend scripts/refreshsafereceipts.py::candidaterolepaths to
     filename: 0451-phase6-self-healing-actions.md
     path: docs/adr/0451-phase6-self-healing-actions.md
+  - adr: '0452'
+    title: Workstream Lifecycle Reconciliation and Safe Closeout
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-28'
+    concern: ci-cd
+    keywords:
+      - workstreams
+      - registry
+      - archive
+      - lifecycle
+      - automation
+      - reconciliation
+      - closeout
+      - repository-references
+      - workstream
+      - safe
+    summary: 'Keep one lifecycle authority: the existing canonical-truth release flow owns'
+    filename: 0452-workstream-lifecycle-auto-close.md
+    path: docs/adr/0452-workstream-lifecycle-auto-close.md
   - adr: '0454'
     title: Incident & Postmortem Registry
     status: Proposed

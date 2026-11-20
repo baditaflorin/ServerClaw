@@ -27,21 +27,254 @@ archive_summary:
   by_year:
     '2026': 349
 workstreams:
+- id: ws-20261119-kamateratmp-trial-cost-accounting
+  adr: 0499
+  title: Measure Kamateratmp trial CI usage and cost in Grafana
+  status: live_applied
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/kamateratmp-dashboard-live-apply-20261119
+  worktree_path: .worktrees/ws-20261119-kamateratmp-cost-live-apply
+  doc: docs/workstreams/ws-20261119-kamateratmp-trial-cost-accounting.md
+  depends_on:
+  - ws-20261118-kamatera-trial-build-worker
+  - ws-20261118-kamateratmp-build-pool-expansion
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0499-temporary-build-trial-cost-accounting.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/**
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0424-fork-clone-0fork.yaml
+  - workstreams/active/ws-20261118-kamateratmp-build-pool-expansion.yaml
+  - docs/runbooks/temporary-build-worker.md
+  - docs/runbooks/monitoring-stack.md
+  - config/grafana/dashboards/build-trial-cost.json
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml
+  - tests/test_monitoring_prometheus_codification.py
+  - docs/workstreams/ws-20261119-kamateratmp-trial-cost-accounting.md
+  - workstreams/active/ws-20261119-kamateratmp-trial-cost-accounting.yaml
+  - workstreams.yaml
+  - receipts/live-applies/ws-20261119-kamateratmp-trial-cost-accounting-apply-receipt.yaml
+  - README.md
+  - changelog.md
+  - docs/status/history/merged-workstreams.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: build_trial_cost_dashboard
+      mode: exclusive
+      paths:
+      - docs/adr/0499-temporary-build-trial-cost-accounting.md
+      - docs/runbooks/monitoring-stack.md
+      - config/grafana/dashboards/build-trial-cost.json
+      - docs/workstreams/ws-20261119-kamateratmp-trial-cost-accounting.md
+    - id: generated_adr_index
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+    - id: generated_coordination_diagram
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+    - id: monitoring_vm_role_shared_edits
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml
+      - tests/test_monitoring_prometheus_codification.py
+    - id: temporary_build_worker_runbook
+      mode: shared_contract
+      contract: temporary-build-worker-runbook-v1
+      paths:
+      - docs/runbooks/temporary-build-worker.md
+    - id: workstream_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - workstreams/active/ws-20261119-kamateratmp-trial-cost-accounting.yaml
+      - workstreams/active/ws-0424-fork-clone-0fork.yaml
+      - workstreams/active/ws-20261118-kamateratmp-build-pool-expansion.yaml
+      - workstreams.yaml
+    - id: live_apply_receipt
+      mode: exclusive
+      paths:
+      - receipts/live-applies/ws-20261119-kamateratmp-trial-cost-accounting-apply-receipt.yaml
+    - id: integration_canonical_summaries
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+      paths:
+      - README.md
+      - changelog.md
+      - docs/status/history/merged-workstreams.md
+  canonical_truth:
+    changelog_entry: Add durable Woodpecker trial accounting and a Grafana cost-per-pipeline
+      dashboard for short-lived build workers.
+    release_bump: minor
+    included_in_repo_version: null
+    latest_receipts:
+      build_trial_cost_dashboard: ws-20261119-kamateratmp-trial-cost-accounting-apply-receipt
+  context: The durable exporter ledger, stable worker label, and dashboard are live;
+    historical coverage was 1 at the recorded snapshot. Earlier exporter behavior
+    used rolling 24-hour gauges, and prior monitoring instructions referenced an old
+    private address and offline jump host; both discrepancies have been corrected.
+    The owner-provided trial cost remains in private Fleet State, while provider billing
+    cutoff is unconfirmed. Dashboard totals distinguish Woodpecker pipelines/workflows
+    from standalone Buildx and Fleet Runner activity.
+  plane_issue_id: 41087441-63d0-4f5b-8819-b69019748564
+- id: ws-20261119-nginx2root-remediation
+  adr: 0498
+  title: Patch NGINX pre-auth RCEs and contain the SCTP privilege-escalation chain
+  status: merged
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/nginx2root-postmortem-20261119
+  worktree_path: .worktrees/nginx2root-postmortem-20261119
+  doc: docs/workstreams/ws-20261119-nginx2root-remediation.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+  - collections/ansible_collections/lv3/platform/roles/nginx2root_kernel_mitigation/**
+  - collections/ansible_collections/lv3/platform/roles/nginx_org_security_package/**
+  - playbooks/services/nginx2root-remediation.yml
+  - scripts/converge_dry_run.py
+  - config/ansible-execution-scopes.yaml
+  - config/image-catalog.json
+  - docs/adr/.index.yaml
+  - docs/adr/index/**
+  - docs/adr/0498-nginx2root-remediation.md
+  - docs/runbooks/nginx2root-remediation.md
+  - docs/workstreams/ws-20261119-nginx2root-remediation.md
+  - docs/postmortems/2026-11-19-nginx2root-response.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/status/history/merged-workstreams.md
+  - README.md
+  - VERSION
+  - changelog.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - receipts/cve/4d1d4ce08432-20261119T110658Z.grype.json
+  - receipts/image-scans/2026-11-19-dify-nginx-runtime.json
+  - receipts/live-applies/ws-20261119-nginx2root-remediation-apply-receipt.yaml
+  - receipts/sbom/4d1d4ce08432.cdx.json
+  - workstreams/active/ws-20261119-nginx2root-remediation.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: nginx2root_automation_and_decision_docs
+      mode: exclusive
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+      - collections/ansible_collections/lv3/platform/roles/nginx2root_kernel_mitigation/**
+      - collections/ansible_collections/lv3/platform/roles/nginx_org_security_package/**
+      - playbooks/services/nginx2root-remediation.yml
+      - scripts/converge_dry_run.py
+      - config/ansible-execution-scopes.yaml
+      - config/image-catalog.json
+      - docs/adr/0498-nginx2root-remediation.md
+      - docs/runbooks/nginx2root-remediation.md
+      - docs/workstreams/ws-20261119-nginx2root-remediation.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+    - id: nginx2root_generated_adr_index
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+    - id: nginx2root_mainline_release_integration
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+      paths:
+      - README.md
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+    - id: nginx2root_generated_status_history
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/status/history/merged-workstreams.md
+    - id: nginx2root_scan_evidence
+      mode: exclusive
+      paths:
+      - receipts/cve/4d1d4ce08432-20261119T110658Z.grype.json
+      - receipts/image-scans/2026-11-19-dify-nginx-runtime.json
+      - receipts/sbom/4d1d4ce08432.cdx.json
+    - id: nginx2root_live_apply_receipt
+      mode: exclusive
+      paths:
+      - receipts/live-applies/ws-20261119-nginx2root-remediation-apply-receipt.yaml
+    - id: nginx2root_publishable_postmortem
+      mode: exclusive
+      paths:
+      - docs/postmortems/2026-11-19-nginx2root-response.md
+    - id: nginx2root_workstream_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - workstreams/active/ws-20261119-nginx2root-remediation.yaml
+      - workstreams.yaml
+  canonical_truth:
+    changelog_entry: Patch every identified NGINX runtime to an official fixed release
+      and block the unused SCTP kernel module on affected hosts until the kernel fix
+      is available.
+    release_bump: patch
+    included_in_repo_version: null
+  context: The disclosed NGINX CVEs affect installed packages and container images
+    across both the managed platform and external Docker hosts. Debian's current NGINX
+    packages remain vulnerable, while official NGINX stable 1.30.7 and mainline 1.31.9
+    contain the published fixes. The privilege-escalation chain also depends on an
+    unfixed SCTP kernel issue; no SCTP listeners or sockets were found on the inspected
+    NGINX hosts. The workstream inventories all reachable NGINX instances, patches
+    managed and external runtimes, and records any host that remains unreachable or
+    awaiting a safe image rebuild.
+  tasks:
+  - id: inventory
+    title: Inventory NGINX processes and runtime ownership across active servers
+    status: completed
+  - id: automation
+    title: Add repeatable package and SCTP mitigation automation and update image
+      references
+    status: completed
+  - id: live-apply
+    title: Apply fixed NGINX releases and verify every reachable runtime
+    status: completed
+  - id: publishable-postmortem
+    title: Record the measured response timeline, cost, CI follow-up, and residual
+      risks
+    status: completed
+  plane_issue_id: 8fc06d4a-7c00-4545-b68b-9a8897de8060
 - id: ws-20261118-kamateratmp-build-pool-expansion
   adr: 0497
   title: Add the temporary Kamatera worker to shared Buildx lanes with enforced sunset
-  status: in_progress
-  ready_to_merge: true
+  status: live_applied
+  ready_to_merge: false
   live_applied: true
   owner: codex
   branch: codex/kamateratmp-postmerge-record
   worktree_path: .worktrees/kamateratmp-build-pool-expansion/.worktrees/kamateratmp-postmerge-record
   doc: docs/workstreams/ws-20261118-kamateratmp-build-pool-expansion.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 705
   depends_on:
   - ws-20261118-kamatera-trial-build-worker
   conflicts_with: []
   shared_surfaces:
-  - docs/adr/0497-expiring-external-build-worker-pool-admission.md - docs/adr/0496-temporary-external-build-worker-lifecycle.md
+  - docs/adr/0497-expiring-external-build-worker-pool-admission.md
+  - docs/adr/0496-temporary-external-build-worker-lifecycle.md
   - docs/adr/.index.yaml
   - docs/adr/index/**
   - docs/diagrams/agent-coordination-map.excalidraw
@@ -62,7 +295,6 @@ workstreams:
       paths:
       - docs/adr/0497-expiring-external-build-worker-pool-admission.md
       - docs/adr/0496-temporary-external-build-worker-lifecycle.md
-      - docs/runbooks/temporary-build-worker.md
       - docs/workstreams/ws-20261118-kamateratmp-build-pool-expansion.md
     - id: build_worker_live_apply_receipt
       mode: exclusive
@@ -79,6 +311,11 @@ workstreams:
       contract: generated-artifacts-v1
       paths:
       - docs/diagrams/agent-coordination-map.excalidraw
+    - id: temporary_build_worker_runbook
+      mode: shared_contract
+      contract: temporary-build-worker-runbook-v1
+      paths:
+      - docs/runbooks/temporary-build-worker.md
     - id: mainline_release_integration
       mode: shared_contract
       contract: mainline-release-integration-v1
@@ -112,7 +349,10 @@ workstreams:
     The patch release is still pending because the release manager reports 105 repository
     blockers, including expired pre-existing waiver failures. The owner-directed sunset
     target is 2026-12-17T14:59:50Z; provider billing cutoff remains unconfirmed. Build
-    selection and Woodpecker scheduling must fail closed at the target.'
+    selection and Woodpecker scheduling must fail closed at the target. Ownership
+    correction on 2026-11-19: append-only trial-cost documentation now shares the
+    temporary worker runbook under `temporary-build-worker-runbook-v1`; the Buildx
+    admission workstream retains ownership of its ADR and workstream document.'
   plane_issue_id: 9084a511-32b5-45da-97a0-21ba11bb7656
 - id: ws-20261118-kamatera-trial-build-worker
   adr: 0496
@@ -224,6 +464,11 @@ workstreams:
   branch: claude/pg-primary-temp-files-log
   worktree_path: .claude/worktrees/pg-primary-temp-files-log
   doc: docs/workstreams/ws-20261031-pg-primary-memory.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 646
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -363,6 +608,11 @@ workstreams:
   branch: claude/pg-primary-pgss-max
   worktree_path: .claude/worktrees/pg-primary-pgss-max
   doc: docs/workstreams/ws-20261031-pg-primary-hugepages.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 648
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -475,6 +725,11 @@ workstreams:
   branch: claude/agent-history-autounlock
   worktree_path: .
   doc: docs/workstreams/ws-20261112-agent-history-autounlock.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 696
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -540,6 +795,11 @@ workstreams:
   branch: codex/ct-reclaim-live-evidence
   worktree_path: .worktrees/ct-reclaim-live-evidence
   doc: docs/workstreams/ws-20261109-ct-names-weekly-trim.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 692
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -620,6 +880,11 @@ workstreams:
   branch: claude/live-apply-fleet-job-caches-trim-alerts
   worktree_path: .claude/worktrees/live-apply-fleet-job-caches-trim-alerts
   doc: docs/workstreams/ws-20261104-fleet-job-caches-trim-alerts.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 672
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -744,6 +1009,11 @@ workstreams:
   branch: claude/pve-0mcp-budget-status
   worktree_path: .claude/worktrees/pve-0mcp-budget-status
   doc: docs/workstreams/ws-20261103-pve-0mcp-budget-status.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 669
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -824,6 +1094,11 @@ workstreams:
   branch: claude/build-gc-helper-image
   worktree_path: .claude/worktrees/build-gc-helper-image
   doc: docs/workstreams/ws-20261103-build-gc-helper-image.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 664
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -913,6 +1188,11 @@ workstreams:
   branch: claude/build-gc-cache-trim
   worktree_path: .claude/worktrees/build-gc-cache-trim
   doc: docs/workstreams/ws-20261102-build-gc-cache-trim.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 657
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -1001,6 +1281,11 @@ workstreams:
   branch: claude/vm130-inventory-correct
   worktree_path: .claude/worktrees/vm130-inventory-correct
   doc: docs/workstreams/ws-20261101-vm130-inventory-correct.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 651
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -1077,6 +1362,11 @@ workstreams:
   branch: claude/live-apply-budget-alert
   worktree_path: .claude/worktrees/live-apply-budget-alert
   doc: docs/workstreams/ws-20261101-pve-0mcp-memory-budget.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 653
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -1185,6 +1475,11 @@ workstreams:
   branch: claude/hostconf-pg-swap
   worktree_path: .claude/worktrees/hostconf-pg-swap
   doc: docs/workstreams/ws-20261101-pg-swap-hostconf.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 654
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -1261,6 +1556,11 @@ workstreams:
   branch: claude/hypervisor-swap-stopgap
   worktree_path: .claude/worktrees/hypervisor-swap-stopgap
   doc: docs/workstreams/ws-20261101-hypervisor-swap-stopgap.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 655
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -1343,6 +1643,11 @@ workstreams:
   branch: claude/agent-history-vip-collision
   worktree_path: .claude/worktrees/ah-vip
   doc: docs/workstreams/ws-20261029-agent-history-vip-collision.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 628
   depends_on:
   - ws-0534-agent-history-vm
   - ws-0537-agent-history-activate
@@ -1408,6 +1713,11 @@ workstreams:
   branch: claude/agent-history-netpolicy-drift
   worktree_path: .claude/worktrees/ah-netpol
   doc: docs/workstreams/ws-20261029-agent-history-netpolicy-drift.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 627
   depends_on:
   - ws-0534-agent-history-vm
   - ws-0537-agent-history-activate
@@ -1507,6 +1817,11 @@ workstreams:
   branch: claude/agent-history-embed-query
   worktree_path: .claude/worktrees/ah-embed-query
   doc: docs/workstreams/ws-20261029-agent-history-embed-query.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 626
   depends_on:
   - ws-0534-agent-history-vm
   - ws-0537-agent-history-activate
@@ -1603,6 +1918,11 @@ workstreams:
   branch: claude/agent-history-canary-scan
   worktree_path: .claude/worktrees/ah-canary
   doc: docs/workstreams/ws-0545-agent-history-canary-scan.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 625
   depends_on:
   - ws-0534-agent-history-vm
   - ws-0535-agent-history-alerts
@@ -1674,6 +1994,11 @@ workstreams:
   branch: claude/agent-history-runbook-records
   worktree_path: .claude/worktrees/ah-records
   doc: docs/workstreams/ws-0540-agent-history-runbook-records.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 620
   depends_on:
   - ws-0534-agent-history-vm
   - ws-0537-agent-history-activate
@@ -1760,6 +2085,11 @@ workstreams:
   branch: claude/agent-history-provision-fix
   worktree_path: .claude/worktrees/ah-provision
   doc: docs/workstreams/ws-0539-agent-history-provision-fix.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 619
   depends_on:
   - ws-0534-agent-history-vm
   - ws-0537-agent-history-activate
@@ -1835,6 +2165,11 @@ workstreams:
   branch: claude/agent-history-policy-owner
   worktree_path: .claude/worktrees/ah-policy
   doc: docs/workstreams/ws-0538-agent-history-policy-owner.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 618
   depends_on:
   - ws-0534-agent-history-vm
   - ws-0537-agent-history-activate
@@ -1900,6 +2235,11 @@ workstreams:
   branch: claude/agent-history-activate
   worktree_path: .claude/worktrees/agent-history-activate
   doc: docs/workstreams/ws-0537-agent-history-activate.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 615
   depends_on:
   - ws-0534-agent-history-vm
   conflicts_with: []
@@ -1994,6 +2334,11 @@ workstreams:
   branch: claude/agent-history-alerts
   worktree_path: .claude/worktrees/agent-history-alerts
   doc: docs/workstreams/ws-0535-agent-history-alerts.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 599
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -2072,6 +2417,11 @@ workstreams:
   branch: claude/agent-history-vm
   worktree_path: .claude/worktrees/agent-history-vm
   doc: docs/workstreams/ws-0534-agent-history-vm.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 598
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -2460,6 +2810,11 @@ workstreams:
   branch: codex/ws-0512-glitchtip-scan-evidence-20261014
   worktree_path: .worktrees/ws-0512-glitchtip-scan-evidence-20261014
   doc: docs/workstreams/ws-0512-authentik-consumer-e2e.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 243
   canonical_truth:
     changelog_entry: Verify Authentik consumer sign-in and preserve source-faithful,
       secret-audited ServerClaw publication.
@@ -3745,6 +4100,11 @@ workstreams:
   branch: codex/regenerate-https-tls-baseline
   worktree_path: .worktrees/regenerate-https-tls-baseline
   doc: docs/workstreams/ws-0498-https-tls-test-baseline.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 223
   depends_on:
   - ws-0496-generated-artifact-reconciliation
   conflicts_with: []
@@ -4312,6 +4672,11 @@ workstreams:
   branch: claude/ws-0488-wave-3
   worktree_path: .claude/worktrees/agitated-saha-a10fa8
   doc: docs/adr/0488-single-deployment-per-repo-checkout.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 122
   depends_on:
   - adr-0385-one-identity-file
   - adr-0407-generic-by-default
@@ -4512,6 +4877,11 @@ workstreams:
   branch: claude/happy-maxwell-b79396
   worktree_path: .claude/worktrees/happy-maxwell-b79396
   doc: docs/adr/0485-convergence-idempotency-tests.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 119
   depends_on:
   - adr-0481-explicit-deployment-context
   - adr-0482-capacity-aware-dynamic-sizing
@@ -4599,6 +4969,11 @@ workstreams:
   branch: unassigned/ws-0484-self-verification-contracts
   worktree_path: unassigned/ws-0484-self-verification-contracts
   doc: docs/adr/0484-self-verification-contracts.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 119
   depends_on:
   - adr-0420-receipt-schema
   - adr-0481-explicit-deployment-context
@@ -4686,6 +5061,11 @@ workstreams:
   branch: claude/happy-maxwell-b79396
   worktree_path: .claude/worktrees/happy-maxwell-b79396
   doc: docs/adr/0483-hands-off-bootstrap.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 119
   depends_on:
   - adr-0407-generic-by-default
   - adr-0420-receipt-schema
@@ -4775,6 +5155,11 @@ workstreams:
   branch: unassigned/ws-0483-capacity-aware-dynamic-sizing
   worktree_path: unassigned/ws-0483-capacity-aware-dynamic-sizing
   doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 119
   depends_on:
   - adr-0407-generic-by-default
   - adr-0440-deployment-layout
@@ -4918,6 +5303,11 @@ workstreams:
   branch: claude/ws-0481-pentest-fleet-migration
   worktree_path: .worktrees/ws-0481-pentest-fleet-migration
   doc: docs/adr/0481-pentest-fleet-coolify-migration.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 125
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -4978,6 +5368,11 @@ workstreams:
   branch: claude/condescending-pascal-021248
   worktree_path: .claude/worktrees/condescending-pascal-021248
   doc: docs/adr/0481-explicit-deployment-context.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 119
   depends_on:
   - adr-0407-generic-by-default
   - adr-0437-overlay-aware-bootstrap
@@ -5096,6 +5491,11 @@ workstreams:
   branch: claude/friendly-pike-233883
   worktree_path: .claude/worktrees/friendly-pike-233883
   doc: docs/postmortems/2026-05-11-service-inventory-gap-multi-deployment.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 118
   related_adrs:
   - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - docs/adr/0437-fork-bootstrap-gaps.md
@@ -5249,6 +5649,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 112
   depends_on:
   - adr-0414-cert-lifecycle-manager
   - adr-0375-certificate-validation
@@ -5284,6 +5689,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0475-workstream-surfaces-cleanup.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 108
   depends_on:
   - adr-0326-workstream-registry-shards
   - adr-0444-workstream-surface-ownership
@@ -5330,6 +5740,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0474-phase12-receipt-mass-refresh.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 107
   depends_on:
   - adr-0449-phase4-self-healing-primitives
   - adr-0451-phase6-self-healing-actions
@@ -5375,6 +5790,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0473-phase11-cpu-only-automation-primitives.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 106
   depends_on:
   - adr-0449-phase4-self-healing-primitives
   - adr-0465-phase9-self-running-automation
@@ -5450,6 +5870,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0472-phase10-reservation-hardening.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 102
   depends_on:
   - adr-0325-adr-discovery-and-reservation-ledger
   - adr-0449-phase4-self-healing-primitives
@@ -5520,6 +5945,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0469-connection-yml-vault-key-pull.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 103
   depends_on:
   - adr-0440-per-deployment-connection-registry
   conflicts_with: []
@@ -5576,6 +6006,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0468-preconverge-snapshot.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 101
   depends_on:
   - adr-0461-atomic-receipt-write-and-dangling-check
   - adr-0466-converge-state-diff-receipt
@@ -5627,6 +6062,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0467-preconverge-live-state-check.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 100
   depends_on:
   - adr-0463-post-converge-health-probe
   conflicts_with: []
@@ -5675,6 +6115,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0466-converge-state-diff-receipt.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 99
   depends_on:
   - adr-0461-atomic-receipt-write-and-dangling-check
   - adr-0463-post-converge-health-probe
@@ -5725,6 +6170,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0465-phase9-self-running-automation.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 96
   depends_on:
   - adr-0450-phase5-doctor-aggregator-and-rename-hook
   - adr-0451-phase6-self-healing-actions
@@ -5830,6 +6280,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0464-ssh-retry-with-classification.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 98
   depends_on:
   - adr-0461-atomic-receipt-write-and-dangling-check
   conflicts_with: []
@@ -5880,6 +6335,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0463-post-converge-health-probe.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 97
   depends_on:
   - adr-0205-capability-contracts-before-product-selection
   - adr-0446-phase2-multi-deployment-hardening
@@ -5947,6 +6407,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0462-topology-precommit-schema-hook.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 94
   depends_on:
   - adr-0440-per-deployment-identity-and-artifact-isolation
   - adr-0457-host-pinning-deployment-owner
@@ -5994,13 +6459,18 @@ workstreams:
 - id: ws-0463-atomic-receipt-write
   adr: '0461'
   title: Atomic receipt write + dangling-receipt gate flag
-  status: in_progress
+  status: merged
   ready_to_merge: true
   live_applied: false
   owner: platform-infrastructure
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 93
   depends_on:
   - adr-0446-phase2-multi-deployment-hardening
   conflicts_with: []
@@ -6041,6 +6511,12 @@ workstreams:
     \ action, separate workstream.\n\n10 new tests cover atomic write, idempotent\
     \ rewrite, no-temp-leftover\non success and on exception, parent-dir creation,\
     \ dangling-check\nempty/dirty/empty-slug paths, and CLI exit codes.\n"
+  canonical_truth:
+    changelog_entry: 'Reconcile the ws-0463 receipt-freshness workstream with merged
+      release PR #93 (0.179.26).'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
 - id: ws-0460-phase8-cross-deploy-and-auto-promote
   adr: '0460'
   title: "Phase 8 \u2014 cross-deployment doctor + advisory auto-promotion tracker"
@@ -6051,6 +6527,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 92
   depends_on:
   - adr-0450-phase5-doctor-aggregator-and-rename-hook
   - adr-0451-phase6-self-healing-actions
@@ -6157,6 +6638,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0459-deployment-lifecycle-cli-parity.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 91
   depends_on:
   - adr-0440-per-deployment-identity-and-artifact-isolation
   - adr-0442-multi-deployment-make-interface-and-worktree-binding
@@ -6208,6 +6694,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0458-cert-validator-multi-deployment.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 89
   depends_on:
   - adr-0440-per-deployment-identity-and-artifact-isolation
   - adr-0456-deployment-aware-certificate-validation
@@ -6268,6 +6759,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0457-host-pinning-deployment-owner.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 95
   depends_on:
   - adr-0457-host-pinning-deployment-owner
   conflicts_with: []
@@ -6311,6 +6807,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0457-host-pinning-deployment-owner.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 88
   depends_on:
   - adr-0457-host-pinning-deployment-owner
   conflicts_with: []
@@ -6356,6 +6857,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0457-host-pinning-deployment-owner.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 87
   depends_on:
   - adr-0457-host-pinning-deployment-owner
   conflicts_with: []
@@ -6413,6 +6919,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0457-host-pinning-deployment-owner.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 86
   depends_on:
   - adr-0457-host-pinning-deployment-owner
   conflicts_with: []
@@ -6456,6 +6967,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0457-host-pinning-deployment-owner.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 85
   depends_on:
   - adr-0440-per-deployment-identity-and-artifact-isolation
   - adr-0445-phase1-multi-deployment-hardening
@@ -6516,6 +7032,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0456-deployment-aware-certificate-validation.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 81
   depends_on:
   - adr-0375-certificate-validation-and-concordance-enforcement
   - adr-0410-generic-by-default-architecture
@@ -6573,6 +7094,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0455-phase7-drive-doctor-to-zero.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 83
   depends_on:
   - adr-0447-phase3-llm-ergonomics-and-traceability
   - adr-0450-phase5-doctor-aggregator-and-rename-hook
@@ -6789,6 +7315,405 @@ workstreams:
     This ADR only adds the rate-tracking layer on top.
 
     '
+- id: ws-20261120-workstream-lifecycle-reconciliation
+  adr: '0452'
+  title: Make workstream reconciliation evidence-based and repeatable
+  status: merged
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/ws-20261120-reconciliation-closeout
+  worktree_path: .worktrees/ws-20261120-reconciliation-closeout
+  doc: docs/workstreams/ws-20261120-workstream-lifecycle-reconciliation.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 715
+  - repository: baditaflorin/platform_server
+    number: 716
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - .config-locations.yaml
+  - .repo-structure.yaml
+  - build/onboarding/*.yaml
+  - docs/adr/.index.yaml
+  - docs/adr/index/*.yaml
+  - docs/adr/0452-workstream-lifecycle-auto-close.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/workstream-registry-shards.md
+  - docs/discovery/config-locations/project-tracking.yaml
+  - docs/discovery/config-locations/validation-and-ci.yaml
+  - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+  - docs/workstreams/ws-20261120-workstream-lifecycle-reconciliation.md
+  - README.md
+  - changelog.md
+  - docs/status/history/merged-workstreams.md
+  - scripts/validate_repo.sh
+  - scripts/workstream_tool.py
+  - tests/test_interface_contracts.py
+  - workstreams/active/ws-20261120-workstream-lifecycle-reconciliation.yaml
+  - workstreams.yaml
+  - config/contracts/workstream-registry-v1.yaml
+  - platform/interface_contracts.py
+  - scripts/workstream_reconciliation.py
+  - tests/test_workstream_reconciliation.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_reconciliation_tool
+      mode: exclusive
+      paths:
+      - scripts/workstream_reconciliation.py
+      - scripts/workstream_tool.py
+      - tests/test_workstream_reconciliation.py
+      - tests/test_interface_contracts.py
+      - docs/runbooks/workstream-registry-shards.md
+      - docs/workstreams/ws-20261120-workstream-lifecycle-reconciliation.md
+    - id: workstream_metadata_contract
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - config/contracts/workstream-registry-v1.yaml
+      - platform/interface_contracts.py
+      - workstreams/active/*.yaml
+    - id: workstream_and_adr_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - docs/adr/0452-workstream-lifecycle-auto-close.md
+      - workstreams/active/ws-20261120-workstream-lifecycle-reconciliation.yaml
+      - workstreams.yaml
+    - id: generated_coordination_diagram
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+    - id: generated_release_summaries
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - README.md
+      - changelog.md
+      - docs/status/history/merged-workstreams.md
+    - id: changed_shard_validation_gate
+      mode: shared_contract
+      contract: pre-push-gate-v1
+      paths:
+      - scripts/validate_repo.sh
+    - id: generated_discovery_and_adr_indexes
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - build/onboarding/*.yaml
+      - docs/adr/.index.yaml
+      - docs/adr/index/*.yaml
+      - docs/discovery/config-locations/project-tracking.yaml
+      - docs/discovery/config-locations/validation-and-ci.yaml
+      - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+  canonical_truth:
+    changelog_entry: Add an evidence-based workstream reconciliation report and explicit
+      repository and pull-request references.
+    release_bump: minor
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: The release gate currently counts every status=in_progress record. A first
+    pass found stale-looking flags, missing worktree paths, and reused branch names,
+    so closure must be evidence-based and must not infer completion from flags or
+    branch names alone. Preserve legacy records while making future records easier
+    to reconcile.
+  schema_version: 1.0.0
+  tasks:
+  - id: t1
+    title: Define the backward-compatible workstream repository and PR reference fields
+    status: completed
+  - id: t2
+    title: Implement a read-only reconciliation report with explicit evidence and
+      safe recommendations
+    status: completed
+  - id: t3
+    title: Document the closeout flow and connect the audit to validation
+    status: completed
+  - id: t4
+    title: Verify current backlog classification and publish through a PR
+    status: completed
+  plane_issue_id: c1211ba6-83e3-4614-b649-eb805bedf53f
+- id: ws-20261120-legacy-workstream-reconciliation
+  adr: '0452'
+  title: Reconcile legacy workstreams from direct PR and release evidence
+  status: merged
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/ws-20261120-legacy-workstream-reconciliation-closeout
+  worktree_path: .worktrees/ws-20261120-legacy-workstream-reconciliation-closeout
+  doc: docs/workstreams/ws-20261120-legacy-workstream-reconciliation.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 717
+  - repository: baditaflorin/platform_server
+    number: 718
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams/active/adr-0481-multi-deployment-service-registry.yaml
+  - workstreams/active/ws-0421-platform-service-watchdog.yaml
+  - workstreams/active/ws-0422-lsp-ai-decision.yaml
+  - workstreams/active/ws-0424-fork-clone-0fork.yaml
+  - workstreams/active/ws-0438-generic-by-construction.yaml
+  - workstreams/active/ws-0443-topology-drift-detection.yaml
+  - workstreams/active/ws-0444-nginx-oauth2-proxy-buffer-sizing.yaml
+  - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+  - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+  - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+  - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+  - workstreams/active/ws-0448-postmortem-and-handoff.yaml
+  - workstreams/active/ws-0449-phase4-self-healing-primitives.yaml
+  - workstreams/active/ws-0450-phase5-doctor-aggregator-and-rename-hook.yaml
+  - workstreams/active/ws-0451-phase6-self-healing-actions.yaml
+  - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
+  - workstreams/active/ws-0455-phase7-drive-doctor-to-zero.yaml
+  - workstreams/active/ws-0456-deployment-aware-cert-validation.yaml
+  - workstreams/active/ws-0457-host-pinning-deployment-owner.yaml
+  - workstreams/active/ws-0458-host-pinning-gate-wiring.yaml
+  - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
+  - workstreams/active/ws-0460-host-pinning-sweep.yaml
+  - workstreams/active/ws-0460-phase8-cross-deploy-and-auto-promote.yaml
+  - workstreams/active/ws-0461-cert-validator-multi-deployment.yaml
+  - workstreams/active/ws-0462-deployment-lifecycle-cli-parity.yaml
+  - workstreams/active/ws-0463-atomic-receipt-write.yaml
+  - workstreams/active/ws-0464-topology-precommit-schema-hook.yaml
+  - workstreams/active/ws-0465-host-pinning-sweep-regression-test.yaml
+  - workstreams/active/ws-0465-phase9-self-running-automation.yaml
+  - workstreams/active/ws-0466-post-converge-health-probe.yaml
+  - workstreams/active/ws-0467-ssh-retry-classifier.yaml
+  - workstreams/active/ws-0468-converge-state-diff.yaml
+  - workstreams/active/ws-0469-preconverge-live-state-check.yaml
+  - workstreams/active/ws-0470-preconverge-snapshot.yaml
+  - workstreams/active/ws-0471-connection-yml-vault-pull.yaml
+  - workstreams/active/ws-0473-phase10-reservation-hardening.yaml
+  - workstreams/active/ws-0474-phase11-cpu-only-automation.yaml
+  - workstreams/active/ws-0475-phase12-receipt-mass-refresh.yaml
+  - workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml
+  - workstreams/active/ws-0477-cert-lifecycle-make-target-fix.yaml
+  - workstreams/active/ws-0481-explicit-deployment-context.yaml
+  - workstreams/active/ws-0481-pentest-fleet-migration.yaml
+  - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
+  - workstreams/active/ws-0484-self-verification-contracts.yaml
+  - workstreams/active/ws-0485-convergence-idempotency-tests.yaml
+  - workstreams/active/ws-0486-hands-off-bootstrap.yaml
+  - workstreams/active/ws-0488-collapse-to-single-deployment.yaml
+  - workstreams/active/ws-0489-neko-vhost-edge-cert-drift.yaml
+  - workstreams/active/ws-0497-fleet-build-broker-pki-handoff.yaml
+  - workstreams/active/ws-0498-https-tls-test-baseline.yaml
+  - workstreams/active/ws-0499-fleet-build-broker-pki-vault-writer.yaml
+  - workstreams/active/ws-0500-builder-private-0mcp-transport.yaml
+  - workstreams/active/ws-0501-https-alert-presence-contract.yaml
+  - workstreams/active/ws-0502-cache-ghcr-private-auth.yaml
+  - workstreams/active/ws-0503-builder-publisher-identity.yaml
+  - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
+  - workstreams/active/ws-0514-repository-release-0-179-47.yaml
+  - workstreams/active/ws-0515-dify-runtime-recovery.yaml
+  - workstreams/active/ws-0516-openbao-completeness.yaml
+  - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
+  - workstreams/active/ws-0523-fleet-observability-roles.yaml
+  - workstreams/active/ws-0529-0infer-observability.yaml
+  - workstreams/active/ws-0532-dbeaver-postgres-direct-access.yaml
+  - workstreams/active/ws-0533-pve-host-daily-low-alert.yaml
+  - workstreams/active/ws-0534-agent-history-vm.yaml
+  - workstreams/active/ws-0535-agent-history-alerts.yaml
+  - workstreams/active/ws-0537-agent-history-activate.yaml
+  - workstreams/active/ws-0538-agent-history-policy-owner.yaml
+  - workstreams/active/ws-0539-agent-history-provision-fix.yaml
+  - workstreams/active/ws-0540-agent-history-runbook-records.yaml
+  - workstreams/active/ws-0541-gate-stacked-base-ref.yaml
+  - workstreams/active/ws-0541-proxmox-vm-firewall-tag.yaml
+  - workstreams/active/ws-0545-agent-history-canary-scan.yaml
+  - workstreams/active/ws-20261020-enrichment-pool-ports.yaml
+  - workstreams/active/ws-20261029-0pipe-gate-builder-runbook.yaml
+  - workstreams/active/ws-20261029-agent-history-embed-query.yaml
+  - workstreams/active/ws-20261029-agent-history-netpolicy-drift.yaml
+  - workstreams/active/ws-20261029-agent-history-vip-collision.yaml
+  - workstreams/active/ws-20261029-dockerhost-state-staging-peak.yaml
+  - workstreams/active/ws-20261029-pve-backup-weekly-freshness.yaml
+  - workstreams/active/ws-20261030-dockerhost-state-live-drift.yaml
+  - workstreams/active/ws-20261030-pve-firewall-install-guard.yaml
+  - workstreams/active/ws-20261030-woodpecker-activate-repo.yaml
+  - workstreams/active/ws-20261031-pg-primary-hugepages.yaml
+  - workstreams/active/ws-20261031-pg-primary-memory.yaml
+  - workstreams/active/ws-20261101-hypervisor-swap-stopgap.yaml
+  - workstreams/active/ws-20261101-pg-swap-hostconf.yaml
+  - workstreams/active/ws-20261101-pve-0mcp-memory-budget.yaml
+  - workstreams/active/ws-20261101-standby-guest-diag.yaml
+  - workstreams/active/ws-20261101-vm130-inventory-correct.yaml
+  - workstreams/active/ws-20261102-build-gc-cache-trim.yaml
+  - workstreams/active/ws-20261102-exec-proxy-tailscale0.yaml
+  - workstreams/active/ws-20261102-tailscaled-restart-proxies.yaml
+  - workstreams/active/ws-20261103-build-gc-helper-image.yaml
+  - workstreams/active/ws-20261103-pve-0mcp-budget-status.yaml
+  - workstreams/active/ws-20261103-tailscaled-restart-0docker.yaml
+  - workstreams/active/ws-20261104-fleet-job-caches-trim-alerts.yaml
+  - workstreams/active/ws-20261109-ct-names-weekly-trim.yaml
+  - workstreams/active/ws-20261109-fix-1107-receipt-validation.yaml
+  - workstreams/active/ws-20261112-agent-history-autounlock.yaml
+  - workstreams/active/ws-20261118-kamateratmp-build-pool-expansion.yaml
+  - workstreams/active/ws-20261120-legacy-workstream-reconciliation.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261120-legacy-workstream-reconciliation.md
+  - docs/workstreams/ws-20261120-legacy-workstream-reconciliation-evidence.csv
+  - README.md
+  - changelog.md
+  - docs/status/history/merged-workstreams.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  ownership_manifest:
+    owned_surfaces:
+    - id: verified_legacy_workstream_reconciliation
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - workstreams/active/adr-0481-multi-deployment-service-registry.yaml
+      - workstreams/active/ws-0421-platform-service-watchdog.yaml
+      - workstreams/active/ws-0422-lsp-ai-decision.yaml
+      - workstreams/active/ws-0424-fork-clone-0fork.yaml
+      - workstreams/active/ws-0438-generic-by-construction.yaml
+      - workstreams/active/ws-0443-topology-drift-detection.yaml
+      - workstreams/active/ws-0444-nginx-oauth2-proxy-buffer-sizing.yaml
+      - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+      - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+      - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+      - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+      - workstreams/active/ws-0448-postmortem-and-handoff.yaml
+      - workstreams/active/ws-0449-phase4-self-healing-primitives.yaml
+      - workstreams/active/ws-0450-phase5-doctor-aggregator-and-rename-hook.yaml
+      - workstreams/active/ws-0451-phase6-self-healing-actions.yaml
+      - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
+      - workstreams/active/ws-0455-phase7-drive-doctor-to-zero.yaml
+      - workstreams/active/ws-0456-deployment-aware-cert-validation.yaml
+      - workstreams/active/ws-0457-host-pinning-deployment-owner.yaml
+      - workstreams/active/ws-0458-host-pinning-gate-wiring.yaml
+      - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
+      - workstreams/active/ws-0460-host-pinning-sweep.yaml
+      - workstreams/active/ws-0460-phase8-cross-deploy-and-auto-promote.yaml
+      - workstreams/active/ws-0461-cert-validator-multi-deployment.yaml
+      - workstreams/active/ws-0462-deployment-lifecycle-cli-parity.yaml
+      - workstreams/active/ws-0463-atomic-receipt-write.yaml
+      - workstreams/active/ws-0464-topology-precommit-schema-hook.yaml
+      - workstreams/active/ws-0465-host-pinning-sweep-regression-test.yaml
+      - workstreams/active/ws-0465-phase9-self-running-automation.yaml
+      - workstreams/active/ws-0466-post-converge-health-probe.yaml
+      - workstreams/active/ws-0467-ssh-retry-classifier.yaml
+      - workstreams/active/ws-0468-converge-state-diff.yaml
+      - workstreams/active/ws-0469-preconverge-live-state-check.yaml
+      - workstreams/active/ws-0470-preconverge-snapshot.yaml
+      - workstreams/active/ws-0471-connection-yml-vault-pull.yaml
+      - workstreams/active/ws-0473-phase10-reservation-hardening.yaml
+      - workstreams/active/ws-0474-phase11-cpu-only-automation.yaml
+      - workstreams/active/ws-0475-phase12-receipt-mass-refresh.yaml
+      - workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml
+      - workstreams/active/ws-0477-cert-lifecycle-make-target-fix.yaml
+      - workstreams/active/ws-0481-explicit-deployment-context.yaml
+      - workstreams/active/ws-0481-pentest-fleet-migration.yaml
+      - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
+      - workstreams/active/ws-0484-self-verification-contracts.yaml
+      - workstreams/active/ws-0485-convergence-idempotency-tests.yaml
+      - workstreams/active/ws-0486-hands-off-bootstrap.yaml
+      - workstreams/active/ws-0488-collapse-to-single-deployment.yaml
+      - workstreams/active/ws-0489-neko-vhost-edge-cert-drift.yaml
+      - workstreams/active/ws-0497-fleet-build-broker-pki-handoff.yaml
+      - workstreams/active/ws-0498-https-tls-test-baseline.yaml
+      - workstreams/active/ws-0499-fleet-build-broker-pki-vault-writer.yaml
+      - workstreams/active/ws-0500-builder-private-0mcp-transport.yaml
+      - workstreams/active/ws-0501-https-alert-presence-contract.yaml
+      - workstreams/active/ws-0502-cache-ghcr-private-auth.yaml
+      - workstreams/active/ws-0503-builder-publisher-identity.yaml
+      - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
+      - workstreams/active/ws-0514-repository-release-0-179-47.yaml
+      - workstreams/active/ws-0515-dify-runtime-recovery.yaml
+      - workstreams/active/ws-0516-openbao-completeness.yaml
+      - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
+      - workstreams/active/ws-0523-fleet-observability-roles.yaml
+      - workstreams/active/ws-0529-0infer-observability.yaml
+      - workstreams/active/ws-0532-dbeaver-postgres-direct-access.yaml
+      - workstreams/active/ws-0533-pve-host-daily-low-alert.yaml
+      - workstreams/active/ws-0534-agent-history-vm.yaml
+      - workstreams/active/ws-0535-agent-history-alerts.yaml
+      - workstreams/active/ws-0537-agent-history-activate.yaml
+      - workstreams/active/ws-0538-agent-history-policy-owner.yaml
+      - workstreams/active/ws-0539-agent-history-provision-fix.yaml
+      - workstreams/active/ws-0540-agent-history-runbook-records.yaml
+      - workstreams/active/ws-0541-gate-stacked-base-ref.yaml
+      - workstreams/active/ws-0541-proxmox-vm-firewall-tag.yaml
+      - workstreams/active/ws-0545-agent-history-canary-scan.yaml
+      - workstreams/active/ws-20261020-enrichment-pool-ports.yaml
+      - workstreams/active/ws-20261029-0pipe-gate-builder-runbook.yaml
+      - workstreams/active/ws-20261029-agent-history-embed-query.yaml
+      - workstreams/active/ws-20261029-agent-history-netpolicy-drift.yaml
+      - workstreams/active/ws-20261029-agent-history-vip-collision.yaml
+      - workstreams/active/ws-20261029-dockerhost-state-staging-peak.yaml
+      - workstreams/active/ws-20261029-pve-backup-weekly-freshness.yaml
+      - workstreams/active/ws-20261030-dockerhost-state-live-drift.yaml
+      - workstreams/active/ws-20261030-pve-firewall-install-guard.yaml
+      - workstreams/active/ws-20261030-woodpecker-activate-repo.yaml
+      - workstreams/active/ws-20261031-pg-primary-hugepages.yaml
+      - workstreams/active/ws-20261031-pg-primary-memory.yaml
+      - workstreams/active/ws-20261101-hypervisor-swap-stopgap.yaml
+      - workstreams/active/ws-20261101-pg-swap-hostconf.yaml
+      - workstreams/active/ws-20261101-pve-0mcp-memory-budget.yaml
+      - workstreams/active/ws-20261101-standby-guest-diag.yaml
+      - workstreams/active/ws-20261101-vm130-inventory-correct.yaml
+      - workstreams/active/ws-20261102-build-gc-cache-trim.yaml
+      - workstreams/active/ws-20261102-exec-proxy-tailscale0.yaml
+      - workstreams/active/ws-20261102-tailscaled-restart-proxies.yaml
+      - workstreams/active/ws-20261103-build-gc-helper-image.yaml
+      - workstreams/active/ws-20261103-pve-0mcp-budget-status.yaml
+      - workstreams/active/ws-20261103-tailscaled-restart-0docker.yaml
+      - workstreams/active/ws-20261104-fleet-job-caches-trim-alerts.yaml
+      - workstreams/active/ws-20261109-ct-names-weekly-trim.yaml
+      - workstreams/active/ws-20261109-fix-1107-receipt-validation.yaml
+      - workstreams/active/ws-20261112-agent-history-autounlock.yaml
+      - workstreams/active/ws-20261118-kamateratmp-build-pool-expansion.yaml
+      - workstreams/active/ws-20261120-legacy-workstream-reconciliation.yaml
+      - workstreams.yaml
+    - id: reconciliation_evidence_doc
+      mode: exclusive
+      paths:
+      - docs/workstreams/ws-20261120-legacy-workstream-reconciliation.md
+      - docs/workstreams/ws-20261120-legacy-workstream-reconciliation-evidence.csv
+    - id: generated_reconciliation_summaries
+      mode: shared_contract
+      contract: generated-artifacts-v1
+      paths:
+      - README.md
+      - changelog.md
+      - docs/status/history/merged-workstreams.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+  canonical_truth:
+    changelog_entry: Backfill repository and pull-request references for legacy workstreams
+      verified from merged PR evidence.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  schema_version: 1.0.0
+  tasks:
+  - id: t1
+    title: Verify historical PR and release evidence for legacy in-progress records
+    status: completed
+  - id: t2
+    title: Reconcile only records whose exact repository, PR, and lifecycle state
+      are proven
+    status: completed
+  - id: t3
+    title: Document evidence, remaining backlog, and safe follow-up automation
+    status: completed
+  - id: t4
+    title: Validate and publish the reconciliation through a pull request
+    status: completed
+  plane_issue_id: fc5cbc6b-b6cd-4027-a2b5-c061e9c74440
 - id: ws-0452-workstream-lifecycle-auto-close
   adr: '0452'
   title: Workstream lifecycle auto-close + receipt slug convention (umbrella for ADRs
@@ -6798,6 +7723,11 @@ workstreams:
   branch: claude/sleepy-proskuriakova-a0a263
   worktree_path: .claude/worktrees/sleepy-proskuriakova-a0a263
   doc: docs/adr/0452-workstream-lifecycle-auto-close.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 82
   depends_on:
   - adr-0326-workstream-registry-shards
   - adr-0420-ci-release-readiness-checks
@@ -6907,6 +7837,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0451-phase6-self-healing-actions.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 79
   depends_on:
   - adr-0450-phase5-doctor-aggregator-and-rename-hook
   - adr-0449-phase4-self-healing-primitives
@@ -7009,6 +7944,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0450-phase5-doctor-aggregator-and-rename-hook.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 78
   depends_on:
   - adr-0445-phase1-multi-deployment-hardening
   - adr-0446-phase2-receipt-freshness
@@ -7114,6 +8054,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0449-phase4-self-healing-primitives.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 77
   depends_on:
   - adr-0325-adr-discovery-and-reservation-ledger
   - adr-0445-phase1-multi-deployment-hardening
@@ -7247,13 +8192,18 @@ workstreams:
 - id: ws-0448-postmortem-and-handoff
   adr: 0448
   title: Cross-agent handoff postmortem for ws-0448 deployment connection registry
-  status: in_progress
+  status: merged
   ready_to_merge: true
   live_applied: false
   owner: platform-infrastructure
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/postmortems/2026-04-28-ws-0448-deployment-connection-registry.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 76
   depends_on:
   - adr-0448-deployment-connection-registry-and-wrapper
   conflicts_with: []
@@ -7304,6 +8254,12 @@ workstreams:
     \ ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n - Deployment-aware\
     \ cert validation.\n - `make new-deployment` / `make use-deployment` (ADR 0442)\
     \ \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they would invoke.\n"
+  canonical_truth:
+    changelog_entry: 'Reconcile the ws-0448 handoff workstream with merged PR #76
+      and its documented 0.179.11 implementation release.'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
 - id: ws-0447-phase3-llm-ergonomics-and-traceability
   adr: '0447'
   title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
@@ -7315,6 +8271,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 72
   depends_on:
   - adr-0445-phase1-multi-deployment-hardening
   - adr-0446-phase2-multi-deployment-hardening
@@ -7425,6 +8386,11 @@ workstreams:
   branch: claude/ws-0447-coolify-apps-self-healing
   worktree_path: .claude/worktrees/ws-0447-coolify-apps-self-healing
   doc: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 80
   ownership_manifest:
     owned_surfaces:
     - id: ws_0447_coolify_runtime_role
@@ -7562,6 +8528,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0446-phase2-multi-deployment-hardening.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 69
   depends_on:
   - adr-0445-phase1-multi-deployment-hardening
   - adr-0438-generic-by-construction
@@ -7677,6 +8648,11 @@ workstreams:
   branch: claude/objective-carson-cbe0c3
   worktree_path: .claude/worktrees/objective-carson-cbe0c3
   doc: docs/adr/0445-phase1-multi-deployment-hardening.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 68
   depends_on:
   - adr-0438-generic-by-construction
   - adr-0439-multi-deployment-repo-architecture
@@ -7844,6 +8820,11 @@ workstreams:
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
   doc: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 67
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -7898,6 +8879,11 @@ workstreams:
   branch: claude/loving-agnesi-b8dab1
   worktree_path: .claude/worktrees/loving-agnesi-b8dab1
   doc: docs/adr/0443-continuous-topology-reconciler.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 61
   depends_on:
   - adr-0373-service-registry-derived-defaults
   - adr-0416-pg-hba-from-service-registry
@@ -8116,6 +9102,11 @@ workstreams:
   branch: claude/reverent-cray-37f3c3
   worktree_path: .claude/worktrees/reverent-cray-37f3c3
   doc: docs/adr/0438-generic-by-construction.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 53
   depends_on:
   - adr-0407-generic-by-default
   - adr-0409-zero-sanitization-publication
@@ -8331,6 +9322,11 @@ workstreams:
   branch: claude/gallant-chebyshev-b0def1
   worktree_path: .claude/worktrees/gallant-chebyshev-b0def1
   doc: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 15
   related_adrs:
   - docs/adr/0425-retrospective-420-adr-platform-build.md
   depends_on:
@@ -8345,6 +9341,9 @@ workstreams:
   - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - docs/adr/0425-retrospective-420-adr-platform-build.md
   - docs/runbooks/hetzner-bare-metal-bootstrap.md
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
   started: '2026-04-21'
   priority: p1
   surfaces:
@@ -8477,12 +9476,16 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml
       - collections/ansible_collections/lv3/platform/roles/step_ca_ssh_trust/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml
-      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
-      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml
       - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/loki-config.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
       - playbooks/step-ca.yml
       mode: exclusive
+    - id: monitoring_vm_role_shared_edits
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
     - id: ws_0424_schema_catalog_fixes
       paths:
       - config/command-catalog.json
@@ -8603,7 +9606,12 @@ workstreams:
     \ (apex wipe). A RAID1 near-miss occurred during disk inventory \u2014 see ADR\
     \ 0425 live postmortem. Recovery was clean. The DNS token shared in chat should\
     \ be rotated regardless of clone outcome. See ADR 0424 open questions for the\
-    \ full list of decisions awaiting operator confirmation on return.\n"
+    \ full list of decisions awaiting operator confirmation on return. Ownership correction\
+    \ (2026-11-19): the monitoring VM defaults, task, and verification files are now\
+    \ maintained under the existing monitoring-vm-role-edits-v1 shared contract used\
+    \ by ws-0522. The recorded WS-0424 branch/worktree is absent, and the monitoring\
+    \ baseline is already on main. Only these three stale exclusive claims were transferred;\
+    \ other claims remain unchanged.\n"
 - id: ws-0422-lsp-ai-decision
   title: "ADR 0422/0423 \u2014 lsp-ai editor-side AI language server decision (do\
     \ not deploy)"
@@ -8615,6 +9623,11 @@ workstreams:
   owner: claude
   worktree_path: .claude/worktrees/serene-euclid
   doc: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 14
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -8706,6 +9719,11 @@ workstreams:
   branch: claude/sharp-jemison
   worktree_path: .claude/worktrees/sharp-jemison
   doc: docs/adr/0421-platform-wide-service-watchdog.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 12
   depends_on:
   - adr-0376-identity-core-watchdog
   - adr-0226-systemd-timers
@@ -9115,6 +10133,11 @@ workstreams:
   branch: codex/fix-https-alert-presence-gate
   worktree_path: .worktrees/fix-https-alert-presence-gate
   doc: docs/workstreams/ws-0501-https-alert-presence-contract.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 225
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -9593,6 +10616,11 @@ workstreams:
   branch: claude/dockerhost-state-live-drift
   worktree_path: .claude/worktrees/dockerhost-state-live-drift
   doc: docs/workstreams/ws-20261030-dockerhost-state-live-drift.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 642
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -9669,6 +10697,11 @@ workstreams:
   branch: claude/live-apply-pve-weekly-freshness
   worktree_path: .claude/worktrees/live-apply-pve-weekly-freshness
   doc: docs/workstreams/ws-20261029-pve-backup-weekly-freshness.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 624
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -9762,6 +10795,11 @@ workstreams:
   branch: claude/dockerhost-state-staging-peak
   worktree_path: .claude/worktrees/dockerhost-state-staging-peak
   doc: docs/workstreams/ws-20261029-dockerhost-state-staging-peak.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 617
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -9840,6 +10878,11 @@ workstreams:
   branch: claude/live-apply-pve-daily-low
   worktree_path: .claude/worktrees/live-apply-pve-daily-low
   doc: docs/workstreams/ws-0533-pve-host-daily-low-alert.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 584
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -9989,6 +11032,11 @@ workstreams:
   branch: claude/fix-neko-vhost-cert-drift-2026-08-29
   worktree_path: .worktrees/fix-neko-vhost-cert-drift
   doc: docs/adr/0380-neko-for-operator-remote-browser-access.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 161
   depends_on:
   - adr-0380-neko-remote-desktop
   conflicts_with: []
@@ -10356,6 +11404,105 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-20261119-ci-edge-reachability
+  adr: '0350'
+  title: Restore public NGINX edge and Woodpecker reachability
+  status: merged
+  ready_to_merge: true
+  owner: codex
+  branch: codex/ci-0mcp-release-0.179.67
+  worktree_path: .worktrees/ci-0mcp-release-0.179.67
+  doc: docs/workstreams/ws-20261119-ci-edge-reachability.md
+  depends_on: []
+  conflicts_with:
+  - ws-0424-fork-clone-0fork
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+  - docs/runbooks/configure-edge-publication.md
+  - docs/workstreams/ws-20261119-ci-edge-reachability.md
+  - README.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/status/history/merged-workstreams.md
+  - platform/workstream_receipts.py
+  - workstreams/active/ws-20261119-ci-edge-reachability.yaml
+  - workstreams.yaml
+  live_applied: true
+  tasks:
+  - id: diagnose
+    title: Trace public CI reachability from DNS through the backend
+    status: completed
+  - id: fix-configuration
+    title: Keep managed NGINX site vhosts loaded after package changes
+    status: completed
+  - id: apply-and-verify
+    title: Apply the edge configuration and prove Woodpecker API reachability
+    status: completed
+  - id: ci-pipeline
+    title: Run the repository pipeline on the 0mcp Woodpecker plane before merge
+    status: completed
+  - id: mainline-reapply
+    title: Reapply the merged NGINX edge configuration from main and verify live state
+    status: completed
+  plane_issue_id: b5b49248-0575-4edc-b46d-63d50d63dc73
+  canonical_truth:
+    changelog_entry: Ensure managed NGINX edge sites load and Woodpecker apply receipts
+      retain their state across JSON fallback.
+    release_bump: patch
+    included_in_repo_version: null
+  ownership_manifest:
+    owned_surfaces:
+    - id: ci_edge_role_integration
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml
+      mode: shared_contract
+      contract: nginx-edge-site-loading-v1
+    - id: ci_edge_runbook
+      paths:
+      - docs/runbooks/configure-edge-publication.md
+      mode: shared_contract
+      contract: edge-publication-runbook-v1
+    - id: ci_edge_apply_receipt
+      paths:
+      - receipts/live-applies/ws-20261119-ci-edge-reachability-apply-receipt.json
+      mode: exclusive
+    - id: ci_edge_receipt_storage
+      paths:
+      - platform/workstream_receipts.py
+      mode: shared_contract
+      contract: workstream-apply-receipt-storage-v1
+    - id: ci_edge_postmortem
+      paths:
+      - docs/workstreams/ws-20261119-ci-edge-reachability.md
+      - workstreams/active/ws-20261119-ci-edge-reachability.yaml
+      mode: exclusive
+    - id: ci_edge_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ci_edge_mainline_truth
+      paths:
+      - README.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: ci_edge_merged_history
+      paths:
+      - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ci_edge_generated_diagram
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ci_edge_topology_snapshot
+      paths:
+      - scripts/topology-snapshot.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
 - id: ws-20261020-enrichment-pool-ports
   title: Permit reviewed enrichment replica private ports
   status: in_progress
@@ -10365,6 +11512,11 @@ workstreams:
   branch: codex/enrichment-pool-ports-20261020
   worktree_path: .
   doc: docs/workstreams/ws-20261020-enrichment-pool-ports.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 526
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -10757,6 +11909,11 @@ workstreams:
   branch: codex/builder-publisher-identity-iac
   worktree_path: .worktrees/builder-publisher-identity-iac
   doc: docs/workstreams/ws-0503-builder-publisher-identity.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 227
   depends_on:
   - ws-0497-fleet-build-broker-vm180
   conflicts_with: []
@@ -10832,6 +11989,11 @@ workstreams:
   branch: codex/builder-0mcp-transport
   worktree_path: .worktrees/builder-0mcp-transport
   doc: docs/workstreams/ws-0500-builder-private-0mcp-transport.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 229
   depends_on:
   - ws-0499-builder-publisher-identity
   conflicts_with: []
@@ -10950,6 +12112,11 @@ workstreams:
   branch: codex/cache-ghcr-private-auth
   worktree_path: .worktrees/ws-0502-cache-ghcr-private-auth
   doc: docs/workstreams/ws-0502-cache-ghcr-private-auth.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 230
   depends_on:
   - ws-0274-artifact-cache-plane
   conflicts_with: []
@@ -11033,6 +12200,11 @@ workstreams:
   branch: claude/hostconf-exec-proxy-tailscale0
   worktree_path: .claude/worktrees/hostconf-exec-proxy-tailscale0
   doc: docs/workstreams/ws-20261102-exec-proxy-tailscale0.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 659
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -11116,6 +12288,11 @@ workstreams:
   branch: claude/woodpecker-activate
   worktree_path: .claude/worktrees/woodpecker-activate
   doc: docs/workstreams/ws-20261030-woodpecker-activate-repo.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 641
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -11534,6 +12711,11 @@ workstreams:
   branch: codex/ws-0515-dify-secret-source-guard-20260928
   worktree_path: .worktrees/ws-0515-dify-live-apply-20260928
   doc: docs/workstreams/ws-0515-dify-runtime-recovery.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 256
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -11825,6 +13007,11 @@ workstreams:
   branch: claude/standby-guest-diag
   worktree_path: .claude/worktrees/standby-guest-diag
   doc: docs/workstreams/ws-20261101-standby-guest-diag.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 652
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -12134,6 +13321,11 @@ workstreams:
   branch: codex/release-0.179.47-20260928
   worktree_path: .worktrees/serverclaw-publish-main-20260928
   doc: docs/workstreams/ws-0514-repository-release-0-179-47.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 254
   canonical_truth:
     changelog_entry: Release Woodpecker-only public CI and scoped service-completeness
       validation in 0.179.47.
@@ -12401,6 +13593,11 @@ workstreams:
   branch: claude/0pipe-gate-builder-runbook
   worktree_path: .claude/worktrees/0pipe-gate-builder
   doc: docs/workstreams/ws-20261029-0pipe-gate-builder-runbook.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 623
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -12467,6 +13664,11 @@ workstreams:
   branch: claude/gate-stacked-base-ref
   worktree_path: .claude/worktrees/gate-stacked-base
   doc: docs/workstreams/ws-0541-gate-stacked-base-ref.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 621
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -12668,6 +13870,11 @@ workstreams:
   branch: claude/pve-fw-guard
   worktree_path: .claude/worktrees/pve-fw-guard
   doc: docs/workstreams/ws-20261030-pve-firewall-install-guard.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 638
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -12788,6 +13995,11 @@ workstreams:
   branch: claude/proxmox-vm-firewall-scope
   worktree_path: .claude/worktrees/vm-firewall-scope
   doc: docs/workstreams/ws-0541-proxmox-vm-firewall-tag.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 622
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -13036,6 +14248,11 @@ workstreams:
   branch: codex/fix-broker-pki-writer-config-validation
   worktree_path: .worktrees/fix-broker-pki-writer-config-validation
   doc: docs/workstreams/ws-0499-fleet-build-broker-pki-vault-writer.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 226
   depends_on:
   - ws-0497-fleet-build-broker-vm180
   conflicts_with: []
@@ -13123,6 +14340,11 @@ workstreams:
   branch: codex/openbao-completeness-20260928
   worktree_path: .worktrees/openbao-completeness-20260928
   doc: docs/workstreams/ws-0516-openbao-completeness.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 260
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -13209,6 +14431,11 @@ workstreams:
   branch: codex/fix-broker-pki-handoff-template
   worktree_path: .worktrees/fix-broker-pki-handoff-template
   doc: docs/workstreams/ws-0497-fleet-build-broker-pki-handoff.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 228
   depends_on:
   - adr-0042-step-ca-for-ssh-and-internal-tls
   - adr-0047-short-lived-credentials-and-internal-mtls
@@ -13371,6 +14598,11 @@ workstreams:
   branch: claude/fix-1107-receipt-validation
   worktree_path: .claude/worktrees/fix-1107-receipt-validation
   doc: docs/workstreams/ws-20261109-fix-1107-receipt-validation.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 691
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -13700,6 +14932,11 @@ workstreams:
   branch: claude/tailscaled-restart-0docker
   worktree_path: .claude/worktrees/tailscaled-0docker
   doc: docs/workstreams/ws-20261103-tailscaled-restart-0docker.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 667
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -13813,6 +15050,11 @@ workstreams:
   branch: claude/tailscaled-restart-proxies
   worktree_path: .claude/worktrees/tailscaled-restart-proxies
   doc: docs/workstreams/ws-20261102-tailscaled-restart-proxies.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 661
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -13925,6 +15167,11 @@ workstreams:
   branch: codex/dbeaver-direct-5432
   worktree_path: .worktrees/dbeaver-postgres-direct-access
   doc: docs/workstreams/ws-0532-dbeaver-postgres-direct-access.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 579
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -13984,6 +15231,11 @@ workstreams:
   branch: codex/ws-0529-monitoring-ssh-scope
   worktree_path: .worktrees/ws-0529-monitoring-ssh-scope
   doc: docs/workstreams/ws-0529-0infer-observability.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 411
   depends_on:
   - ws-0528-0infer-ci-worker
   conflicts_with: []
@@ -14079,6 +15331,11 @@ workstreams:
   branch: fleet-observability-roles
   worktree_path: .worktrees/fleet-observability-roles
   doc: docs/workstreams/ws-0523-fleet-observability-roles.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 302
   depends_on:
   - ws-0522-monitoring-live-changes-codify
   conflicts_with: []
@@ -14165,6 +15422,11 @@ workstreams:
   branch: codify-monitoring-live-changes
   worktree_path: .worktrees/codify-monitoring-live-changes
   doc: docs/workstreams/ws-0522-monitoring-live-changes-codify.md
+  repositories:
+  - baditaflorin/platform_server
+  pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 299
   depends_on: []
   conflicts_with: []
   shared_surfaces:

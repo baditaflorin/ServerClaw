@@ -8,6 +8,11 @@ owner: claude
 branch: claude/agent-history-autounlock
 worktree_path: .
 doc: docs/workstreams/ws-20261112-agent-history-autounlock.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 696
 depends_on: []
 conflicts_with: []
 shared_surfaces:

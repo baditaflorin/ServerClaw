@@ -4,11 +4,17 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
 import platform.interface_contracts as interface_contracts
-from platform.interface_contracts import check_live_apply_target, validate_contracts
+from platform.interface_contracts import (
+    check_live_apply_target,
+    validate_contracts,
+    validate_workstream_repository_references,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +34,36 @@ def load_interface_contracts_module():
 def test_workstream_registry_contract_validates() -> None:
     contracts = validate_contracts()
     assert any(contract["contract_id"] == "workstream-registry-v1" for contract in contracts)
+
+
+def test_workstream_repository_and_pull_request_references_validate() -> None:
+    validate_workstream_repository_references(
+        {
+            "repositories": ["baditaflorin/platform_server"],
+            "pull_requests": [{"repository": "baditaflorin/platform_server", "number": 714}],
+        },
+        "workstream",
+    )
+
+
+@pytest.mark.parametrize(
+    "workstream, message",
+    [
+        ({"repositories": ["not-a-repository"]}, "owner/repository"),
+        ({"pull_requests": [{"repository": "org/repo", "number": 1}]}, "requires an explicit repositories list"),
+        (
+            {"repositories": ["org/repo"], "pull_requests": [{"repository": "other/repo", "number": 1}]},
+            "must also appear",
+        ),
+        (
+            {"repositories": ["org/repo"], "pull_requests": [{"repository": "org/repo", "number": 0}]},
+            "positive integer",
+        ),
+    ],
+)
+def test_invalid_workstream_repository_references_fail(workstream, message: str) -> None:
+    with pytest.raises(ValueError, match=message):
+        validate_workstream_repository_references(workstream, "workstream")
 
 
 def test_workstream_registry_contract_accepts_in_progress_status(tmp_path: Path, monkeypatch) -> None:

@@ -8,6 +8,11 @@ owner: claude
 branch: claude/live-apply-fleet-job-caches-trim-alerts
 worktree_path: .claude/worktrees/live-apply-fleet-job-caches-trim-alerts
 doc: docs/workstreams/ws-20261104-fleet-job-caches-trim-alerts.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 672
 depends_on: []
 conflicts_with: []
 shared_surfaces:

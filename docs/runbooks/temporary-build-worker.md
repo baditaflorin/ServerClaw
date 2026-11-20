@@ -119,6 +119,41 @@ Buildx admission. Monitoring also fetched the tailnet-only exporter
 successfully. The provider billing cutoff remains unconfirmed; the recorded
 expiry is the owner-directed sunset target and does not schedule deletion.
 
+## Trial cost accounting
+
+The metrics exporter supports private trial definitions from the Fleet State
+file `ci-build-trials.json`. Each entry declares the control plane, execution
+host, historical and current worker registration IDs, UTC start and end, and
+the owner-provided spend. The exporter backfills pipeline details, then keeps a
+per-pipeline ledger in its existing persistent state file and exports current
+aggregate gauges. This keeps trial totals available after Prometheus sample
+retention expires.
+
+The managed Grafana dashboard is titled **Build Trial Cost and CI Usage**. Its
+cost-per-pipeline figures divide recorded spend by unique Woodpecker pipelines
+that had at least one workflow on the worker; a pipeline using multiple hosts
+is counted once. Cost per worker workflow is also shown because one pipeline
+can contain multiple workflow executions. These measures do not count image
+artifacts or standalone Buildx and Fleet Runner jobs. Check that **Historical
+coverage complete** is `1` before using the cost ratios. Keep actual spend,
+host, registration IDs, and trial dates in the private Fleet State
+configuration rather than copying them into this generic runbook.
+
+To view the dashboard when the public Grafana route is unavailable, forward a
+local port through the configured monitoring SSH alias:
+
+```bash
+ssh "$MONITORING_SSH_ALIAS" -L 13000:127.0.0.1:3000 -N
+```
+
+Open the deployment's Grafana dashboard for the configured trial ID through
+that tunnel. At the end of the interval, reconcile the owner-provided cost with
+the provider invoice and actual billing cutoff, verify coverage is still `1`,
+and record completed and successful pipelines, worker workflow executions,
+cost per completed pipeline, cost per successful pipeline, and cost per
+workflow. Record the snapshot time and explain that the ratios exclude
+standalone Buildx and Fleet Runner activity.
+
 ## Onboarding
 
 1. Confirm the provider image is Debian 13, record its resource ID and expiry,

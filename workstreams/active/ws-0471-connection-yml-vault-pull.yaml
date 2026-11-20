@@ -8,6 +8,11 @@ owner: platform-infrastructure
 branch: claude/crazy-chaplygin-c7c256
 worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
 doc: docs/adr/0469-connection-yml-vault-key-pull.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 103
 depends_on:
   - adr-0440-per-deployment-connection-registry
 conflicts_with: []

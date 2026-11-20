@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
+This runbook converges the dedicated monitoring VM from the current private inventory with:
 
 - Grafana on port `3000`
 - InfluxDB 2 on port `8086`
@@ -28,7 +28,9 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 - Docker container log shipping from `docker-runtime`
 - shared MinIO object storage for the Loki chunk backend after the 2026-03-30 schema cutover
 
-Grafana is available both on the private VM and at [https://grafana.example.com](https://grafana.example.com).
+Grafana is intended to be available on the monitoring VM and through the configured public service URL. Verify the live route before relying on either path.
+
+> **Connection drift:** older copies of this runbook used `10.10.10.40` and the `100.64.0.1` jump host. Those no longer match the current private inventory. Use the current generated inventory and its local SSH alias for the monitoring guest. Other legacy cross-guest examples below must also be checked against inventory before use.
 The public hostname is operator-facing only: anonymous dashboard access is denied, public dashboard sharing is disabled, and the public edge now returns `404` for `/api/health` so the external surface does not disclose the running Grafana version.
 
 ## Command
@@ -36,6 +38,43 @@ The public hostname is operator-facing only: anonymous dashboard access is denie
 ```bash
 make converge-monitoring
 ```
+
+To apply only the managed build-trial dashboard after the monitoring role change
+has merged, use the scoped Grafana playbook and the `build_trial_dashboard` tag:
+
+```bash
+LOCAL_OVERLAY_ROOT="$(scripts/resolve_local_overlay_root.sh)"
+DEPLOYMENT_ID="<deployment>"
+IDENTITY_OVERLAY="$LOCAL_OVERLAY_ROOT/deployments/$DEPLOYMENT_ID/identity.yml"
+CONNECTION_OVERLAY="$LOCAL_OVERLAY_ROOT/deployments/$DEPLOYMENT_ID/ansible-connection.yml"
+
+PLATFORM_IDENTITY_OVERLAY="$IDENTITY_OVERLAY" \
+PLATFORM_INVENTORY_OVERLAY="$CONNECTION_OVERLAY" \
+uv run --with pyyaml python3 scripts/ansible_scope_runner.py plan \
+  --inventory inventory/hosts.yml \
+  --inventory "$CONNECTION_OVERLAY" \
+  --playbook playbooks/services/grafana.yml \
+  --env production
+
+PLATFORM_IDENTITY_OVERLAY="$IDENTITY_OVERLAY" \
+PLATFORM_INVENTORY_OVERLAY="$CONNECTION_OVERLAY" \
+uv run --with pyyaml python3 scripts/ansible_scope_runner.py run \
+  --inventory inventory/hosts.yml \
+  --inventory "$CONNECTION_OVERLAY" \
+  --playbook playbooks/services/grafana.yml \
+  --env production -- \
+  --limit monitoring \
+  --tags build_trial_dashboard
+```
+
+The connection overlay must route `monitoring` through the selected deployment's
+operator SSH alias when the controller cannot reach its private address
+directly. Keep that mapping in the private deployment overlay; do not pass an
+`ansible_host` extra-var, because the scope runner rejects connection-identity
+overrides when a deployment identity is selected. The narrow tag loads the
+Grafana admin credential, copies and imports the dashboard, then verifies its
+Grafana UID. It does not run the public-edge checks; use the full monitoring
+convergence after the public Grafana route is healthy.
 
 ## Controller Prerequisites
 
@@ -57,9 +96,9 @@ make converge-monitoring
 10. Initializes InfluxDB with the `lv3` organization and the `proxmox` bucket.
 11. Creates separate InfluxDB tokens for Proxmox metric writes and Grafana bucket reads.
 12. Provisions Grafana datasources for InfluxDB, Loki, Prometheus, and Tempo automatically.
-13. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/monitoring/guest-writer.token`.
+13. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `.local/monitoring/guest-writer.token`.
 14. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
-15. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
+15. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to the inventory-resolved monitoring address on port `8086`.
 16. Converges shared guest observability plumbing for service-level Telegraf on managed guests that ship into InfluxDB.
 17. Converges `nginx-edge` with loopback-only `stub_status` as a thin extension on top of that shared guest observability framework.
 18. Converges `docker-build` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events as another thin extension on the same framework.
@@ -73,24 +112,17 @@ make converge-monitoring
 
 Option 1, use the published Grafana URL:
 
-Log in at [https://grafana.example.com](https://grafana.example.com).
+Log in at the configured public Grafana URL after verifying that its health check succeeds.
 
-Option 2, use a local SSH port forward to Grafana:
-
-```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 -L 3000:127.0.0.1:3000 -N
-```
-
-Retrieve the managed Grafana admin password:
+Option 2, use a local SSH port forward to Grafana. Set `MONITORING_SSH_ALIAS` to the monitoring target in the generated private SSH configuration first:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'sudo cat /etc/lv3/monitoring/grafana-admin-password'
+ssh "$MONITORING_SSH_ALIAS" -L 3000:127.0.0.1:3000 -N
 ```
 
-Then log in at [http://127.0.0.1:3000](http://127.0.0.1:3000) with:
-
-- username: `admin`
-- password: the retrieved secret
+Use the approved Grafana credential flow for the admin account. Do not put the
+password on a command line, in shell history, or in this repository. Then log
+in at [http://127.0.0.1:3000](http://127.0.0.1:3000) through the SSH tunnel.
 
 ## Verification
 
@@ -100,16 +132,16 @@ Syntax-check the dedicated monitoring playbook:
 make syntax-check-monitoring
 ```
 
-Verify the monitoring services on VM `140`:
+Verify monitoring services through the inventory-managed SSH alias:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'systemctl is-active influxdb grafana-server loki loki-canary alloy tempo otelcol-contrib lv3-prometheus prometheus-alertmanager prometheus-blackbox-exporter'
+ssh "$MONITORING_SSH_ALIAS" 'systemctl is-active influxdb grafana-server loki loki-canary alloy tempo otelcol-contrib lv3-prometheus prometheus-alertmanager prometheus-blackbox-exporter'
 ```
 
 Verify the Grafana health endpoint locally on the guest:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3000/api/health'
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS http://127.0.0.1:3000/api/health'
 ```
 
 ## 0own Proxmox host metrics
@@ -150,7 +182,7 @@ Apply and verify the 0own target:
 ```bash
 python3 scripts/ansible_scope_runner.py plan --playbook playbooks/services/prometheus-0own-node-exporter.yml --env production
 python3 scripts/ansible_scope_runner.py run --playbook playbooks/services/prometheus-0own-node-exporter.yml --env production -- --limit monitoring -e '{"ansible_host":"0mcp_monitoring"}'
-ssh 0mcp_monitoring 'curl -fsS --get --data-urlencode "query=up{job=\"pve_0own_host_node_exporter_via_tailscale\",monitored_host=\"proxmox-node\"}" http://127.0.0.1:9090/api/v1/query'
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS --get --data-urlencode "query=up{job=\"pve_0own_host_node_exporter_via_tailscale\",monitored_host=\"proxmox-node\"}" http://127.0.0.1:9090/api/v1/query'
 ```
 
 The target query should have value `1`. Useful host metrics include
@@ -161,13 +193,13 @@ or exporter availability problem; it does not by itself identify the cause.
 Verify the managed overview dashboard exists and has the expected title:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS -u admin:$(sudo cat /etc/lv3/monitoring/grafana-admin-password) http://127.0.0.1:3000/api/dashboards/uid/lv3-platform-overview'
+ssh -t "$MONITORING_SSH_ALIAS" 'curl -fsS -u admin http://127.0.0.1:3000/api/dashboards/uid/lv3-platform-overview'
 ```
 
 Verify unauthenticated public dashboard URLs do not expose dashboard content:
 
 ```bash
-curl -I https://grafana.example.com/d/lv3-platform-overview/lv3-platform-overview
+curl -I "${GRAFANA_URL:?Set the configured public Grafana URL}/d/<dashboard-uid>/<dashboard-slug>"
 ```
 
 Expected result:
@@ -178,8 +210,8 @@ Expected result:
 Verify the public edge blocks the Grafana health API and strips version headers:
 
 ```bash
-curl -i https://grafana.example.com/api/health
-curl -I https://grafana.example.com/login
+curl -i "${GRAFANA_URL:?Set the configured public Grafana URL}/api/health"
+curl -I "${GRAFANA_URL:?Set the configured public Grafana URL}/login"
 ```
 
 Expected result:
@@ -190,118 +222,123 @@ Expected result:
 Verify the Grafana Loki datasource exists:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'PASS=$(sudo cat /etc/lv3/monitoring/grafana-admin-password); curl -fsS -u admin:${PASS} http://127.0.0.1:3000/api/datasources/name/Loki%20Logs | jq -r '\''[.name, .type, .url] | @tsv'\'''
+ssh -t "$MONITORING_SSH_ALIAS" 'curl -fsS -u admin http://127.0.0.1:3000/api/datasources/name/Loki%20Logs | jq -r '\''[.name, .type, .url] | @tsv'\'''
 ```
 
 Verify the full dashboard inventory:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'PASS=$(sudo cat /etc/lv3/monitoring/grafana-admin-password); curl -fsS -u admin:${PASS} http://127.0.0.1:3000/api/search?query=lv3 | jq -r '\''.[] | [.uid, .title, .url] | @tsv'\'''
+ssh -t "$MONITORING_SSH_ALIAS" 'curl -fsS -u admin "http://127.0.0.1:3000/api/search?query=lv3" | jq -r '\''.[] | [.uid, .title, .url] | @tsv'\'''
 ```
+
+The **Build Trial Cost and CI Usage** dashboard is imported into the `LV3`
+folder by the monitoring role. Open it from the Grafana dashboard list after
+deployment. Its UID is deployment-prefixed; use the title rather than assuming
+a fixed UID. Use cost ratios only when **Historical coverage complete** is `1`.
 
 Verify the managed log-canary dashboard exists:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'PASS=$(sudo cat /etc/lv3/monitoring/grafana-admin-password); curl -fsS -u admin:${PASS} http://127.0.0.1:3000/api/dashboards/uid/lv3-log-canary-overview | jq -r '\''.dashboard.title'\'''
+ssh -t "$MONITORING_SSH_ALIAS" 'curl -fsS -u admin http://127.0.0.1:3000/api/dashboards/uid/lv3-log-canary-overview | jq -r '\''.dashboard.title'\'''
 ```
 
 Verify Loki Canary exposes metrics locally:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3500/metrics | grep "^loki_canary_" | sed -n '\''1,20p'\'''
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS http://127.0.0.1:3500/metrics | grep "^loki_canary_" | sed -n '\''1,20p'\'''
 ```
 
 Verify Prometheus sees the Loki Canary target:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=up{job="loki-canary"}'\'' http://127.0.0.1:9090/api/v1/query | jq -c .data.result'
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS --get --data-urlencode '\''query=up{job="loki-canary"}'\'' http://127.0.0.1:9090/api/v1/query | jq -c .data.result'
 ```
 
 Verify Loki can still query the canary stream:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'start=$(date -u -d "15 minutes ago" +%s000000000); end=$(date -u +%s000000000); curl -fsSG --data-urlencode "query={name=\"loki-canary\",stream=\"stdout\"}" --data-urlencode limit=5 --data-urlencode start=$start --data-urlencode end=$end http://127.0.0.1:3100/loki/api/v1/query_range | jq -c .data.result'
+ssh "$MONITORING_SSH_ALIAS" 'start=$(date -u -d "15 minutes ago" +%s000000000); end=$(date -u +%s000000000); curl -fsSG --data-urlencode "query={name=\"loki-canary\",stream=\"stdout\"}" --data-urlencode limit=5 --data-urlencode start=$start --data-urlencode end=$end http://127.0.0.1:3100/loki/api/v1/query_range | jq -c .data.result'
 ```
 
 Verify the shared-object-store cutover settings are present in Loki:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'sudo grep -E "object_store: s3|bucketnames: loki-chunks|delete_request_store: s3" /etc/loki/config.yml'
+ssh "$MONITORING_SSH_ALIAS" 'sudo grep -E "object_store: s3|bucketnames: loki-chunks|delete_request_store: s3" /etc/loki/config.yml'
 ```
 
-If the canary raises alerts or one of these checks fails, continue in [docs/runbooks/log-queryability-canary.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/log-queryability-canary.md).
+If the canary raises alerts or one of these checks fails, continue in [docs/runbooks/log-queryability-canary.md](log-queryability-canary.md).
 
 Verify Loki currently knows about every managed host label:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3100/loki/api/v1/label/host/values | jq -c .data'
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS http://127.0.0.1:3100/loki/api/v1/label/host/values | jq -c .data'
 ```
 
 Verify Docker container log streams are present in Loki:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'start=$(date -u -d "1 hour ago" +%s000000000); curl -fsSG --data-urlencode "match[]={host=\"docker-runtime\",source=\"docker\"}" --data-urlencode start=$start http://127.0.0.1:3100/loki/api/v1/series | jq -c .data'
+ssh "$MONITORING_SSH_ALIAS" 'start=$(date -u -d "1 hour ago" +%s000000000); curl -fsSG --data-urlencode "match[]={host=\"docker-runtime\",source=\"docker\"}" --data-urlencode start=$start http://127.0.0.1:3100/loki/api/v1/series | jq -c .data'
 ```
 
 Verify NGINX access logs are present in Loki:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'start=$(date -u -d "1 hour ago" +%s000000000); curl -fsSG --data-urlencode "match[]={host=\"nginx-edge\",service=\"nginx\",log_type=\"access\"}" --data-urlencode start=$start http://127.0.0.1:3100/loki/api/v1/series | jq -c .data'
+ssh "$MONITORING_SSH_ALIAS" 'start=$(date -u -d "1 hour ago" +%s000000000); curl -fsSG --data-urlencode "match[]={host=\"nginx-edge\",service=\"nginx\",log_type=\"access\"}" --data-urlencode start=$start http://127.0.0.1:3100/loki/api/v1/series | jq -c .data'
 ```
 
 If you need deterministic proof for Proxmox-host journald ingestion, emit one verification-only syslog line on the host and query it from Loki:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo logger -t adr0052-verification "proxmox host loki verification event"'
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'start=$(date -u -d "10 minutes ago" +%s000000000); end=$(date -u +%s000000000); curl -fsSG --data-urlencode "query={host=\"proxmox-host\",syslog_identifier=\"adr0052-verification\"}" --data-urlencode limit=5 --data-urlencode start=$start --data-urlencode end=$end http://127.0.0.1:3100/loki/api/v1/query_range | jq -c .data.result'
+ssh "$PROXMOX_SSH_ALIAS" 'sudo logger -t adr0052-verification "proxmox host loki verification event"'
+ssh "$MONITORING_SSH_ALIAS" 'start=$(date -u -d "10 minutes ago" +%s000000000); end=$(date -u +%s000000000); curl -fsSG --data-urlencode "query={host=\"proxmox-host\",syslog_identifier=\"adr0052-verification\"}" --data-urlencode limit=5 --data-urlencode start=$start --data-urlencode end=$end http://127.0.0.1:3100/loki/api/v1/query_range | jq -c .data.result'
 ```
 
 Verify Tempo has recorded service names from traced workloads:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values'
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values'
 ```
 
 Verify Tempo service-graph metrics are present in Prometheus:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_service_graph_request_total'\'' http://127.0.0.1:9090/api/v1/query'
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS --get --data-urlencode '\''query=traces_service_graph_request_total'\'' http://127.0.0.1:9090/api/v1/query'
 ```
 
 Verify Tempo span metrics are present in Prometheus:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_spanmetrics_calls_total'\'' http://127.0.0.1:9090/api/v1/query'
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS --get --data-urlencode '\''query=traces_spanmetrics_calls_total'\'' http://127.0.0.1:9090/api/v1/query'
 ```
 
 Verify Alertmanager is healthy:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS http://127.0.0.1:9093/-/healthy'
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS http://127.0.0.1:9093/-/healthy'
 ```
 
 Verify the blackbox exporter is healthy:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS http://127.0.0.1:9115/-/healthy'
+ssh "$MONITORING_SSH_ALIAS" 'curl -fsS http://127.0.0.1:9115/-/healthy'
 ```
 
 Verify nginx guest telemetry is present in InfluxDB:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r._measurement == "nginx" and r.host == "nginx-edge") |> limit(n: 10)'\'''
+ssh "$MONITORING_SSH_ALIAS" 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r._measurement == "nginx" and r.host == "nginx-edge") |> limit(n: 10)'\'''
 ```
 
 Verify docker build count and duration telemetry is present in InfluxDB:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r._measurement == "docker_builds" and r.host == "docker-build" and (r._field == "count" or r._field == "duration_ms" or r._field == "start_time_ns" or r._field == "end_time_ns")) |> limit(n: 20)'\'''
+ssh "$MONITORING_SSH_ALIAS" 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r._measurement == "docker_builds" and r.host == "docker-build" and (r._field == "count" or r._field == "duration_ms" or r._field == "start_time_ns" or r._field == "end_time_ns")) |> limit(n: 20)'\'''
 ```
 
 Verify docker runtime container telemetry is present in InfluxDB:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r.host == "docker-runtime" and (r._measurement == "docker_container_status" or r._measurement == "docker_container_cpu" or r._measurement == "docker_container_mem" or r._measurement == "docker_container_net" or r._measurement == "docker_container_health")) |> limit(n: 20)'\'''
+ssh "$MONITORING_SSH_ALIAS" 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r.host == "docker-runtime" and (r._measurement == "docker_container_status" or r._measurement == "docker_container_cpu" or r._measurement == "docker_container_mem" or r._measurement == "docker_container_net" or r._measurement == "docker_container_health")) |> limit(n: 20)'\'''
 ```
 
 Verify Telegraf has Docker socket access on the runtime guest:
@@ -325,13 +362,13 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetz
 Verify the Proxmox metric server definition on the host:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo pvesh get /cluster/metrics/server/influxdb-http --output-format json'
+ssh "$PROXMOX_SSH_ALIAS" 'sudo pvesh get /cluster/metrics/server/influxdb-http --output-format json'
 ```
 
 Verify that recent Proxmox metrics are arriving in InfluxDB:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> limit(n: 5)'\'''
+ssh "$MONITORING_SSH_ALIAS" 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> limit(n: 5)'\'''
 ```
 
 ## Managed Secrets
@@ -375,14 +412,14 @@ the canonical service-name variable rather than a hard-coded unit.
 
 The control machine keeps one mirrored token outside git for host-side Proxmox configuration:
 
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/monitoring/proxmox-writer.token`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/monitoring/guest-writer.token`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/monitoring/loki-minio-secret-key.txt`
+- `.local/monitoring/proxmox-writer.token`
+- `.local/monitoring/guest-writer.token`
+- `.local/monitoring/loki-minio-secret-key.txt`
 
 The shared trace ingress for instrumented private services is:
 
-- OTLP gRPC: `10.10.10.40:4317`
-- OTLP HTTP: `http://10.10.10.40:4318/v1/traces`
+- OTLP gRPC: inventory-resolved monitoring address on port `4317`
+- OTLP HTTP: inventory-resolved monitoring address on port `4318`, path `/v1/traces`
 
 If the mirrored local token is missing, rerun `make converge-monitoring` from the control machine.
 
@@ -393,9 +430,9 @@ During the live rollout on 2026-03-22, VMs `110`, `120`, `130`, and `140` again 
 The repair used the existing guest-agent flow from the netplan drift runbook before rerunning the monitoring playbook:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo qm config 110 | grep ^net0 && sudo qm config 120 | grep ^net0 && sudo qm config 130 | grep ^net0 && sudo qm config 140 | grep ^net0'
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 "sudo qm guest exec 110 -- bash -lc 'sed -i \"s/bc:24:11:94:37:83/bc:24:11:0d:03:bb/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 "sudo qm guest exec 120 -- bash -lc 'sed -i \"s/bc:24:11:b0:d4:d1/bc:24:11:aa:99:7c/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 "sudo qm guest exec 130 -- bash -lc 'sed -i \"s/bc:24:11:7c:4e:5b/bc:24:11:0f:8a:f2/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 "sudo qm guest exec 140 -- bash -lc 'sed -i \"s/bc:24:11:82:c6:38/bc:24:11:b1:76:a0/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
+ssh "$PROXMOX_SSH_ALIAS" 'sudo qm config 110 | grep ^net0 && sudo qm config 120 | grep ^net0 && sudo qm config 130 | grep ^net0 && sudo qm config 140 | grep ^net0'
+ssh "$PROXMOX_SSH_ALIAS" "sudo qm guest exec 110 -- bash -lc 'sed -i \"s/bc:24:11:94:37:83/bc:24:11:0d:03:bb/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
+ssh "$PROXMOX_SSH_ALIAS" "sudo qm guest exec 120 -- bash -lc 'sed -i \"s/bc:24:11:b0:d4:d1/bc:24:11:aa:99:7c/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
+ssh "$PROXMOX_SSH_ALIAS" "sudo qm guest exec 130 -- bash -lc 'sed -i \"s/bc:24:11:7c:4e:5b/bc:24:11:0f:8a:f2/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
+ssh "$PROXMOX_SSH_ALIAS" "sudo qm guest exec 140 -- bash -lc 'sed -i \"s/bc:24:11:82:c6:38/bc:24:11:b1:76:a0/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
 ```

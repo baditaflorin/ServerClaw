@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-09-28'
+generated: '2026-11-20'
 source_root: docs/discovery/config-locations
 pack_manifest: docs/discovery/onboarding-packs.yaml
 purpose: Generated root configuration discovery entrypoint. Use the section summaries below to choose the right canonical source file under docs/discovery/config-locations/.
@@ -36,7 +36,7 @@ section_index:
     file: docs/discovery/config-locations/validation-and-ci.yaml
     summary: Validation entrypoints, CI workflows, and the scripts that enforce repo-wide standards.
     when_to_read: Use this section when changing validation, CI, or generated-repo contract enforcement.
-    entry_count: 6
+    entry_count: 7
   - id: infrastructure-state
     title: Infrastructure State And Receipts
     file: docs/discovery/config-locations/infrastructure-state.yaml

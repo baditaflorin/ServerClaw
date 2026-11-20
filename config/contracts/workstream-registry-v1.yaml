@@ -29,6 +29,17 @@ input_schema:
     - workstreams
 output_schema:
   type: workstream_entry
+  optional_fields:
+    repositories:
+      type: list
+      item_pattern: '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'
+      description: Exact GitHub repositories associated with the workstream.
+    pull_requests:
+      type: list
+      item_schema:
+        repository: string
+        number: positive_integer
+      description: Exact GitHub pull requests associated with the workstream.
   required_fields:
     - id
     - adr

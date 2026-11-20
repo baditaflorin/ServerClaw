@@ -8,6 +8,11 @@ owner: platform-infrastructure
 branch: claude/crazy-chaplygin-c7c256
 worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
 doc: docs/adr/0468-preconverge-snapshot.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 101
 depends_on:
   - adr-0461-atomic-receipt-write-and-dangling-check
   - adr-0466-converge-state-diff-receipt

@@ -8,6 +8,11 @@ owner: platform-infrastructure
 branch: claude/crazy-chaplygin-c7c256
 worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
 doc: docs/adr/0456-deployment-aware-certificate-validation.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 81
 depends_on:
   - adr-0375-certificate-validation-and-concordance-enforcement
   - adr-0410-generic-by-default-architecture

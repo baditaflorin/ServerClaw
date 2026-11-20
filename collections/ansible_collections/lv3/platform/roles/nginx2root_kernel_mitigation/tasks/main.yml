@@ -1,0 +1,82 @@
+# Purpose: Disable SCTP autoload only after proving no active sockets depend on it.
+# Use case: Temporary containment of the separate SCTP kernel privilege-escalation path.
+# Inputs: Linux kernel config, `ss`, and `modprobe` on the selected host.
+# Outputs: Persistent module block, unloaded SCTP module, and verified no sockets.
+# Idempotency: Yes when SCTP remains unused; active or built-in SCTP fails closed.
+# Dependencies: ADR 0498; do not apply to hosts that require SCTP.
+---
+- name: Read the active kernel's SCTP configuration
+  ansible.builtin.shell: >-
+    grep -E '^(CONFIG_IP_SCTP=|# CONFIG_IP_SCTP is not set)' "/boot/config-$(uname -r)" || true
+  args:
+    executable: /bin/sh
+  register: nginx2root_kernel_sctp_config
+  changed_when: false
+
+- name: Require SCTP to be modular or disabled in the active kernel
+  ansible.builtin.assert:
+    that:
+      - nginx2root_kernel_sctp_config.stdout in ['CONFIG_IP_SCTP=m', '# CONFIG_IP_SCTP is not set']
+    fail_msg: >-
+      The active kernel reports {{ nginx2root_kernel_sctp_config.stdout | default('unknown SCTP configuration') }}.
+      Built-in or unknown SCTP support cannot be disabled safely by this role.
+
+- name: Check all SCTP sockets before applying the module block
+  ansible.builtin.command:
+    argv:
+      - ss
+      - -H
+      - -A
+      - sctp
+  register: nginx2root_kernel_sctp_sockets
+  changed_when: false
+  failed_when: nginx2root_kernel_sctp_sockets.rc != 0 or (nginx2root_kernel_sctp_sockets.stdout | trim | length > 0)
+
+- name: Persist the SCTP module block
+  ansible.builtin.copy:
+    dest: "{{ nginx2root_kernel_mitigation_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: "{{ nginx2root_kernel_mitigation_content }}"
+
+- name: Check whether SCTP is currently loaded
+  ansible.builtin.stat:
+    path: /sys/module/sctp
+  register: nginx2root_kernel_sctp_module
+
+- name: Unload the SCTP module when it is present and unused
+  ansible.builtin.command:
+    argv:
+      - modprobe
+      - -r
+      - sctp
+  when:
+    - nginx2root_kernel_sctp_module.stat.exists
+    - nginx2root_kernel_sctp_config.stdout == 'CONFIG_IP_SCTP=m'
+
+- name: Verify modprobe blocks SCTP loading
+  ansible.builtin.shell: >-
+    modprobe --showconfig | grep -Fx 'install sctp /bin/false'
+  args:
+    executable: /bin/sh
+  changed_when: false
+
+- name: Verify no SCTP sockets remain
+  ansible.builtin.command:
+    argv:
+      - ss
+      - -H
+      - -A
+      - sctp
+  register: nginx2root_kernel_sctp_sockets_after
+  changed_when: false
+  failed_when: nginx2root_kernel_sctp_sockets_after.rc != 0 or (nginx2root_kernel_sctp_sockets_after.stdout | trim | length > 0)
+
+- name: Verify SCTP module is unloaded when modular
+  ansible.builtin.stat:
+    path: /sys/module/sctp
+  register: nginx2root_kernel_sctp_module_after
+  failed_when:
+    - nginx2root_kernel_sctp_config.stdout == 'CONFIG_IP_SCTP=m'
+    - nginx2root_kernel_sctp_module_after.stat.exists

@@ -8,6 +8,11 @@ owner: codex
 branch: codex/regenerate-https-tls-baseline
 worktree_path: .worktrees/regenerate-https-tls-baseline
 doc: docs/workstreams/ws-0498-https-tls-test-baseline.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 223
 depends_on:
   - ws-0496-generated-artifact-reconciliation
 conflicts_with: []

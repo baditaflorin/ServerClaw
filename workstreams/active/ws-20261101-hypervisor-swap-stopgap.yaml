@@ -8,6 +8,11 @@ owner: claude
 branch: claude/hypervisor-swap-stopgap
 worktree_path: .claude/worktrees/hypervisor-swap-stopgap
 doc: docs/workstreams/ws-20261101-hypervisor-swap-stopgap.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 655
 depends_on: []
 conflicts_with: []
 shared_surfaces:

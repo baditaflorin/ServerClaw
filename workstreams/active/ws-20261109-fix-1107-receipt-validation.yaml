@@ -8,6 +8,11 @@ owner: claude
 branch: claude/fix-1107-receipt-validation
 worktree_path: .claude/worktrees/fix-1107-receipt-validation
 doc: docs/workstreams/ws-20261109-fix-1107-receipt-validation.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 691
 depends_on: []
 conflicts_with: []
 shared_surfaces:

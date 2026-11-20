@@ -1,0 +1,123 @@
+id: ws-20261119-nginx2root-remediation
+adr: 0498
+title: Patch NGINX pre-auth RCEs and contain the SCTP privilege-escalation chain
+status: merged
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/nginx2root-postmortem-20261119
+worktree_path: .worktrees/nginx2root-postmortem-20261119
+doc: docs/workstreams/ws-20261119-nginx2root-remediation.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+- collections/ansible_collections/lv3/platform/roles/nginx2root_kernel_mitigation/**
+- collections/ansible_collections/lv3/platform/roles/nginx_org_security_package/**
+- playbooks/services/nginx2root-remediation.yml
+- scripts/converge_dry_run.py
+- config/ansible-execution-scopes.yaml
+- config/image-catalog.json
+- docs/adr/.index.yaml
+- docs/adr/index/**
+- docs/adr/0498-nginx2root-remediation.md
+- docs/runbooks/nginx2root-remediation.md
+- docs/workstreams/ws-20261119-nginx2root-remediation.md
+- docs/postmortems/2026-11-19-nginx2root-response.md
+- docs/diagrams/agent-coordination-map.excalidraw
+- docs/status/history/merged-workstreams.md
+- README.md
+- VERSION
+- changelog.md
+- versions/stack.yaml
+- build/platform-manifest.json
+- receipts/cve/4d1d4ce08432-20261119T110658Z.grype.json
+- receipts/image-scans/2026-11-19-dify-nginx-runtime.json
+- receipts/live-applies/ws-20261119-nginx2root-remediation-apply-receipt.yaml
+- receipts/sbom/4d1d4ce08432.cdx.json
+- workstreams/active/ws-20261119-nginx2root-remediation.yaml
+- workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: nginx2root_automation_and_decision_docs
+    mode: exclusive
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+    - collections/ansible_collections/lv3/platform/roles/nginx2root_kernel_mitigation/**
+    - collections/ansible_collections/lv3/platform/roles/nginx_org_security_package/**
+    - playbooks/services/nginx2root-remediation.yml
+    - scripts/converge_dry_run.py
+    - config/ansible-execution-scopes.yaml
+    - config/image-catalog.json
+    - docs/adr/0498-nginx2root-remediation.md
+    - docs/runbooks/nginx2root-remediation.md
+    - docs/workstreams/ws-20261119-nginx2root-remediation.md
+    - docs/diagrams/agent-coordination-map.excalidraw
+  - id: nginx2root_generated_adr_index
+    mode: shared_contract
+    contract: generated-artifacts-v1
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/**
+  - id: nginx2root_mainline_release_integration
+    mode: shared_contract
+    contract: mainline-release-integration-v1
+    paths:
+    - README.md
+    - VERSION
+    - changelog.md
+    - versions/stack.yaml
+    - build/platform-manifest.json
+  - id: nginx2root_generated_status_history
+    mode: shared_contract
+    contract: generated-artifacts-v1
+    paths:
+    - docs/status/history/merged-workstreams.md
+  - id: nginx2root_scan_evidence
+    mode: exclusive
+    paths:
+    - receipts/cve/4d1d4ce08432-20261119T110658Z.grype.json
+    - receipts/image-scans/2026-11-19-dify-nginx-runtime.json
+    - receipts/sbom/4d1d4ce08432.cdx.json
+  - id: nginx2root_live_apply_receipt
+    mode: exclusive
+    paths:
+    - receipts/live-applies/ws-20261119-nginx2root-remediation-apply-receipt.yaml
+  - id: nginx2root_publishable_postmortem
+    mode: exclusive
+    paths:
+    - docs/postmortems/2026-11-19-nginx2root-response.md
+  - id: nginx2root_workstream_registry
+    mode: shared_contract
+    contract: workstream-registry-v1
+    paths:
+    - workstreams/active/ws-20261119-nginx2root-remediation.yaml
+    - workstreams.yaml
+canonical_truth:
+  changelog_entry: Patch every identified NGINX runtime to an official fixed release
+    and block the unused SCTP kernel module on affected hosts until the kernel fix
+    is available.
+  release_bump: patch
+  included_in_repo_version: null
+context: The disclosed NGINX CVEs affect installed packages and container images across
+  both the managed platform and external Docker hosts. Debian's current NGINX packages
+  remain vulnerable, while official NGINX stable 1.30.7 and mainline 1.31.9 contain
+  the published fixes. The privilege-escalation chain also depends on an unfixed SCTP
+  kernel issue; no SCTP listeners or sockets were found on the inspected NGINX hosts.
+  The workstream inventories all reachable NGINX instances, patches managed and external
+  runtimes, and records any host that remains unreachable or awaiting a safe image
+  rebuild.
+tasks:
+- id: inventory
+  title: Inventory NGINX processes and runtime ownership across active servers
+  status: completed
+- id: automation
+  title: Add repeatable package and SCTP mitigation automation and update image references
+  status: completed
+- id: live-apply
+  title: Apply fixed NGINX releases and verify every reachable runtime
+  status: completed
+- id: publishable-postmortem
+  title: Record the measured response timeline, cost, CI follow-up, and residual risks
+  status: completed
+plane_issue_id: 8fc06d4a-7c00-4545-b68b-9a8897de8060

@@ -8,6 +8,11 @@ owner: claude
 branch: claude/pg-primary-temp-files-log
 worktree_path: .claude/worktrees/pg-primary-temp-files-log
 doc: docs/workstreams/ws-20261031-pg-primary-memory.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 646
 depends_on: []
 conflicts_with: []
 shared_surfaces:

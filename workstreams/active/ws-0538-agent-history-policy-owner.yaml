@@ -8,6 +8,11 @@ owner: claude
 branch: claude/agent-history-policy-owner
 worktree_path: .claude/worktrees/ah-policy
 doc: docs/workstreams/ws-0538-agent-history-policy-owner.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 618
 depends_on:
   - ws-0534-agent-history-vm
   - ws-0537-agent-history-activate

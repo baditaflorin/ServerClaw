@@ -8,6 +8,11 @@ owner: claude
 branch: claude/agent-history-embed-query
 worktree_path: .claude/worktrees/ah-embed-query
 doc: docs/workstreams/ws-20261029-agent-history-embed-query.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 626
 depends_on:
   - ws-0534-agent-history-vm
   - ws-0537-agent-history-activate

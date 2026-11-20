@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.65",
-  "platform_version": "0.179.63",
-  "generated_at": "2026-11-18T04:05:42Z",
-  "next_refresh_at": "2026-11-18T05:05:42Z",
+  "repo_version": "0.179.66",
+  "platform_version": "0.179.66",
+  "generated_at": "2026-11-19T17:43:48Z",
+  "next_refresh_at": "2026-11-19T18:43:48Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",

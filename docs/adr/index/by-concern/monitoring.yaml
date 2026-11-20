@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-11-18'
+generated: '2026-11-20'
 facet: concern
 concern: monitoring
-total_adrs: 14
+total_adrs: 15
 adrs:
   - adr: '0041'
     title: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
@@ -281,3 +281,27 @@ adrs:
     summary: 'scripts/convergestatereceipt.py:'
     filename: 0466-converge-state-diff-receipt.md
     path: docs/adr/0466-converge-state-diff-receipt.md
+  - adr: 0499
+    title: Durable Cost Accounting for Temporary Build Workers
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-11-19'
+    concern: monitoring
+    keywords:
+      - build-worker
+      - woodpecker
+      - grafana
+      - cost
+      - trial
+      - lifecycle
+      - durable
+      - accounting
+      - temporary
+      - build
+    summary: 1. Store each trial's control plane, execution host, historical and current
+    filename: 0499-temporary-build-trial-cost-accounting.md
+    path: docs/adr/0499-temporary-build-trial-cost-accounting.md
+    implemented_in_repo_version: 0.179.66
+    implemented_in_platform_version: 0.179.66
+    implemented_on: '2026-11-19'

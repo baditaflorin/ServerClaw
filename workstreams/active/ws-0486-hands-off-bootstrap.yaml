@@ -9,6 +9,11 @@ deployment: 0fork
 branch: claude/happy-maxwell-b79396
 worktree_path: .claude/worktrees/happy-maxwell-b79396
 doc: docs/adr/0483-hands-off-bootstrap.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 119
 depends_on:
   - adr-0407-generic-by-default
   - adr-0420-receipt-schema

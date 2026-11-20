@@ -8,6 +8,11 @@ owner: claude
 branch: claude/objective-carson-cbe0c3
 worktree_path: .claude/worktrees/objective-carson-cbe0c3
 doc: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 72
 depends_on:
   - adr-0445-phase1-multi-deployment-hardening
   - adr-0446-phase2-multi-deployment-hardening

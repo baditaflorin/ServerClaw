@@ -7,6 +7,11 @@ owner: codex
 branch: codex/enrichment-pool-ports-20261020
 worktree_path: .
 doc: docs/workstreams/ws-20261020-enrichment-pool-ports.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 526
 depends_on: []
 conflicts_with: []
 shared_surfaces:

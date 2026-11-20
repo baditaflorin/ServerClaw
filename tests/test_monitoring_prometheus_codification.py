@@ -238,6 +238,7 @@ def test_production_render_uses_scanopy_file_sd_for_inventory_targets() -> None:
     assert node["file_sd_configs"][0]["files"] == ["/etc/prometheus/file_sd/scanopy-node.json"]
     assert "static_configs" not in node
     assert {"source_labels": ["scanopy_job"], "regex": "(.+)", "target_label": "job"} in node["relabel_configs"]
+
     # Scanopy publishes every node exporter, hypervisors included, so nothing is dropped from its job.
     assert [rule for rule in node["relabel_configs"] if rule.get("action") == "drop"] == []
 
@@ -250,6 +251,20 @@ def test_production_render_uses_scanopy_file_sd_for_inventory_targets() -> None:
     blackbox = jobs["scanopy-blackbox"]
     assert blackbox["file_sd_configs"][0]["files"] == ["/etc/prometheus/file_sd/scanopy-blackbox.json"]
     assert blackbox["relabel_configs"][-1] == {"target_label": "__address__", "replacement": "127.0.0.1:9115"}
+
+
+def test_build_trial_dashboard_tag_loads_its_grafana_admin_credential() -> None:
+    tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "main.yml").read_text())
+    by_name = {task.get("name"): task for task in tasks if isinstance(task, dict)}
+
+    read_password = by_name["Read Grafana admin password"]
+    set_password = by_name["Set Grafana admin password fact"]
+
+    assert "build_trial_dashboard" in read_password.get("tags", [])
+    assert "build_trial_dashboard" in set_password.get("tags", [])
+    assert read_password.get("no_log") is True
+    assert set_password.get("no_log") is True
+    assert set(set_password["ansible.builtin.set_fact"]) == {"monitoring_grafana_admin_password"}
 
 
 def test_stale_catalog_targets_are_dropped_from_the_generated_blackbox_jobs() -> None:

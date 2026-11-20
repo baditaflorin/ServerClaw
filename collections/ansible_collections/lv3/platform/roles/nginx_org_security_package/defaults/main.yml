@@ -1,0 +1,19 @@
+# Purpose: Declare the fixed NGINX.org package and signing-key inputs.
+# Use case: Consumed by nginx_org_security_package during managed edge remediation.
+# Inputs: None; Debian release is discovered from Ansible facts.
+# Outputs: Package version, key paths, and repository configuration.
+# Idempotency: Fully idempotent; defaults only.
+# Dependencies: NGINX.org stable Debian package repository.
+---
+nginx_org_security_package_stable_version: "1.30.7"
+nginx_org_security_package_mainline_version: "1.31.9"
+nginx_org_security_package_repository_root: "https://nginx.org/packages"
+nginx_org_security_package_key_url: "https://nginx.org/keys/nginx_signing.key"
+nginx_org_security_package_key_ascii: /usr/share/keyrings/nginx-archive-keyring.asc
+nginx_org_security_package_keyring: /usr/share/keyrings/nginx-archive-keyring.gpg
+nginx_org_security_package_key_fingerprints:
+  - "573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62"
+  - "8540A6F18833A80E9C1653A42FD21310B49F6B46"
+  - "9E9BE90EACBCDE69FE9B204CBCDCD8A38D88A2B3"
+nginx_org_security_package_perl_module_config: /etc/nginx/modules-enabled/50-mod-http-perl.conf
+nginx_org_security_package_stream_module_config: /etc/nginx/modules-enabled/50-mod-stream.conf

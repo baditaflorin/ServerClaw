@@ -8,6 +8,11 @@ owner: claude
 branch: codify-monitoring-live-changes
 worktree_path: .worktrees/codify-monitoring-live-changes
 doc: docs/workstreams/ws-0522-monitoring-live-changes-codify.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 299
 depends_on: []
 conflicts_with: []
 shared_surfaces:

@@ -8,12 +8,13 @@ section:
     workstream.
 entries:
   workstreams.yaml:
-    purpose: "Active workstream registry — branch, assignee, status, ADR ref"
+    purpose: Generated active workstream registry with exact repository and PR references where known
     owner: human and automation
     format: "YAML — workstream definitions"
     use_for: Tracking parallel work and current projects
     update_when: Starting or completing a workstream
     update_by: Agent at start/end of branch work
+    closeout_audit: Run scripts/workstream_tool.py reconcile; the report is read-only and does not infer repository or PR identity from branch names
     structure: "workstreams:\n  - name: workstream-name\n    branch: codex/adr-XXXX-description\n\
       \    assignee: claude | codex | human\n    status: in-progress | blocked | review-ready
       | complete\n    adr_reference: docs/workstreams/adr-XXXX-workstream-name.md\n"

@@ -8,6 +8,11 @@ owner: codex
 branch: codex/builder-publisher-identity-iac
 worktree_path: .worktrees/builder-publisher-identity-iac
 doc: docs/workstreams/ws-0503-builder-publisher-identity.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 227
 depends_on:
   - ws-0497-fleet-build-broker-vm180
 conflicts_with: []

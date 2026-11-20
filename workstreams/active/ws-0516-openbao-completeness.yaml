@@ -8,6 +8,11 @@ owner: codex
 branch: codex/openbao-completeness-20260928
 worktree_path: .worktrees/openbao-completeness-20260928
 doc: docs/workstreams/ws-0516-openbao-completeness.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 260
 depends_on: []
 conflicts_with: []
 shared_surfaces:

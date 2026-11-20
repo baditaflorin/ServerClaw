@@ -1,0 +1,26 @@
+{
+  "workstream_id": "ws-20261119-ci-edge-reachability",
+  "state": "completed",
+  "schema_version": "1.1.0",
+  "started_at": "2026-11-19T16:38:21Z",
+  "completed_at": "2026-11-19T16:43:06Z",
+  "applied_by": "codex/ci-0mcp-release-0.179.67",
+  "repo_version": "0.179.66",
+  "adr": "0350",
+  "summary": "Intentional post-merge reconcile of the edge configuration from origin/main.",
+  "targets": [
+    {
+      "target": "public NGINX edge",
+      "status": "completed"
+    }
+  ],
+  "errors": [],
+  "notes": [
+    "Post-merge reconcile completed from the fresh mainline worktree.",
+    "nginx                      : ok=165  changed=5    unreachable=0    failed=0    skipped=60   rescued=0    ignored=0",
+    "All 36 edge certificates validated.",
+    "Public CI health endpoint returned HTTP 204 with TLS verification result 0.",
+    "Unauthenticated Woodpecker API returned HTTP 401 as expected.",
+    "Edge listeners on ports 80 and 443 were present and nginx -t passed."
+  ]
+}

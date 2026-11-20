@@ -8,6 +8,11 @@ owner: claude
 branch: claude/build-gc-cache-trim
 worktree_path: .claude/worktrees/build-gc-cache-trim
 doc: docs/workstreams/ws-20261102-build-gc-cache-trim.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 657
 depends_on: []
 conflicts_with: []
 shared_surfaces:

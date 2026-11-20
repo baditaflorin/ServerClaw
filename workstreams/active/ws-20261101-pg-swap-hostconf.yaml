@@ -8,6 +8,11 @@ owner: claude
 branch: claude/hostconf-pg-swap
 worktree_path: .claude/worktrees/hostconf-pg-swap
 doc: docs/workstreams/ws-20261101-pg-swap-hostconf.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 654
 depends_on: []
 conflicts_with: []
 shared_surfaces:

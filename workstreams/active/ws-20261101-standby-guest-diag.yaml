@@ -8,6 +8,11 @@ owner: claude
 branch: claude/standby-guest-diag
 worktree_path: .claude/worktrees/standby-guest-diag
 doc: docs/workstreams/ws-20261101-standby-guest-diag.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 652
 depends_on: []
 conflicts_with: []
 shared_surfaces:

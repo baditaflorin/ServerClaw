@@ -132,7 +132,10 @@ def find_playbooks_for_role(role: str) -> list[Path]:
     for pb_dir in PLAYBOOK_DIRS:
         if not pb_dir.is_dir():
             continue
-        for path in sorted(pb_dir.glob("*.yml")):
+        # Service playbooks are grouped under subdirectories such as
+        # playbooks/services/; recurse so changed roles used there are
+        # discovered by the pre-push convergence matrix.
+        for path in sorted(pb_dir.rglob("*.yml")):
             text = _read_text_safe(path)
             if not text:
                 continue

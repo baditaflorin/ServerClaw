@@ -8,6 +8,11 @@ owner: codex
 branch: codex/builder-0mcp-transport
 worktree_path: .worktrees/builder-0mcp-transport
 doc: docs/workstreams/ws-0500-builder-private-0mcp-transport.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 229
 depends_on:
   - ws-0499-builder-publisher-identity
 conflicts_with: []

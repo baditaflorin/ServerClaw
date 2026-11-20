@@ -8,10 +8,17 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0499` | Measure Kamateratmp trial CI usage and cost in Grafana | `live_applied` | [ws-20261119-kamateratmp-trial-cost-accounting.md](../../workstreams/ws-20261119-kamateratmp-trial-cost-accounting.md) |
+| `0498` | Patch NGINX pre-auth RCEs and contain the SCTP privilege-escalation chain | `merged` | [ws-20261119-nginx2root-remediation.md](../../workstreams/ws-20261119-nginx2root-remediation.md) |
+| `0497` | Add the temporary Kamatera worker to shared Buildx lanes with enforced sunset | `live_applied` | [ws-20261118-kamateratmp-build-pool-expansion.md](../../workstreams/ws-20261118-kamateratmp-build-pool-expansion.md) |
 | `0496` | Onboard a 30-day external Debian build worker and record its sunset path | `merged` | [ws-20261118-kamatera-trial-build-worker.md](../../workstreams/ws-20261118-kamatera-trial-build-worker.md) |
 | `0493` | Bound Plausible ClickHouse diagnostic log storage | `live_applied` | [ws-0520-plausible-clickhouse-log-retention.md](../../workstreams/ws-0520-plausible-clickhouse-log-retention.md) |
 | `0492` | Scope Plausible analytics SSO to the operator email identity | `live_applied` | [ws-0519-plausible-email-sso.md](../../workstreams/ws-0519-plausible-email-sso.md) |
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](../../adr/0470-deployment-fixture-matrix.md) |
+| `0461` | Atomic receipt write + dangling-receipt gate flag | `merged` | [0461-atomic-receipt-write-and-dangling-check.md](../../adr/0461-atomic-receipt-write-and-dangling-check.md) |
+| `0452` | Make workstream reconciliation evidence-based and repeatable | `merged` | [ws-20261120-workstream-lifecycle-reconciliation.md](../../workstreams/ws-20261120-workstream-lifecycle-reconciliation.md) |
+| `0452` | Reconcile legacy workstreams from direct PR and release evidence | `merged` | [ws-20261120-legacy-workstream-reconciliation.md](../../workstreams/ws-20261120-legacy-workstream-reconciliation.md) |
+| `0448` | Cross-agent handoff postmortem for ws-0448 deployment connection registry | `merged` | [2026-04-28-ws-0448-deployment-connection-registry.md](../../postmortems/2026-04-28-ws-0448-deployment-connection-registry.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](../../adr/0448-deployment-connection-registry-and-wrapper.md) |
 | `0409` | Keep sanitized ServerClaw snapshots compatible with source validation | `merged` | [ws-0524-serverclaw-snapshot-ci-compat.md](../../workstreams/ws-0524-serverclaw-snapshot-ci-compat.md) |
 | `0409` | Accept clean ignored HTTPS alert outputs while rejecting present drift | `merged` | [ws-0500-https-alert-runtime-output-gate.md](../../workstreams/ws-0500-https-alert-runtime-output-gate.md) |
@@ -23,6 +30,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](../../adr/0362-agent-service-api-gateway-pattern.md) |
 | `0360` | Restore the governed Plane API access path for workstream sync | `merged` | [ws-0518-plane-api-access.md](../../workstreams/ws-0518-plane-api-access.md) |
+| `0350` | Restore public NGINX edge and Woodpecker reachability | `merged` | [ws-20261119-ci-edge-reachability.md](../../workstreams/ws-20261119-ci-edge-reachability.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |

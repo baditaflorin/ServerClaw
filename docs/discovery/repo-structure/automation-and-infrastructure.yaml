@@ -177,6 +177,10 @@ entries:
           playbooks, roles, and workstream/docs surfaces together
         service_catalog.py: Read-only CLI for querying the assembled service capability
           catalog and bundle provenance
+        workstream_reconciliation.py: Read-only audit of workstream status signals,
+          repository/PR references, and changed-shard metadata requirements
+        workstream_tool.py: Query CLI for workstream status, blockers, conflicts,
+          and reconciliation evidence
     tests:
       purpose: Test suites for automated validation
       contains: pytest unit + integration tests, molecule scenarios

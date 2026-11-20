@@ -8,6 +8,11 @@ owner: platform-infrastructure
 branch: claude/crazy-chaplygin-c7c256
 worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
 doc: docs/adr/0459-deployment-lifecycle-cli-parity.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 91
 depends_on:
   - adr-0440-per-deployment-identity-and-artifact-isolation
   - adr-0442-multi-deployment-make-interface-and-worktree-binding

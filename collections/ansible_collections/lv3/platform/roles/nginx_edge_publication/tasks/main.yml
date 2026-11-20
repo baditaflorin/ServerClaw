@@ -51,6 +51,10 @@
       - public_edge_authenticated_sites is mapping
     fail_msg: "nginx_edge_publication requires certificate, site, and content-path inputs."
 
+- name: Ensure the public edge uses a fixed official NGINX release
+  ansible.builtin.include_role:
+    name: lv3.platform.nginx_org_security_package
+
 - name: Ensure public edge packages are present
   ansible.builtin.apt:
     name: >-
@@ -80,6 +84,14 @@
     - /etc/nginx/sites-enabled
     - /etc/letsencrypt/renewal-hooks/deploy
     - "{{ public_edge_dns_hetzner_credentials_file | dirname }}"
+
+- name: Load managed edge sites from the main NGINX configuration
+  ansible.builtin.lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: '^\s*include\s+/etc/nginx/sites-enabled/\*;'
+    line: '    include /etc/nginx/sites-enabled/*;'
+    insertafter: '^\s*include\s+/etc/nginx/conf\.d/\*\.conf;'
+    backup: true
 
 - name: Record the Certbot plugin path for local Python packages
   ansible.builtin.set_fact:

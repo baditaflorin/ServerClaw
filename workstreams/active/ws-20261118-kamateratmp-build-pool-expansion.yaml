@@ -1,19 +1,24 @@
 id: ws-20261118-kamateratmp-build-pool-expansion
 adr: 0497
 title: Add the temporary Kamatera worker to shared Buildx lanes with enforced sunset
-status: in_progress
-ready_to_merge: true
+status: live_applied
+ready_to_merge: false
 live_applied: true
 owner: codex
 branch: codex/kamateratmp-postmerge-record
 worktree_path: .worktrees/kamateratmp-build-pool-expansion/.worktrees/kamateratmp-postmerge-record
 doc: docs/workstreams/ws-20261118-kamateratmp-build-pool-expansion.md
+repositories:
+  - baditaflorin/platform_server
+pull_requests:
+  - repository: baditaflorin/platform_server
+    number: 705
 depends_on:
 - ws-20261118-kamatera-trial-build-worker
 conflicts_with: []
 shared_surfaces:
 - docs/adr/0497-expiring-external-build-worker-pool-admission.md
-  - docs/adr/0496-temporary-external-build-worker-lifecycle.md
+- docs/adr/0496-temporary-external-build-worker-lifecycle.md
 - docs/adr/.index.yaml
 - docs/adr/index/**
 - docs/diagrams/agent-coordination-map.excalidraw
@@ -34,7 +39,6 @@ ownership_manifest:
     paths:
     - docs/adr/0497-expiring-external-build-worker-pool-admission.md
     - docs/adr/0496-temporary-external-build-worker-lifecycle.md
-    - docs/runbooks/temporary-build-worker.md
     - docs/workstreams/ws-20261118-kamateratmp-build-pool-expansion.md
   - id: build_worker_live_apply_receipt
     mode: exclusive
@@ -51,6 +55,11 @@ ownership_manifest:
     contract: generated-artifacts-v1
     paths:
     - docs/diagrams/agent-coordination-map.excalidraw
+  - id: temporary_build_worker_runbook
+    mode: shared_contract
+    contract: temporary-build-worker-runbook-v1
+    paths:
+    - docs/runbooks/temporary-build-worker.md
   - id: mainline_release_integration
     mode: shared_contract
     contract: mainline-release-integration-v1
@@ -85,5 +94,8 @@ context: >-
   still pending because the release manager reports 105 repository blockers, including
   expired pre-existing waiver failures. The owner-directed sunset target is
   2026-12-17T14:59:50Z; provider billing cutoff remains unconfirmed. Build selection and
-  Woodpecker scheduling must fail closed at the target.
+  Woodpecker scheduling must fail closed at the target. Ownership correction on
+  2026-11-19: append-only trial-cost documentation now shares the temporary worker
+  runbook under `temporary-build-worker-runbook-v1`; the Buildx admission workstream
+  retains ownership of its ADR and workstream document.
 plane_issue_id: 9084a511-32b5-45da-97a0-21ba11bb7656

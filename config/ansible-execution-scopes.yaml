@@ -816,6 +816,17 @@ playbooks:
     shared_surfaces:
       - service:nginx-observability
       - inventory/host_vars/proxmox-host.yml
+  playbooks/services/nginx2root-remediation.yml:
+    playbook_id: nginx2root-remediation
+    mutation_scope: platform
+    shared_surfaces:
+      - service:public-edge
+      - service:dify
+      - service:plane
+      - service:coolify
+      - service:harbor
+      - service:excalidraw
+      - inventory/host_vars/proxmox-host.yml
   playbooks/services/proxmox-host-log-shipping.yml:
     playbook_id: proxmox-host-log-shipping
     mutation_scope: host
